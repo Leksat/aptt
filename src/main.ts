@@ -4,12 +4,13 @@ import {
   clipboard,
   globalShortcut,
   Menu,
-  Tray
+  Tray,
 } from 'electron';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
+if (require('electron-squirrel-startup')) {
+  // eslint-disable-line global-require
   app.quit();
 }
 
@@ -20,7 +21,7 @@ const createWindow = (): void => {
     height: 600,
     width: 800,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
     },
     skipTaskbar: true,
   });
@@ -31,7 +32,7 @@ const createWindow = (): void => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  setTimeout(() => mainWindow.webContents.send('bob', 'okay'), 2000)
+  setTimeout(() => mainWindow.webContents.send('bob', 'okay'), 2000);
 };
 
 // This method will be called when Electron has finished
@@ -61,35 +62,38 @@ app.whenReady().then(() => {
   // Register a 'CommandOrControl+X' shortcut listener.
   const ret = globalShortcut.register('CommandOrControl+Alt+V', () => {
     console.log('CommandOrControl+Alt+V is pressed');
-    mainWindow.webContents.send('bob', 'CommandOrControl+Alt+V is pressed')
-    mainWindow.webContents.send('bob', clipboard.readText('clipboard'))
-  })
+    mainWindow.webContents.send('bob', 'CommandOrControl+Alt+V is pressed');
+    mainWindow.webContents.send('bob', clipboard.readText('clipboard'));
+  });
 
   if (!ret) {
-    console.log('registration failed')
+    console.log('registration failed');
   }
 
   // Check whether a shortcut is registered.
-  console.log('is reg:', globalShortcut.isRegistered('CommandOrControl+Alt+V'))
+  console.log('is reg:', globalShortcut.isRegistered('CommandOrControl+Alt+V'));
 
   let currentImage = 'assets/tray-idle.png';
-  tray = new Tray(currentImage)
+  tray = new Tray(currentImage);
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Item1', type: 'radio' },
     { label: 'Item2', type: 'radio' },
     { label: 'Item3', type: 'radio', checked: true },
-    { label: 'Item4', type: 'radio' }
-  ])
-  tray.setToolTip('This is my application.')
-  tray.setTitle('bob!')
-  tray.setContextMenu(contextMenu)
+    { label: 'Item4', type: 'radio' },
+  ]);
+  tray.setToolTip('This is my application.');
+  tray.setTitle('bob!');
+  tray.setContextMenu(contextMenu);
   setInterval(() => {
-    currentImage = currentImage === 'assets/tray-idle.png' ? 'assets/tray-working.png' : 'assets/tray-idle.png';
-    tray.setImage(currentImage)
-  }, 3000)
-})
+    currentImage =
+      currentImage === 'assets/tray-idle.png'
+        ? 'assets/tray-working.png'
+        : 'assets/tray-idle.png';
+    tray.setImage(currentImage);
+  }, 3000);
+});
 
-app.dock.hide()
+app.dock.hide();
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
