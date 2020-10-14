@@ -8,10 +8,10 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 // installing/uninstalling.
 if (require('electron-squirrel-startup')) app.quit();
 
-let mainWindow: BrowserWindow;
+let window: BrowserWindow;
 
 const createWindow = (): void => {
-  mainWindow = new BrowserWindow({
+  window = new BrowserWindow({
     height: state.get('window').height,
     width: state.get('window').width,
     webPreferences: {
@@ -19,15 +19,20 @@ const createWindow = (): void => {
     },
     skipTaskbar: true,
   });
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).catch(() => app.exit(1));
-  mainWindow.webContents.openDevTools();
+  window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).catch(() => app.exit(1));
+  window.webContents.openDevTools();
+
+  window.on('close', (event) => {
+    event.preventDefault();
+    window.hide();
+  });
 };
 
 app.on('ready', createWindow);
 
 app.whenReady().then(() => {
   registerShortcuts(app, state.get('shortcuts'));
-  createTray(app, createWindow);
+  createTray(app, window);
 });
 
 app.on('window-all-closed', () => {

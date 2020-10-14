@@ -1,15 +1,15 @@
-import { App, Menu, Tray } from 'electron';
+import { App, BrowserWindow, Menu, Tray } from 'electron';
 
 let currentImage = 'assets/tray-idle.png';
 
-export const createTray = (app: App, createWindow: () => void): void => {
+export const createTray = (app: App, window: BrowserWindow): void => {
   const tray = new Tray(currentImage);
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show window',
       type: 'normal',
       click: () => {
-        createWindow();
+        window.show();
       },
     },
     {
