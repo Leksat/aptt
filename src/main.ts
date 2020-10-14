@@ -9,8 +9,9 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 if (require('electron-squirrel-startup')) app.quit();
 
 let window: BrowserWindow;
+let shouldQuit = false;
 
-const createWindow = (): void => {
+app.on('ready', () => {
   window = new BrowserWindow({
     height: state.get('window').height,
     width: state.get('window').width,
@@ -23,12 +24,16 @@ const createWindow = (): void => {
   window.webContents.openDevTools();
 
   window.on('close', (event) => {
-    event.preventDefault();
-    window.hide();
+    if (!shouldQuit) {
+      event.preventDefault();
+      window.hide();
+    }
   });
-};
+});
 
-app.on('ready', createWindow);
+app.on('before-quit', () => {
+  shouldQuit = true;
+});
 
 app.whenReady().then(() => {
   registerShortcuts(app, state.get('shortcuts'));
