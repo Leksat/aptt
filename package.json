@@ -89,6 +89,7 @@
     "@types/react-dom": "^16.9.8",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^6.0.1",
+    "moment": "^2.29.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }

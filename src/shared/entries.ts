@@ -1,5 +1,7 @@
+import moment from 'moment';
+
 interface Entry {
-  start: Date;
+  start: string;
   description: string;
 }
 
@@ -17,14 +19,14 @@ export const parseEntries = (
         return { kind: 'error', error: `Invalid time on line ${lineNumber}.` };
       }
       const lastEntry = entries[entries.length - 1];
-      if (lastEntry && lastEntry.start.getTime() >= date.getTime()) {
+      if (lastEntry && lastEntry.start >= trimmed) {
         return {
           kind: 'error',
           error: `The time on line ${lineNumber} should be bigger than the previous one.`,
         };
       }
       entries.push({
-        start: date,
+        start: trimmed,
         description: '',
       });
     } else if (trimmed !== '') {
@@ -47,5 +49,4 @@ export const parseEntries = (
   return { kind: 'ok', entries };
 };
 
-export const stringifyEntries = (entries: Entry[]): string =>
-  entries.map((entry) => entry.start + '\n' + entry.description).join('\n');
+export const now = (): string => moment().format('YYYY-MM-DD HH:mm');
