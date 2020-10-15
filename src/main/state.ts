@@ -1,25 +1,8 @@
 import Store from 'electron-store';
-import { State } from '../shared/state';
-import { ipcMain } from 'electron';
+import { defaults, State } from '../shared/state';
+import { BrowserWindow, ipcMain } from 'electron';
 
-export const state = new Store<State>({
-  defaults: {
-    entries: [],
-    jira: {
-      url: '',
-      username: '',
-      password: '',
-    },
-    window: {
-      height: 600,
-      width: 800,
-    },
-    shortcuts: {
-      newEntry: 'CommandOrControl+Alt+V',
-      displayWindow: 'CommandOrControl+Alt+X',
-    },
-  },
-});
+export const state = new Store<State>({ defaults });
 
 ipcMain.on('setState', (event, ...data) => {
   const key = data[0] as keyof State;
@@ -30,3 +13,12 @@ ipcMain.on('setState', (event, ...data) => {
 ipcMain.on('getState', (event, key: keyof State) => {
   event.returnValue = state.get(key);
 });
+
+export const connectStore = (window: BrowserWindow): void => {
+  for (const _key of Object.keys(defaults)) {
+    const key = _key as keyof State;
+    state.onDidChange(key, (value) => {
+      window.webContents.send('stateUpdated', key, value);
+    });
+  }
+};

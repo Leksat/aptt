@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import { createTray } from './main/tray';
 import { registerShortcuts } from './main/shortcuts';
-import { state } from './main/state';
+import { connectStore, state } from './main/state';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 // From the boilerplate: Handle creating/removing shortcuts on Windows when
@@ -17,9 +17,12 @@ app.on('ready', () => {
     width: state.get('window').width,
     webPreferences: {
       nodeIntegration: true,
+      // Required to make electron-store work in renderer process.
+      enableRemoteModule: true,
     },
     skipTaskbar: true,
   });
+
   window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY).catch(() => app.exit(1));
   window.webContents.openDevTools();
 
@@ -29,6 +32,8 @@ app.on('ready', () => {
       window.hide();
     }
   });
+
+  connectStore(window);
 });
 
 app.on('before-quit', () => {
@@ -37,7 +42,7 @@ app.on('before-quit', () => {
 
 app.whenReady().then(() => {
   registerShortcuts(app, state.get('shortcuts'));
-  createTray(app, window);
+  createTray(app, window, state);
 });
 
 app.on('window-all-closed', () => {

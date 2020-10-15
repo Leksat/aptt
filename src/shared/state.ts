@@ -1,10 +1,5 @@
-export interface Entry {
-  start: string;
-  description: string;
-}
-
 export interface State {
-  entries: Entry[];
+  entries: string;
   jira: {
     url: string;
     username: string;
@@ -19,3 +14,20 @@ export interface State {
     displayWindow: string;
   };
 }
+
+export const defaults: State = {
+  entries: '',
+  jira: {
+    url: '',
+    username: '',
+    password: '',
+  },
+  window: {
+    height: 600,
+    width: 800,
+  },
+  shortcuts: {
+    newEntry: 'CommandOrControl+Alt+V',
+    displayWindow: 'CommandOrControl+Alt+X',
+  },
+};

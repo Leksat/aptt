@@ -1,6 +1,11 @@
-import { Entry } from './state';
+interface Entry {
+  start: Date;
+  description: string;
+}
 
-export const parseEntries = (text: string): Entry[] | string => {
+export const parseEntries = (
+  text: string
+): { kind: 'ok'; entries: Entry[] } | { kind: 'error'; error: string } => {
   const entries: Entry[] = [];
   let lineNumber = 0;
   for (const line of text.split('\n')) {
@@ -9,28 +14,37 @@ export const parseEntries = (text: string): Entry[] | string => {
     if (trimmed.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)) {
       const date = new Date(trimmed);
       if (isNaN(date.getTime())) {
-        return `Invalid time on line ${lineNumber}.`;
+        return { kind: 'error', error: `Invalid time on line ${lineNumber}.` };
       }
       const lastEntry = entries[entries.length - 1];
-      if (lastEntry && lastEntry.start >= trimmed) {
-        return `The time on line ${lineNumber} should be bigger than the previous one.`;
+      if (lastEntry && lastEntry.start.getTime() >= date.getTime()) {
+        return {
+          kind: 'error',
+          error: `The time on line ${lineNumber} should be bigger than the previous one.`,
+        };
       }
       entries.push({
-        start: trimmed,
+        start: date,
         description: '',
       });
     } else if (trimmed !== '') {
       const lastEntry = entries[entries.length - 1];
       if (!lastEntry) {
-        return `Found a description on line ${lineNumber}, but there is no start time defined.`;
+        return {
+          kind: 'error',
+          error: `Found a description on line ${lineNumber}, but there is no start time defined.`,
+        };
       }
       if (lastEntry.description !== '') {
-        return `Found a description on line ${lineNumber}, but the description is already defined above.`;
+        return {
+          kind: 'error',
+          error: `Found a description on line ${lineNumber}, but the description is already defined above.`,
+        };
       }
       lastEntry.description = trimmed;
     }
   }
-  return entries;
+  return { kind: 'ok', entries };
 };
 
 export const stringifyEntries = (entries: Entry[]): string =>

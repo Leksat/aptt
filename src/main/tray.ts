@@ -1,8 +1,14 @@
 import { App, BrowserWindow, Menu, Tray } from 'electron';
+import Store from 'electron-store';
+import { State } from '../shared/state';
 
 let currentImage = 'assets/tray-idle.png';
 
-export const createTray = (app: App, window: BrowserWindow): void => {
+export const createTray = (
+  app: App,
+  window: BrowserWindow,
+  state: Store<State>
+): void => {
   const tray = new Tray(currentImage);
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -17,6 +23,7 @@ export const createTray = (app: App, window: BrowserWindow): void => {
       type: 'normal',
       click: () => {
         // AXXX create from clipboard
+        state.set('entries', state.get('entries') + '\nok'); // AXXX del
       },
     },
     {

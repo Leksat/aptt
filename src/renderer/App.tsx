@@ -1,26 +1,34 @@
-import React, { useState } from 'react';
-import { parseEntries, stringifyEntries } from '../shared/entries';
-import { getState, setState } from './state';
+import React, { useEffect, useState } from 'react';
+import { parseEntries } from '../shared/entries';
+import { state } from './state';
 
 const App = (): JSX.Element => {
   const [error, setError] = useState('');
+  const [entries, setEntries] = useState(state.get('entries'));
+  useEffect(() => {
+    state.updated('entries', (value) => {
+      setEntries(value);
+    });
+  }, []);
 
   const onTextChange = (text: string): void => {
-    const parsed = parseEntries(text);
-    if (typeof parsed === 'string') {
-      setError(parsed);
-    } else {
+    setEntries(text);
+    const result = parseEntries(text);
+    if (result.kind === 'ok') {
       setError('');
-      setState('entries', parsed);
+      state.set('entries', text);
+    } else {
+      setError(result.error);
     }
   };
 
   return (
     <>
       <textarea
-        rows={10}
+        rows={15}
+        cols={50}
         onChange={(event) => onTextChange(event.target.value)}
-        defaultValue={stringifyEntries(getState('entries'))}
+        value={entries}
       />
       {error && <div>{error}</div>}
     </>
