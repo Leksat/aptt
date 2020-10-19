@@ -5,7 +5,7 @@ const stateListeners: {
   [Key in keyof State]?: ((value: State[keyof State]) => void)[];
 } = {};
 
-export const state = {
+export const store = {
   get: <Key extends keyof State>(key: Key): State[Key] => {
     return ipcRenderer.sendSync('getState', key);
   },

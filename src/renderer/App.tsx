@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { parseEntries } from '../shared/entries';
-import { state } from './state';
+import { store } from './store';
 
 const App = (): JSX.Element => {
   const [error, setError] = useState('');
-  const [entries, setEntries] = useState(state.get('entries'));
+  const [entries, setEntries] = useState(store.get('entries'));
   useEffect(() => {
-    state.updated('entries', (value) => {
+    store.updated('entries', (value) => {
       setEntries(value);
     });
   }, []);
@@ -16,7 +16,7 @@ const App = (): JSX.Element => {
     try {
       parseEntries(text);
       setError('');
-      state.set('entries', text);
+      store.set('entries', text);
     } catch (e) {
       setError(e.message);
     }
