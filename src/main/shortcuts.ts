@@ -1,15 +1,15 @@
-import { App, globalShortcut } from 'electron';
-import { State } from '../shared/state';
+import { globalShortcut } from 'electron';
+import { App } from './app';
 
-export const registerShortcuts = (
-  app: App,
-  shortcuts: State['shortcuts']
-): void => {
-  const success = globalShortcut.register(shortcuts.newEntry, () => {
-    // AXXX do magic
-  });
+export const registerShortcuts = (app: App): void => {
+  const success = globalShortcut.register(
+    app.store.get('shortcuts').newEntry,
+    () => {
+      // AXXX do magic
+    }
+  );
   if (!success) {
-    app.exit(1);
+    app.electronApp.exit(1);
   }
 
   // AXXX shortcuts.displayWindow

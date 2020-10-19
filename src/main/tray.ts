@@ -1,97 +1,56 @@
-import { App, BrowserWindow, dialog, Menu, Tray } from 'electron';
-import Store from 'electron-store';
-import { State } from '../shared/state';
-import { getTicketFromClipboard, parseTicket } from '../shared/tickets';
-import { now, parseEntries } from '../shared/entries';
+import { Menu, Tray } from 'electron';
+import { App } from './app';
 
 let currentImage = 'assets/tray-idle.png';
 
-export const createTray = (
-  app: App,
-  window: BrowserWindow,
-  state: Store<State>
-): void => {
+export const createTray = (app: App): void => {
   const tray = new Tray(currentImage);
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show window',
-      type: 'normal',
+      click: () => app.showWindow(),
+    },
+    {
+      label: 'New...',
       click: () => {
-        window.show();
+        app.withErrorDialog(() => {
+          app.addNewEntry('');
+        });
       },
     },
     {
       label: 'New from clipboard',
-      type: 'normal',
       click: () => {
-        const entries = state.get('entries');
-        const result = parseEntries(entries);
-        if (result.kind === 'error') {
-          dialog.showErrorBox(
-            'Whoops!',
-            'Current entries are not valid: ' + result.error
-          );
-          return;
-        }
-
-        const time = now();
-        const lastEntry = result.entries.length
-          ? result.entries[result.entries.length - 1]
-          : null;
-        if (lastEntry) {
-          if (lastEntry.start === time) {
-            dialog.showErrorBox(
-              'Whoops!',
-              'You are too fast! You already have a record for the current minute.'
-            );
-            return;
-          }
-          if (lastEntry.start > time) {
-            dialog.showErrorBox(
-              'Whoops!',
-              'Looks like your existing items are in the future O_o'
-            );
-            return;
-          }
-        }
-
-        const ticket = getTicketFromClipboard();
-        if (ticket === '') {
-          dialog.showErrorBox(
-            'Whoops!',
-            'Cannot find a ticket number in the clipboard.'
-          );
-          return;
-        }
-        if (lastEntry && ticket === parseTicket(lastEntry.description)) {
-          dialog.showErrorBox('Whoops!', 'You already tracking this ticket.');
-          return;
-        }
-
-        state.set(
-          'entries',
-          `${entries.trimEnd()}
-${time}
-${ticket} `
-        );
+        app.withErrorDialog(() => {
+          const ticket = app.getTicketWithError();
+          app.addNewEntry(ticket);
+        });
       },
     },
     {
       label: 'New from clipboard...',
-      type: 'normal',
       click: () => {
-        // AXXX create from clipboard and display window
+        app.withErrorDialog(() => {
+          const ticket = app.getTicketWithError();
+          app.addNewEntry(ticket);
+          app.showWindow();
+          // AXXX cursor to end of textarea
+        });
       },
     },
     {
       label: 'Quit',
-      type: 'normal',
-      click: () => app.exit(),
+      click: () => app.electronApp.exit(),
     },
   ]);
+
+  // AXXX update
   tray.setToolTip('This is my application.');
   tray.setTitle('bob!');
+
   tray.setContextMenu(contextMenu);
+
+  // AXXX del
   setInterval(() => {
     currentImage =
       currentImage === 'assets/tray-idle.png'

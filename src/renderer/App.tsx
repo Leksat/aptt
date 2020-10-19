@@ -13,12 +13,12 @@ const App = (): JSX.Element => {
 
   const onTextChange = (text: string): void => {
     setEntries(text);
-    const result = parseEntries(text);
-    if (result.kind === 'ok') {
+    try {
+      parseEntries(text);
       setError('');
       state.set('entries', text);
-    } else {
-      setError(result.error);
+    } catch (e) {
+      setError(e.message);
     }
   };
 
