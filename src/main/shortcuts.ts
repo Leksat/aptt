@@ -1,16 +1,33 @@
 import { globalShortcut } from 'electron';
 import { App } from './app';
 
+let lastHitNewEntry = 0;
+const newEntryDelay = 1000;
+
 export const registerShortcuts = (app: App): void => {
-  const success = globalShortcut.register(
-    app.store.get('shortcuts').newEntry,
-    () => {
-      // AXXX do magic
-    }
-  );
-  if (!success) {
+  if (
+    !globalShortcut.register(app.store.get('shortcuts').newEntry, () => {
+      app.withErrorDialog(() => {
+        const now = new Date().getTime();
+        if (now - lastHitNewEntry > newEntryDelay) {
+          const ticket = app.getTicketWithError();
+          app.addNewEntry(ticket);
+        } else {
+          app.showWindow();
+          // AXXX cursor to end of textarea
+        }
+        lastHitNewEntry = now;
+      });
+    })
+  ) {
     app.electronApp.exit(1);
   }
 
-  // AXXX shortcuts.displayWindow
+  if (
+    !globalShortcut.register(app.store.get('shortcuts').displayWindow, () => {
+      app.showWindow();
+    })
+  ) {
+    app.electronApp.exit(1);
+  }
 };
