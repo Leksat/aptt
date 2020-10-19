@@ -7,13 +7,17 @@ interface Entry {
   description: string;
 }
 
+export const isTimeString = (text: string): boolean => {
+  return !!text.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
+};
+
 export const parseEntries = (text: string): Entry[] => {
   const entries: Entry[] = [];
   let lineNumber = 0;
   for (const line of text.split('\n')) {
     lineNumber++;
     const trimmed = line.trim();
-    if (trimmed.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)) {
+    if (isTimeString(trimmed)) {
       const date = new Date(trimmed);
       if (isNaN(date.getTime())) {
         throw new AppError(`Invalid time on line ${lineNumber}.`);

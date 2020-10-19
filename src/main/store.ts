@@ -1,7 +1,7 @@
 import Store from 'electron-store';
 import { defaults, State } from '../shared/state';
 import { ipcMain } from 'electron';
-import { App } from './app';
+import { App } from '../shared/types';
 
 export const store = new Store<State>({ defaults });
 

@@ -1,5 +1,5 @@
 import { globalShortcut } from 'electron';
-import { App } from './app';
+import { App } from '../shared/types';
 
 let lastHitNewEntry = 0;
 const newEntryDelay = 1000;

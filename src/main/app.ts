@@ -1,4 +1,4 @@
-import { app as electronApp, BrowserWindow, dialog } from 'electron';
+import { app as electronApp, BrowserWindow, dialog, ipcMain } from 'electron';
 import { store } from './store';
 import { getTicketFromClipboard } from '../shared/tickets';
 import { addNewEntry, now } from '../shared/entries';
@@ -44,9 +44,22 @@ export const app = {
     app.store.set('entries', updatedEntries);
   },
 
+  addNewEntryFromClipboard: (): void => {
+    const ticket = app.getTicketWithError();
+    app.addNewEntry(ticket);
+  },
+
   focusToTextarea: (): void => {
     app.window.webContents.send('focusToTextarea');
   },
 };
 
-export type App = typeof app;
+for (const key in app) {
+  // @ts-ignore
+  const method = app[key];
+  if (typeof method === 'function') {
+    ipcMain.on(key, (event, ...data) => {
+      event.returnValue = method(...data);
+    });
+  }
+}

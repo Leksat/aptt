@@ -1,5 +1,5 @@
 import { Menu, Tray } from 'electron';
-import { App } from './app';
+import { App } from '../shared/types';
 
 let currentImage = 'assets/tray-idle.png';
 
