@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { parseTicket } from './tickets';
+import { AppError } from './errors';
 
 interface Entry {
   start: string;
@@ -15,11 +16,13 @@ export const parseEntries = (text: string): Entry[] => {
     if (trimmed.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)) {
       const date = new Date(trimmed);
       if (isNaN(date.getTime())) {
-        throw `Invalid time on line ${lineNumber}.`;
+        throw new AppError(`Invalid time on line ${lineNumber}.`);
       }
       const lastEntry = entries[entries.length - 1];
       if (lastEntry && lastEntry.start >= trimmed) {
-        throw `The time on line ${lineNumber} should be bigger than the previous one.`;
+        throw new AppError(
+          `The time on line ${lineNumber} should be bigger than the previous one.`
+        );
       }
       entries.push({
         start: trimmed,
@@ -28,10 +31,14 @@ export const parseEntries = (text: string): Entry[] => {
     } else if (trimmed !== '') {
       const lastEntry = entries[entries.length - 1];
       if (!lastEntry) {
-        throw `Found a description on line ${lineNumber}, but there is no start time defined.`;
+        throw new AppError(
+          `Found a description on line ${lineNumber}, but there is no start time defined.`
+        );
       }
       if (lastEntry.description !== '') {
-        throw `Found a description on line ${lineNumber}, but the description is already defined above.`;
+        throw new AppError(
+          `Found a description on line ${lineNumber}, but the description is already defined above.`
+        );
       }
       lastEntry.description = trimmed;
     }
@@ -50,23 +57,25 @@ export const addNewEntry = (args: {
   try {
     entries = parseEntries(args.existingEntries);
   } catch (e) {
-    throw new Error('Current entries are not valid: ' + e.message);
+    throw new AppError('Current entries are not valid: ' + e.message);
   }
 
   const lastEntry = entries.length ? entries[entries.length - 1] : null;
   if (lastEntry) {
     if (lastEntry.start === args.time) {
-      throw new Error(
+      throw new AppError(
         'You are too fast! You already have a record for the current minute.'
       );
     }
     if (lastEntry.start > args.time) {
-      throw new Error('Looks like your existing items are in the future O_o');
+      throw new AppError(
+        'Looks like your existing items are in the future O_o'
+      );
     }
   }
 
   if (lastEntry && args.ticket === parseTicket(lastEntry.description)) {
-    throw new Error('You already tracking this ticket.');
+    throw new AppError('You already tracking this ticket.');
   }
 
   return `${args.existingEntries.trimEnd()}

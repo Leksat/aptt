@@ -14,7 +14,6 @@ export const registerShortcuts = (app: App): void => {
           app.addNewEntry(ticket);
         } else {
           app.showWindow();
-          // AXXX cursor to end of textarea
         }
         lastHitNewEntry = now;
       });

@@ -2,6 +2,7 @@ import { app as electronApp, BrowserWindow, dialog } from 'electron';
 import { store } from './store';
 import { getTicketFromClipboard } from '../shared/tickets';
 import { addNewEntry, now } from '../shared/entries';
+import { AppError } from '../shared/errors';
 
 export const app = {
   electronApp,
@@ -12,16 +13,24 @@ export const app = {
     try {
       callback();
     } catch (e) {
-      dialog.showErrorBox('Whoops!', e.message);
+      if (e instanceof AppError) {
+        dialog.showErrorBox('Whoops!', e.message);
+      } else {
+        throw e;
+      }
     }
   },
 
-  showWindow: (): void => app.window.show(),
+  showWindow: (): void => {
+    app.window.show();
+    app.window.focus();
+    app.focusToTextarea();
+  },
 
   getTicketWithError: (): string => {
     const ticket = getTicketFromClipboard();
     if (ticket === '') {
-      throw new Error('Cannot find a ticket number in the clipboard.');
+      throw new AppError('Cannot find a ticket number in the clipboard.');
     }
     return ticket;
   },
@@ -33,6 +42,10 @@ export const app = {
       existingEntries: app.store.get('entries'),
     });
     app.store.set('entries', updatedEntries);
+  },
+
+  focusToTextarea: (): void => {
+    app.window.webContents.send('focusToTextarea');
   },
 };
 

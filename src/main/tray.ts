@@ -34,7 +34,6 @@ export const createTray = (app: App): void => {
           const ticket = app.getTicketWithError();
           app.addNewEntry(ticket);
           app.showWindow();
-          // AXXX cursor to end of textarea
         });
       },
     },
