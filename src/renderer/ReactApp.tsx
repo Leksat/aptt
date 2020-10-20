@@ -8,6 +8,7 @@ import { Settings } from './Settings';
 
 const ReactApp = (): JSX.Element => {
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState('');
   const [entries, setEntries] = useState(store.get('entries'));
   const [settingsOpened, setSettingsOpened] = useState(false);
   const textarea = useRef<HTMLTextAreaElement>(null);
@@ -33,9 +34,7 @@ const ReactApp = (): JSX.Element => {
     store.updated('entries', (value) => {
       setEntries(value);
     });
-  }, []);
 
-  useEffect(() => {
     ipcRenderer.on('focusToTextarea', () => {
       if (textarea.current) {
         textarea.current.scrollTop = textarea.current.scrollHeight;
@@ -45,6 +44,10 @@ const ReactApp = (): JSX.Element => {
         );
         textarea.current.focus();
       }
+    });
+
+    ipcRenderer.on('submitting', (event, text) => {
+      setSubmitting(text);
     });
   }, []);
 
@@ -70,6 +73,7 @@ const ReactApp = (): JSX.Element => {
           />
         </div>
         {error && <div className="row error">{error}</div>}
+        {submitting && <div className="row submitting">{submitting}</div>}
         <div className="row">
           <button
             onClick={() => {
@@ -95,6 +99,15 @@ const ReactApp = (): JSX.Element => {
             }}
           >
             Start selected
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Really?')) {
+                appProxy.submit();
+              }
+            }}
+          >
+            Submit
           </button>
           <button
             onClick={() => {

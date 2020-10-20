@@ -1,8 +1,17 @@
-import { app as electronApp, BrowserWindow, ipcMain } from 'electron';
+import { app as electronApp, BrowserWindow, dialog, ipcMain } from 'electron';
 import { store } from './store';
-import { getTicketFromClipboard } from '../shared/tickets';
-import { addNewEntry, now } from '../shared/entries';
+import { getTicketFromClipboard, parseTicket } from '../shared/tickets';
+import {
+  addNewEntry,
+  diffInSeconds,
+  Entry,
+  makeJiraTimeEntry,
+  now,
+  parseEntries,
+  stringifyEntries,
+} from '../shared/entries';
 import { AppError } from '../shared/errors';
+import axios, { AxiosBasicCredentials } from 'axios';
 
 export const app = {
   electronApp,
@@ -39,6 +48,67 @@ export const app = {
 
   focusToTextarea: (): void => {
     app.window.webContents.send('focusToTextarea');
+  },
+
+  submit: async (): Promise<void> => {
+    const entries = parseEntries(store.get('entries'));
+    const initialAmount = entries.length - 1;
+    let current;
+    let error = false;
+    while ((current = entries.shift())) {
+      try {
+        const next = entries[0] as Entry | undefined;
+        if (!next) {
+          // That's the current active item.
+          entries.unshift(current);
+          break;
+        }
+
+        app.window.webContents.send(
+          'submitting',
+          `Submitted: ${
+            100 - Math.round((entries.length * 100) / initialAmount)
+          }%`
+        );
+
+        const ticket = parseTicket(current.description);
+        if (!ticket) {
+          // Nothing to send to Jira.
+          continue;
+        }
+
+        const seconds = diffInSeconds(current.start, next.start);
+
+        const url =
+          store.get('jira').url.replace(/\/+$/, '') +
+          '/rest/tempo-timesheets/4/worklogs/';
+
+        const auth: AxiosBasicCredentials = {
+          username: store.get('jira').username,
+          password: store.get('jira').password,
+        };
+
+        const data = makeJiraTimeEntry({
+          username: store.get('jira').username,
+          ticket,
+          seconds,
+          ...current,
+        });
+
+        await axios.post(url, data, { auth });
+      } catch (e) {
+        entries.unshift(current);
+        dialog.showErrorBox('Whoops!', 'Error during submission: ' + e.message);
+        error = true;
+        break;
+      }
+    }
+    app.window.webContents.send(
+      'submitting',
+      `Submitted: ${error ? '???' : 100}%`
+    );
+    setTimeout(() => app.window.webContents.send('submitting', ''), 3000);
+    store.set('entries', stringifyEntries(entries));
   },
 };
 
