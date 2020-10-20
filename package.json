@@ -19,6 +19,34 @@
   "license": "MIT",
   "config": {
     "forge": {
+      "github_repository": {
+        "owner": "Leksat",
+        "name": "aptt"
+      },
+      "make_targets": {
+        "win32": [
+          "squirrel"
+        ],
+        "darwin": [
+          "zip"
+        ],
+        "linux": [
+          "deb",
+          "rpm"
+        ]
+      },
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "Leksat",
+              "name": "aptt"
+            },
+            "prerelease": "true"
+          }
+        }
+      ],
       "packagerConfig": {},
       "makers": [
         {
@@ -69,6 +97,7 @@
     "@electron-forge/maker-squirrel": "6.0.0-beta.53",
     "@electron-forge/maker-zip": "6.0.0-beta.53",
     "@electron-forge/plugin-webpack": "6.0.0-beta.53",
+    "@electron-forge/publisher-github": "6.0.0-beta.52",
     "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
     "@typescript-eslint/eslint-plugin": "^3.9.0",
     "@typescript-eslint/parser": "^3.9.0",
