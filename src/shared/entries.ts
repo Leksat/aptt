@@ -87,8 +87,12 @@ export const addNewEntry = (args: {
     throw new AppError('You already tracking this ticket.');
   }
 
-  const trimmed = args.existingEntries.trimEnd();
-  return ticket === args.description && args.description.trim() !== ''
-    ? trimmed + '\n' + args.time + '\n' + ticket + ' '
-    : trimmed + '\n' + args.time + '\n' + args.description;
+  entries.push({
+    start: args.time,
+    description: args.description,
+  });
+  return (
+    entries.map((entry) => entry.start + '\n' + entry.description).join('\n') +
+    (ticket === args.description && args.description.trim() !== '' ? ' ' : '')
+  );
 };
