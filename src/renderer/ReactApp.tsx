@@ -4,10 +4,12 @@ import { store } from './store';
 import { ipcRenderer } from 'electron';
 import { appProxy } from './app-proxy';
 import { AppError } from '../shared/errors';
+import { Settings } from './Settings';
 
 const ReactApp = (): JSX.Element => {
   const [error, setError] = useState('');
   const [entries, setEntries] = useState(store.get('entries'));
+  const [settingsOpened, setSettingsOpened] = useState(false);
   const textarea = useRef<HTMLTextAreaElement>(null);
 
   const getEntryUnderCursor = (): string => {
@@ -94,8 +96,20 @@ const ReactApp = (): JSX.Element => {
           >
             Start selected
           </button>
+          <button
+            onClick={() => {
+              setSettingsOpened(true);
+            }}
+          >
+            Settings
+          </button>
         </div>
       </div>
+      {settingsOpened && (
+        <div className="settings-wrapper">
+          <Settings close={() => setSettingsOpened(false)} />
+        </div>
+      )}
     </>
   );
 };

@@ -1,9 +1,11 @@
+/* Base */
 html,
 body {
   height: 100%;
   margin: 0;
 }
 
+/* Main controls */
 .box {
   display: flex;
   flex-flow: column;
@@ -30,4 +32,30 @@ body {
 
 .box .row button {
   margin-right: 10px;
+}
+
+/* Settings */
+.settings-wrapper {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: white;
+  padding: 10px;
+}
+
+.settings-wrapper label {
+  margin: 10px 0;
+  display: block;
+}
+
+.settings-wrapper button,
+.settings-wrapper input[type='submit'] {
+  margin-right: 10px;
+}
+
+.settings-wrapper label input {
+  display: block;
+  width: 80%;
 }
