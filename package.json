@@ -1,8 +1,8 @@
 {
-  "name": "forge",
-  "productName": "forge",
+  "name": "aptt",
+  "productName": "aptt",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "A perfect time tracker",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
