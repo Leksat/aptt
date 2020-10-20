@@ -1,7 +1,33 @@
+html,
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  height: 100%;
+  margin: 0;
+}
+
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.box .row {
+  padding: 10px;
+}
+
+.box .row.error {
+  background-color: orange;
+}
+
+.box .row.max-height {
+  flex: 1 1 auto;
+}
+
+.box .row.max-height textarea {
+  height: 100%;
+  width: 50%;
+  box-sizing: border-box;
+}
+
+.box .row button {
+  margin-right: 10px;
 }

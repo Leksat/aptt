@@ -59,39 +59,43 @@ const ReactApp = (): JSX.Element => {
 
   return (
     <>
-      <textarea
-        rows={15}
-        cols={50}
-        onChange={(event) => onTextChange(event.target.value)}
-        value={entries}
-        ref={textarea}
-      />
-      <button
-        onClick={() => {
-          appProxy.addNewEntry('');
-          appProxy.focusToTextarea();
-        }}
-      >
-        New
-      </button>
-      <button
-        onClick={() => {
-          appProxy.addNewEntryFromClipboard();
-          appProxy.focusToTextarea();
-        }}
-      >
-        New from clipboard
-      </button>
-      <button
-        onClick={() => {
-          const line = getEntryUnderCursor();
-          appProxy.addNewEntry(line);
-          appProxy.focusToTextarea();
-        }}
-      >
-        Start selected
-      </button>
-      {error && <div>{error}</div>}
+      <div className="box">
+        <div className="row max-height">
+          <textarea
+            onChange={(event) => onTextChange(event.target.value)}
+            value={entries}
+            ref={textarea}
+          />
+        </div>
+        {error && <div className="row error">{error}</div>}
+        <div className="row">
+          <button
+            onClick={() => {
+              appProxy.addNewEntry('');
+              appProxy.focusToTextarea();
+            }}
+          >
+            New
+          </button>
+          <button
+            onClick={() => {
+              appProxy.addNewEntryFromClipboard();
+              appProxy.focusToTextarea();
+            }}
+          >
+            New from clipboard
+          </button>
+          <button
+            onClick={() => {
+              const line = getEntryUnderCursor();
+              appProxy.addNewEntry(line);
+              appProxy.focusToTextarea();
+            }}
+          >
+            Start selected
+          </button>
+        </div>
+      </div>
     </>
   );
 };
