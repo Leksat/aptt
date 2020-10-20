@@ -17,28 +17,23 @@ export const createTray = (app: App): void => {
     {
       label: 'New...',
       click: () => {
-        app.withErrorDialog(() => {
-          app.addNewEntry('');
-        });
+        app.addNewEntry('');
+        app.showWindow();
       },
     },
     {
       label: 'New from clipboard',
       click: () => {
-        app.withErrorDialog(() => {
-          const ticket = app.getTicketWithError();
-          app.addNewEntry(ticket);
-        });
+        const ticket = app.getTicketWithError();
+        app.addNewEntry(ticket);
       },
     },
     {
       label: 'New from clipboard...',
       click: () => {
-        app.withErrorDialog(() => {
-          const ticket = app.getTicketWithError();
-          app.addNewEntry(ticket);
-          app.showWindow();
-        });
+        const ticket = app.getTicketWithError();
+        app.addNewEntry(ticket);
+        app.showWindow();
       },
     },
     {

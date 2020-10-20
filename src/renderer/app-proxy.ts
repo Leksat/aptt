@@ -1,4 +1,4 @@
-import { App, PickMethods } from '../shared/types';
+import { App, PickMethods, WithNoReturnValue } from '../shared/types';
 import { ipcRenderer } from 'electron';
 
 export const appProxy = new Proxy(
@@ -6,8 +6,8 @@ export const appProxy = new Proxy(
   {
     get(target, p) {
       return (...args: unknown[]) => {
-        return ipcRenderer.sendSync(p as string, ...args);
+        ipcRenderer.send(p as string, ...args);
       };
     },
   }
-) as PickMethods<App>;
+) as WithNoReturnValue<PickMethods<App>>;

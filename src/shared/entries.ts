@@ -54,7 +54,7 @@ export const now = (): string => moment().format('YYYY-MM-DD HH:mm');
 
 export const addNewEntry = (args: {
   time: string;
-  ticket: string;
+  description: string;
   existingEntries: string;
 }): string => {
   let entries;
@@ -78,11 +78,17 @@ export const addNewEntry = (args: {
     }
   }
 
-  if (lastEntry && args.ticket === parseTicket(lastEntry.description)) {
+  const ticket = parseTicket(args.description);
+  if (
+    lastEntry &&
+    ticket !== '' &&
+    ticket === parseTicket(lastEntry.description)
+  ) {
     throw new AppError('You already tracking this ticket.');
   }
 
-  return `${args.existingEntries.trimEnd()}
-${args.time}
-${args.ticket} `;
+  const trimmed = args.existingEntries.trimEnd();
+  return ticket === args.description && args.description.trim() !== ''
+    ? trimmed + '\n' + args.time + '\n' + ticket + ' '
+    : trimmed + '\n' + args.time + '\n' + args.description;
 };

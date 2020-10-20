@@ -1,13 +1,22 @@
-import { app as electronApp, BrowserWindow } from 'electron';
+import { app as electronApp, BrowserWindow, dialog } from 'electron';
 import { createTray } from './tray';
 import { registerShortcuts } from './shortcuts';
 import { connectStore } from './store';
 import { app } from './app';
+import { AppError } from '../shared/errors';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 // From the boilerplate: Handle creating/removing shortcuts on Windows when
 // installing/uninstalling.
 if (require('electron-squirrel-startup')) electronApp.quit();
+
+process.on('uncaughtException', function (e) {
+  if (e instanceof AppError) {
+    dialog.showErrorBox('Whoops!', e.message);
+  } else {
+    throw e;
+  }
+});
 
 let shouldQuit = false;
 
