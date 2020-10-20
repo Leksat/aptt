@@ -1,10 +1,14 @@
 import { Menu, Tray } from 'electron';
 import { App } from '../shared/types';
+import { parseEntries } from '../shared/entries';
+import { AppError } from '../shared/errors';
+import { parseTicket } from '../shared/tickets';
 
-let currentImage = 'assets/tray-idle.png';
+const trayImageIdle = 'assets/tray-idle.png';
+const trayImageWorking = 'assets/tray-working.png';
 
 export const createTray = (app: App): void => {
-  const tray = new Tray(currentImage);
+  const tray = new Tray(trayImageIdle);
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show window',
@@ -42,19 +46,32 @@ export const createTray = (app: App): void => {
       click: () => app.electronApp.exit(),
     },
   ]);
-
-  // AXXX update
-  tray.setToolTip('This is my application.');
-  tray.setTitle('bob!');
-
   tray.setContextMenu(contextMenu);
 
-  // AXXX del
-  setInterval(() => {
-    currentImage =
-      currentImage === 'assets/tray-idle.png'
-        ? 'assets/tray-working.png'
-        : 'assets/tray-idle.png';
-    tray.setImage(currentImage);
-  }, 3000);
+  const getTrayText = (entries: string): string => {
+    try {
+      const parsed = parseEntries(entries);
+      const lastEntry = parsed[parsed.length - 1];
+      if (lastEntry) {
+        const ticket = parseTicket(lastEntry.description);
+        if (ticket !== '') {
+          return ticket;
+        }
+      }
+    } catch (e) {
+      if (e instanceof AppError) {
+        // No need to warn user here.
+      } else {
+        throw e;
+      }
+    }
+    return '';
+  };
+  const onEntriesUpdate = (entries: string | undefined) => {
+    const text = getTrayText(entries || '');
+    tray.setTitle(text);
+    tray.setImage(text === '' ? trayImageIdle : trayImageWorking);
+  };
+  app.store.onDidChange('entries', onEntriesUpdate);
+  onEntriesUpdate(app.store.get('entries'));
 };
