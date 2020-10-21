@@ -28,6 +28,15 @@ body {
   height: 100%;
   width: 50%;
   box-sizing: border-box;
+  float: left;
+}
+
+.summary {
+  float: right;
+  width: 50%;
+  box-sizing: border-box;
+  padding: 0 10px;
+  margin: 0;
 }
 
 .box .row button {

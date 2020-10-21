@@ -152,3 +152,10 @@ export const diffInSeconds = (from: string, to: string): number => {
 
   return (toTime - fromTime) / 1000;
 };
+
+export const toHumanTime = (seconds: number): string => {
+  const minutes = Math.round(seconds / 60);
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return (h ? h + 'h' : '') + m + 'm';
+};

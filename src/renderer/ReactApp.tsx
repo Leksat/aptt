@@ -1,15 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { isTimeString, parseEntries } from '../shared/entries';
+import { isTimeString, now as nowFunc, parseEntries } from '../shared/entries';
 import { store } from './store';
 import { ipcRenderer } from 'electron';
 import { appProxy } from './app-proxy';
 import { AppError } from '../shared/errors';
 import { Settings } from './Settings';
+import { Summary } from './Summary';
 
 const ReactApp = (): JSX.Element => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState('');
   const [entries, setEntries] = useState(store.get('entries'));
+  const [now, setNow] = useState(nowFunc());
   const [settingsOpened, setSettingsOpened] = useState(false);
   const textarea = useRef<HTMLTextAreaElement>(null);
 
@@ -49,6 +51,10 @@ const ReactApp = (): JSX.Element => {
     ipcRenderer.on('submitting', (event, text) => {
       setSubmitting(text);
     });
+
+    setInterval(() => {
+      setNow(nowFunc());
+    }, 60 * 1000);
   }, []);
 
   const onTextChange = (text: string): void => {
@@ -71,6 +77,7 @@ const ReactApp = (): JSX.Element => {
             value={entries}
             ref={textarea}
           />
+          <Summary entries={entries} now={now} />
         </div>
         {error && <div className="row error">{error}</div>}
         {submitting && <div className="row submitting">{submitting}</div>}
