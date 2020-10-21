@@ -3,9 +3,10 @@ import { App } from '../shared/types';
 import { parseEntries } from '../shared/entries';
 import { AppError } from '../shared/errors';
 import { parseTicket } from '../shared/tickets';
+import * as path from 'path';
 
-const trayImageIdle = 'assets/tray-idle.png';
-const trayImageWorking = 'assets/tray-working.png';
+const trayImageIdle = path.resolve(__dirname, 'assets/tray-idle.png');
+const trayImageWorking = path.resolve(__dirname, 'assets/tray-working.png');
 
 export const createTray = (app: App): void => {
   const tray = new Tray(trayImageIdle);
