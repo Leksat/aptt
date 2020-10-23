@@ -35,7 +35,6 @@ electronApp.on('ready', () => {
   app.window
     .loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
     .catch(() => electronApp.exit(1));
-  app.window.webContents.openDevTools();
 
   app.window.on('close', (event) => {
     if (!shouldQuit) {
