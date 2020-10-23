@@ -38,6 +38,12 @@ export const createTray = (app: App): void => {
       },
     },
     {
+      label: 'Stop',
+      click: () => {
+        app.addNewEntry('');
+      },
+    },
+    {
       label: 'Quit',
       click: () => app.electronApp.exit(),
     },

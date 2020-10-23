@@ -88,7 +88,7 @@ const ReactApp = (): JSX.Element => {
               appProxy.focusToTextarea();
             }}
           >
-            New
+            New/Stop
           </button>
           <button
             onClick={() => {
@@ -105,7 +105,7 @@ const ReactApp = (): JSX.Element => {
               appProxy.focusToTextarea();
             }}
           >
-            Start selected
+            New from selected
           </button>
           <button
             onClick={() => {
