@@ -92,14 +92,6 @@ const ReactApp = (): JSX.Element => {
           </button>
           <button
             onClick={() => {
-              appProxy.addNewEntryFromClipboard();
-              appProxy.focusToTextarea();
-            }}
-          >
-            New from clipboard
-          </button>
-          <button
-            onClick={() => {
               const line = getEntryUnderCursor();
               appProxy.addNewEntry(line);
               appProxy.focusToTextarea();
