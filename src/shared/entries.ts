@@ -99,11 +99,6 @@ export const addNewEntry = (args: {
 
   const lastEntry = entries.length ? entries[entries.length - 1] : null;
   if (lastEntry) {
-    if (lastEntry.start === args.time) {
-      throw new AppError(
-        'You are too fast! You already have a record for the current minute.'
-      );
-    }
     if (lastEntry.start > args.time) {
       throw new AppError(
         'Looks like your existing items are in the future O_o'
@@ -112,13 +107,6 @@ export const addNewEntry = (args: {
   }
 
   const ticket = parseTicket(args.description);
-  if (
-    lastEntry &&
-    ticket !== '' &&
-    ticket === parseTicket(lastEntry.description)
-  ) {
-    throw new AppError('You already tracking this ticket.');
-  }
 
   entries.push({
     start: args.time,
