@@ -31,7 +31,7 @@ export const makeJiraTimeEntry = (args: {
   attributes: {},
   billableSeconds: args.seconds,
   worker: args.username,
-  comment: args.description,
+  comment: args.description.replace(args.ticket, '').trim(),
   started: args.start.replace(' ', 'T') + ':00.000',
   timeSpentSeconds: args.seconds,
   originTaskId: args.ticket,
