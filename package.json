@@ -1,7 +1,7 @@
 {
   "name": "aptt",
   "productName": "aptt",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A perfect time tracker",
   "main": ".webpack/main",
   "scripts": {
@@ -42,8 +42,7 @@
             "repository": {
               "owner": "Leksat",
               "name": "aptt"
-            },
-            "prerelease": "true"
+            }
           }
         }
       ],
