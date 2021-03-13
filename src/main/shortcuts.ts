@@ -12,7 +12,7 @@ export const registerShortcuts = (app: App): void => {
         const ticket = app.getTicketWithError();
         app.addNewEntry(ticket);
       } else {
-        app.showWindow();
+        app.toggleWindow();
       }
       lastHitNewEntry = now;
     })
@@ -21,8 +21,8 @@ export const registerShortcuts = (app: App): void => {
   }
 
   if (
-    !globalShortcut.register(app.store.get('shortcuts').displayWindow, () => {
-      app.showWindow();
+    !globalShortcut.register(app.store.get('shortcuts').toggleWindow, () => {
+      app.toggleWindow();
     })
   ) {
     app.electronApp.exit(1);

@@ -13,13 +13,13 @@ export const createTray = (app: App): void => {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show window',
-      click: () => app.showWindow(),
+      click: () => app.toggleWindow(),
     },
     {
       label: 'New...',
       click: () => {
         app.addNewEntry('');
-        app.showWindow();
+        app.toggleWindow();
       },
     },
     {
@@ -34,7 +34,7 @@ export const createTray = (app: App): void => {
       click: () => {
         const ticket = app.getTicketWithError();
         app.addNewEntry(ticket);
-        app.showWindow();
+        app.toggleWindow();
       },
     },
     {

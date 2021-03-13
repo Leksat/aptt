@@ -11,7 +11,7 @@ export interface State {
   };
   shortcuts: {
     newEntry: string;
-    displayWindow: string;
+    toggleWindow: string;
   };
 }
 
@@ -28,6 +28,6 @@ export const defaults: State = {
   },
   shortcuts: {
     newEntry: 'CommandOrControl+Alt+V',
-    displayWindow: 'CommandOrControl+Alt+X',
+    toggleWindow: 'CommandOrControl+Alt+X',
   },
 };

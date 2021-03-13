@@ -18,7 +18,7 @@ export const Settings: React.FC<Props> = ({ close }) => {
         });
         store.set('shortcuts', {
           newEntry: data.get('shortcuts.newEntry') as string,
-          displayWindow: data.get('shortcuts.displayWindow') as string,
+          toggleWindow: data.get('shortcuts.toggleWindow') as string,
         });
         close();
       }}
@@ -47,10 +47,10 @@ export const Settings: React.FC<Props> = ({ close }) => {
         />
       </label>
       <label>
-        Shortcut display window
+        Shortcut toggle window
         <input
-          name="shortcuts.displayWindow"
-          defaultValue={store.get('shortcuts').displayWindow}
+          name="shortcuts.toggleWindow"
+          defaultValue={store.get('shortcuts').toggleWindow}
         />
       </label>
       <button onClick={close}>Close</button>

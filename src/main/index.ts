@@ -39,7 +39,7 @@ electronApp.on('ready', () => {
   app.window.on('close', (event) => {
     if (!shouldQuit) {
       event.preventDefault();
-      app.window.hide();
+      app.electronApp.hide();
     }
   });
 

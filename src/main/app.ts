@@ -18,10 +18,14 @@ export const app = {
   window: {} as BrowserWindow,
   store,
 
-  showWindow: (): void => {
-    app.window.show();
-    app.window.focus();
-    app.focusToTextarea();
+  toggleWindow: (): void => {
+    if (app.window.isVisible()) {
+      app.electronApp.hide();
+    } else {
+      app.window.show();
+      app.window.focus();
+      app.focusToTextarea();
+    }
   },
 
   getTicketWithError: (): string => {
