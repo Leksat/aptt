@@ -43,6 +43,10 @@ electronApp.on('ready', () => {
     }
   });
 
+  app.window.on('blur', () => {
+    app.electronApp.hide();
+  });
+
   connectStore(app);
 });
 
