@@ -1,7 +1,7 @@
 {
   "name": "aptt",
   "productName": "aptt",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A perfect time tracker",
   "main": ".webpack/main",
   "scripts": {
