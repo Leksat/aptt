@@ -3,8 +3,6 @@ import { registerShortcuts } from './shortcuts';
 import { connectStore } from './store';
 import { app } from './app';
 import { AppError } from '../shared/errors';
-import { parseEntries } from '../shared/entries';
-import { parseTicket } from '../shared/tickets';
 import { initBadge } from './badge';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
