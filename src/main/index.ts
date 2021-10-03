@@ -26,8 +26,7 @@ electronApp.on('ready', () => {
     width: app.store.get('window').width,
     webPreferences: {
       nodeIntegration: true,
-      // Required to make electron-store work in renderer process.
-      enableRemoteModule: true,
+      contextIsolation: false,
     },
     skipTaskbar: true,
   });

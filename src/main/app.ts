@@ -102,7 +102,10 @@ export const app = {
         await axios.post(url, data, { auth });
       } catch (e) {
         entries.unshift(current);
-        dialog.showErrorBox('Whoops!', 'Error during submission: ' + e.message);
+        dialog.showErrorBox(
+          'Whoops!',
+          'Error during submission: ' + (e as Error).message
+        );
         error = true;
         break;
       }
@@ -117,6 +120,7 @@ export const app = {
 };
 
 for (const key in app) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const method = app[key];
   if (typeof method === 'function') {

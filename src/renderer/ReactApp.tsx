@@ -64,7 +64,7 @@ const ReactApp = (): JSX.Element => {
       setError('');
       store.set('entries', text);
     } catch (e) {
-      setError(e.message);
+      setError((e as Error).message);
     }
   };
 

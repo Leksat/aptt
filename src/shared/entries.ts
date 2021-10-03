@@ -94,7 +94,9 @@ export const addNewEntry = (args: {
   try {
     entries = parseEntries(args.existingEntries);
   } catch (e) {
-    throw new AppError('Current entries are not valid: ' + e.message);
+    throw new AppError(
+      'Current entries are not valid: ' + (e as Error).message
+    );
   }
 
   const lastEntry = entries.length ? entries[entries.length - 1] : null;
