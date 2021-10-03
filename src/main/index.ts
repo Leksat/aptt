@@ -1,9 +1,11 @@
 import { app as electronApp, BrowserWindow, dialog } from 'electron';
-import { createTray } from './tray';
 import { registerShortcuts } from './shortcuts';
 import { connectStore } from './store';
 import { app } from './app';
 import { AppError } from '../shared/errors';
+import { parseEntries } from '../shared/entries';
+import { parseTicket } from '../shared/tickets';
+import { initBadge } from './badge';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 // From the boilerplate: Handle creating/removing shortcuts on Windows when
@@ -28,7 +30,6 @@ electronApp.on('ready', () => {
       nodeIntegration: true,
       contextIsolation: false,
     },
-    skipTaskbar: true,
   });
 
   app.window
@@ -42,10 +43,6 @@ electronApp.on('ready', () => {
     }
   });
 
-  app.window.on('blur', () => {
-    app.electronApp.hide();
-  });
-
   connectStore(app);
 });
 
@@ -55,12 +52,9 @@ electronApp.on('before-quit', () => {
 
 electronApp.whenReady().then(() => {
   registerShortcuts(app);
-  createTray(app);
+  initBadge(app);
 });
 
 electronApp.on('window-all-closed', () => {
   // Empty handler is required to disable auto-exit.
 });
-
-// Electron.BrowserWindowConstructorOptions.skipTaskbar does not work on Mac.
-electronApp.dock.hide();

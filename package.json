@@ -9,7 +9,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "tsc --noEmit && eslint --ext .ts,.tsx ."
   },
   "keywords": [],
   "author": {
@@ -46,7 +46,9 @@
           }
         }
       ],
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "clock.icns"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
@@ -102,7 +104,6 @@
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
     "@vercel/webpack-asset-relocator-loader": "1.7.0",
-    "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.0.0",
     "electron": "15.1.0",
     "eslint": "^7.6.0",
