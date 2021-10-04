@@ -19,7 +19,7 @@ export const app = {
   store,
 
   toggleWindow: (): void => {
-    if (app.window.isVisible()) {
+    if (app.window.isFocused()) {
       app.electronApp.hide();
     } else {
       app.window.show();

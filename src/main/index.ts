@@ -3,7 +3,7 @@ import { registerShortcuts } from './shortcuts';
 import { connectStore } from './store';
 import { app } from './app';
 import { AppError } from '../shared/errors';
-import { initBadge } from './badge';
+import { initIndicators } from './indicators';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 // From the boilerplate: Handle creating/removing shortcuts on Windows when
@@ -50,7 +50,7 @@ electronApp.on('before-quit', () => {
 
 electronApp.whenReady().then(() => {
   registerShortcuts(app);
-  initBadge(app);
+  initIndicators(app);
 });
 
 electronApp.on('window-all-closed', () => {

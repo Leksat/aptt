@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+const CopyPlugin = require('copy-webpack-plugin');
+
 module.exports = {
   target: 'electron-main',
   /**
@@ -12,4 +15,9 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
   },
+  plugins: [
+    new CopyPlugin({
+      patterns: [{ from: 'src/main/assets', to: 'assets' }],
+    }),
+  ],
 };
