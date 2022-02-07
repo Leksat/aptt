@@ -12,9 +12,8 @@ export const Settings: React.FC<Props> = ({ close }) => {
         event.preventDefault();
         const data = new FormData(event.target as HTMLFormElement);
         store.set('jira', {
-          url: data.get('jira.url') as string,
-          username: data.get('jira.username') as string,
-          password: data.get('jira.password') as string,
+          workerId: data.get('jira.workerId') as string,
+          token: data.get('jira.token') as string,
         });
         store.set('shortcuts', {
           newEntry: data.get('shortcuts.newEntry') as string,
@@ -24,20 +23,18 @@ export const Settings: React.FC<Props> = ({ close }) => {
       }}
     >
       <label>
-        Jira URL
-        <input name="jira.url" defaultValue={store.get('jira').url} />
+        Jira Account ID
+        <input name="jira.workerId" defaultValue={store.get('jira').workerId} />
+        <small>
+          https://community.atlassian.com/t5/Jira-questions/how-to-find-accountid/qaq-p/1111436
+        </small>
       </label>
       <label>
-        Jira username
-        <input name="jira.username" defaultValue={store.get('jira').username} />
-      </label>
-      <label>
-        Jira password
-        <input
-          name="jira.password"
-          defaultValue={store.get('jira').password}
-          type="password"
-        />
+        Tempo API token
+        <input name="jira.token" defaultValue={store.get('jira').token} />
+        <small>
+          https://tempo-io.atlassian.net/wiki/spaces/THC/pages/840531971/Using+REST+API+Integrations+-+Tempo+Cloud#UsingRESTAPIIntegrations-TempoCloud-CreatingaNewToken
+        </small>
       </label>
       <label>
         Shortcut new entry

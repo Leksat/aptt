@@ -83,23 +83,21 @@ export const app = {
 
         const seconds = diffInSeconds(current.start, next.start);
 
-        const url =
-          store.get('jira').url.replace(/\/+$/, '') +
-          '/rest/tempo-timesheets/4/worklogs/';
-
-        const auth: AxiosBasicCredentials = {
-          username: store.get('jira').username,
-          password: store.get('jira').password,
-        };
+        // POST
+        const url = 'https://api.tempo.io/core/3/worklogs';
 
         const data = makeJiraTimeEntry({
-          username: store.get('jira').username,
+          workerId: store.get('jira').workerId,
           ticket,
           seconds,
           ...current,
         });
 
-        await axios.post(url, data, { auth });
+        await axios.post(url, data, {
+          headers: {
+            Authorization: 'Bearer ' + store.get('jira').token,
+          },
+        });
       } catch (e) {
         entries.unshift(current);
         dialog.showErrorBox(

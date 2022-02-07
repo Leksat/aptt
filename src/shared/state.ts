@@ -1,9 +1,8 @@
 export interface State {
   entries: string;
   jira: {
-    url: string;
-    username: string;
-    password: string;
+    workerId: string;
+    token: string;
   };
   window: {
     height: number;
@@ -18,9 +17,8 @@ export interface State {
 export const defaults: State = {
   entries: '',
   jira: {
-    url: '',
-    username: '',
-    password: '',
+    workerId: '',
+    token: '',
   },
   window: {
     height: 600,

@@ -9,36 +9,35 @@ export interface Entry {
 
 export interface JiraTimeEntry {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  attributes: {};
+  attributes: [];
   billableSeconds: number;
-  worker: string;
-  comment: string;
-  started: string; // e.g. "2020-10-20T06:01:00.000"
+  authorAccountId: string;
+  description: string;
+  startDate: string; // e.g. "2020-10-20"
+  startTime: string; // e.g. "06:01:00"
   timeSpentSeconds: number;
-  originTaskId: string; // e.g. "123456" or "ABC-123"
-  remainingEstimate: number;
-  endDate: null;
-  includeNonWorkingDays: false;
+  issueKey: string; // e.g. "ABC-123"
 }
 
 export const makeJiraTimeEntry = (args: {
-  username: string;
+  workerId: string;
   ticket: string;
   start: string;
   seconds: number;
   description: string;
-}): JiraTimeEntry => ({
-  attributes: {},
-  billableSeconds: args.seconds,
-  worker: args.username,
-  comment: args.description.replace(args.ticket, '').trim(),
-  started: args.start.replace(' ', 'T') + ':00.000',
-  timeSpentSeconds: args.seconds,
-  originTaskId: args.ticket,
-  remainingEstimate: 0,
-  endDate: null,
-  includeNonWorkingDays: false,
-});
+}): JiraTimeEntry => {
+  const [date, time] = args.start.split(' ');
+  return {
+    attributes: [],
+    billableSeconds: args.seconds,
+    authorAccountId: args.workerId,
+    description: args.description.replace(args.ticket, '').trim(),
+    startDate: date,
+    startTime: time + ':00',
+    timeSpentSeconds: args.seconds,
+    issueKey: args.ticket,
+  };
+};
 
 export const isTimeString = (text: string): boolean => {
   return !!text.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
