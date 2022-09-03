@@ -6,6 +6,7 @@ import { AppError } from './errors';
 import { Summary } from './Summary';
 import { core } from './core';
 import { Settings } from './Settings';
+import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
 
 function App() {
   const [error, setError] = useState('');
@@ -55,9 +56,12 @@ function App() {
       setSubmitting(event.payload as string);
     });
 
-    setInterval(() => {
+    const scheduler = new IntervalBasedCronScheduler(1_000);
+    scheduler.registerTask(parseCronExpression('* * * * *'), () => {
       setNow(nowFunc());
-    }, 60 * 1000);
+    });
+    scheduler.stop();
+    scheduler.start();
   }, []);
 
   const onTextChange = (text: string): void => {
