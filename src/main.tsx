@@ -1,12 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './style.css';
-import { listen } from '@tauri-apps/api/event';
+import { init } from './core';
+import './styles.css';
 
-await listen('clipboard-hotkey', (event) => {
-  console.log('axxx', event); // AXXX
-});
+await init();
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

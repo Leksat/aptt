@@ -11,7 +11,10 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true
+      "all": true,
+      "http": {
+        "scope": ["https://api.tempo.io/core/3/worklogs"]
+      }
     },
     "bundle": {
       "active": true,
