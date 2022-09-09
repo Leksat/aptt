@@ -7,6 +7,7 @@ import { Summary } from './Summary';
 import { core } from './core';
 import { Settings } from './Settings';
 import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
+import Egg from './Egg';
 
 function App() {
   const [error, setError] = useState('');
@@ -129,6 +130,7 @@ function App() {
           <Settings close={() => setSettingsOpened(false)} />
         </div>
       )}
+      <Egg />
     </>
   );
 }

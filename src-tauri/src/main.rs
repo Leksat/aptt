@@ -8,11 +8,11 @@ mod clipboard_hotkey;
 use crate::clipboard_hotkey::ClipboardHotkey;
 use rdev::listen_non_blocking;
 use std::cell::UnsafeCell;
-use tauri::{Manager, RunEvent, WindowEvent};
+use tauri::{Manager, WindowEvent};
 use tray_item::TrayItem;
 
 fn main() {
-    let app = tauri::Builder::default()
+    tauri::Builder::default()
         .setup(|app| {
             let app_handle = app.handle();
             let mut clipboard_hotkey = ClipboardHotkey::new();
@@ -37,19 +37,21 @@ fn main() {
 
             Ok(())
         })
-        .build(tauri::generate_context!())
+        .on_window_event(|event| {
+            match event.event() {
+                WindowEvent::CloseRequested { api, .. } => {
+                    event
+                        .window()
+                        .emit("show-egg", ())
+                        .expect("Cannot emit show-egg event");
+                    // TODO: Once https://github.com/tauri-apps/tauri/issues/3084 is solved:
+                    //  - hide the window here
+                    //  - restore the window on dock-click/option+tab ("activate" macos event).
+                    api.prevent_close();
+                }
+                _ => {}
+            }
+        })
+        .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
-    app.run(|_, e| match e {
-        RunEvent::WindowEvent {
-            event: WindowEvent::CloseRequested { api, .. },
-            ..
-        } => {
-            // TODO: Once https://github.com/tauri-apps/tauri/issues/3084 is solved:
-            //  - hide the window here
-            //  - restore the window on dock-click/option+tab ("activate" macos event).
-            api.prevent_close();
-        }
-        _ => {}
-    });
 }
