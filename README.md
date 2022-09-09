@@ -8,6 +8,7 @@ REST API.
 - add the app to `Applications`
 - drag it into
   `System Preferences > Security & Privacy > Privacy > Input Monitoring`
+  <img src="docs/input-monitoring.png"  width="50%">
 - open the app with right click
 
 ## Limitations
@@ -50,3 +51,6 @@ If the "new entry" hotkey is hit twice in one second, the main window will be
 shown - to add a description.
 
 ## Hotkeys
+
+- `cmd+c+c`: copy text to clipboard + start a new entry from it
+- `cmd+alt+x`: focus the app
