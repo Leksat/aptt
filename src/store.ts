@@ -26,14 +26,8 @@ export type StoreChangedEvent = {
 export const store = {
   get: <K extends keyof Store>(key: K): Store[K] =>
     JSON.parse(window.localStorage.getItem(key) || 'null') || defaults[key],
-  set: <K extends keyof Store>(
-    key: K,
-    value: Store[K],
-    options: { notify: boolean },
-  ) => {
+  set: <K extends keyof Store>(key: K, value: Store[K]) => {
     window.localStorage.setItem(key, JSON.stringify(value));
-    if (options.notify) {
-      appWindow.emit('store-changed', { key, value });
-    }
+    appWindow.emit('store-changed', { key, value });
   },
 };

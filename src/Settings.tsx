@@ -11,14 +11,10 @@ export const Settings: React.FC<Props> = ({ close }) => {
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.target as HTMLFormElement);
-        store.set(
-          'jira',
-          {
-            workerId: data.get('jira.workerId') as string,
-            token: data.get('jira.token') as string,
-          },
-          { notify: false },
-        );
+        store.set('jira', {
+          workerId: data.get('jira.workerId') as string,
+          token: data.get('jira.token') as string,
+        });
         close();
       }}
     >

@@ -69,7 +69,7 @@ function App() {
     try {
       parseEntries(text);
       setError('');
-      store.set('entries', text, { notify: false });
+      store.set('entries', text);
     } catch (e) {
       setError(`${e}`);
     }

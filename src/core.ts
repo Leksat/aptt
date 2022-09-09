@@ -1,4 +1,4 @@
-import { store } from './store';
+import { store, StoreChangedEvent } from './store';
 import { getTicketFromClipboard, parseTicket } from './tickets';
 import {
   addNewEntry,
@@ -20,7 +20,21 @@ export const init = async () => {
   await listen('clipboard-hotkey', () => {
     core.addNewEntryFromClipboard();
   });
+
   await globalShortcut.register('Command+Alt+X', core.focusWindow);
+
+  const setTrayText = (entries: string) => {
+    const entry = parseEntries(entries).at(-1);
+    const ticket = entry?.description ? parseTicket(entry.description) : '';
+    appWindow.emit('set-text', ticket ? '🕒 ' + ticket : '🕒');
+  };
+  setTrayText(store.get('entries'));
+  await appWindow.listen('store-changed', (event) => {
+    const data = JSON.parse(event.payload as string) as StoreChangedEvent;
+    if (data.key === 'entries') {
+      setTrayText(data.value);
+    }
+  });
 };
 
 export const core = {
@@ -43,7 +57,7 @@ export const core = {
       description,
       existingEntries: store.get('entries'),
     });
-    store.set('entries', updatedEntries, { notify: true });
+    store.set('entries', updatedEntries);
   },
 
   addNewEntryFromClipboard: async (): Promise<void> => {
@@ -113,6 +127,6 @@ export const core = {
     }
     await appWindow.emit('submitting', `Submitted: ${error ? '???' : 100}%`);
     setTimeout(() => appWindow.emit('submitting', ''), 3000);
-    store.set('entries', stringifyEntries(entries), { notify: true });
+    store.set('entries', stringifyEntries(entries));
   },
 };
