@@ -80,8 +80,7 @@ export const parseEntries = (text: string): Entry[] => {
   return entries;
 };
 
-export const now = (): string =>
-  new Date().toISOString().substring(0, 16).replace('T', ' ');
+export const now = (): string => formatDate(new Date());
 
 export const addNewEntry = (args: {
   time: string;
@@ -148,3 +147,14 @@ export const toHumanTime = (seconds: number): string => {
 
 export const parseDate = (date: string): Date =>
   new Date(date.replace(' ', 'T') + ':00');
+
+export const formatDate = (date: Date): string =>
+  date.getFullYear() +
+  '-' +
+  (date.getMonth() + 1).toString().padStart(2, '0') +
+  '-' +
+  date.getDate().toString().padStart(2, '0') +
+  ' ' +
+  date.getHours().toString().padStart(2, '0') +
+  ':' +
+  date.getMinutes().toString().padStart(2, '0');
