@@ -17,11 +17,19 @@ fn main() {
             let app_handle = app.handle();
             let mut clipboard_hotkey = ClipboardHotkey::new();
             listen_non_blocking(move |event| {
-                clipboard_hotkey.callback(event, || {
-                    app_handle
-                        .emit_all("clipboard-hotkey", ())
-                        .expect("Cannot emit main-hotkey event");
-                });
+                clipboard_hotkey.callback(
+                    event,
+                    || {
+                        app_handle
+                            .emit_all("clipboard-hotkey", ())
+                            .expect("Cannot emit clipboard-hotkey event");
+                    },
+                    || {
+                        app_handle
+                            .emit_all("focus", ())
+                            .expect("Cannot emit focus event");
+                    },
+                );
             })
             .expect("Cannot listen to keyboard events");
 

@@ -32,21 +32,26 @@ const KEY_C: Key = Key(RdevKey::KeyC);
 
 #[derive(Debug)]
 pub struct ClipboardHotkey {
-    last_key: Option<Key>,
-    last_key_time: Option<SystemTime>,
+    hits_count: u8,
+    last_hit_time: SystemTime,
     current_mod_keys: HashSet<Key>,
 }
 
 impl ClipboardHotkey {
     pub fn new() -> ClipboardHotkey {
         ClipboardHotkey {
-            last_key: None,
-            last_key_time: None,
+            hits_count: 0,
+            last_hit_time: SystemTime::now(),
             current_mod_keys: HashSet::new(),
         }
     }
 
-    pub fn callback<F: Fn() -> ()>(&mut self, event: Event, callback: F) -> () {
+    pub fn callback<F1: Fn() -> (), F2: Fn() -> ()>(
+        &mut self,
+        event: Event,
+        second_hit_callback: F1,
+        third_hit_callback: F2,
+    ) -> () {
         match event.event_type {
             EventType::KeyPress(rdev_key) => {
                 let key = Key(rdev_key);
@@ -59,27 +64,37 @@ impl ClipboardHotkey {
             EventType::KeyRelease(rdev_key) => {
                 let current_key = Key(rdev_key);
                 if MOD_KEYS.contains(&current_key) {
+                    // A mod key.
                     if self.current_mod_keys.contains(&current_key) {
                         self.current_mod_keys.remove(&current_key);
                     }
-                }
-                if current_key == KEY_C
+                } else if current_key == KEY_C
                     && self.current_mod_keys.len() == 1
                     && (self.current_mod_keys.contains(&KEY_META_LEFT)
                         || self.current_mod_keys.contains(&KEY_META_RIGHT))
-                    && self.last_key == Some(KEY_C)
-                    && SystemTime::now()
-                        .duration_since(self.last_key_time.unwrap())
-                        .unwrap()
-                        .as_millis()
-                        < 500
                 {
-                    self.last_key = None;
-                    self.last_key_time = None;
-                    callback();
+                    // The C key.
+                    if self.hits_count > 0
+                        && SystemTime::now()
+                            .duration_since(self.last_hit_time)
+                            .unwrap()
+                            .as_millis()
+                            < 500
+                    {
+                        self.hits_count += 1;
+                        if self.hits_count == 2 {
+                            second_hit_callback();
+                        } else if self.hits_count == 3 {
+                            third_hit_callback();
+                        }
+                        self.last_hit_time = SystemTime::now();
+                    } else {
+                        self.hits_count = 1;
+                        self.last_hit_time = SystemTime::now();
+                    }
                 } else {
-                    self.last_key = Some(current_key);
-                    self.last_key_time = Some(SystemTime::now());
+                    // Any other key.
+                    self.hits_count = 0;
                 }
             }
             _ => {}

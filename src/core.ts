@@ -22,6 +22,7 @@ export const init = async () => {
   });
 
   await globalShortcut.register('Command+Alt+X', core.focusWindow);
+  await listen('focus', core.focusWindow);
 
   const setTrayText = (entries: string) => {
     const entry = parseEntries(entries).at(-1);

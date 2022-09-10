@@ -29,7 +29,7 @@ ABC-456 some comment
 The above means:
 
 - for one minute I did something unknown
-- for the next minute I worked on the ticket ABC-123
+- for the next minute I worked on a Jira issue ABC-123
 - for the next two minutes I did nothing (and I mentioned this specifically)
 - starting from 2022-09-10 06:23 and till the current moment I'm working on
   ABC-456 (and I added `some comment`)
@@ -40,7 +40,9 @@ On Submit:
 - the last entry will stay, it won't be logged because it's an active one
 - everything else will disappear
 
-## Hotkeys
+## Global hotkeys
 
-- `cmd+c+c`: copy text to clipboard + start a new entry from it
+- `cmd+c+c`: copy selected text to clipboard, search the clipboard contents for
+  a Jira issue, start a new entry if it was found
+- `cmd+c+c+c`: same as the above but also focuses the app
 - `cmd+alt+x`: focus the app
