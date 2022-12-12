@@ -8,6 +8,7 @@
     "test:static": "tsc --noEmit",
     "test:unit": "vitest",
     "dev": "vite",
+    "tauri-dev": "tauri dev",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri"
