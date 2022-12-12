@@ -7,7 +7,7 @@ import { Summary } from './Summary';
 import { core, init } from './core';
 import { Settings } from './Settings';
 import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
-import { ask } from '@tauri-apps/api/dialog';
+import { ask, message } from '@tauri-apps/api/dialog';
 import Egg from './Egg';
 
 function App() {
@@ -115,6 +115,20 @@ function App() {
           </button>
           <button
             onClick={async () => {
+              const entries = parseEntries(store.get('entries'));
+              for (const entry of entries) {
+                if (
+                  entry.description.startsWith('!') ||
+                  entry.description.match(/^[A-Z][A-Z0-9]*-\d+ !/)
+                ) {
+                  await message(
+                    `There is an entry with a description starting with question mark:
+"${entry.description}"
+Please update it to continue.`,
+                  );
+                  return;
+                }
+              }
               if (await ask('Really?')) {
                 await core.submit();
               }
