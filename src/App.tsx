@@ -7,6 +7,7 @@ import { Summary } from './Summary';
 import { core, init } from './core';
 import { Settings } from './Settings';
 import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
+import { ask } from '@tauri-apps/api/dialog';
 import Egg from './Egg';
 
 function App() {
@@ -113,9 +114,9 @@ function App() {
             New from selected
           </button>
           <button
-            onClick={() => {
-              if (confirm('Really?')) {
-                core.submit();
+            onClick={async () => {
+              if (await ask('Really?')) {
+                await core.submit();
               }
             }}
           >
