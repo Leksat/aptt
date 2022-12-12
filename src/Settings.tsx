@@ -38,7 +38,14 @@ export const Settings: React.FC<Props> = ({ close }) => {
           <small>Hpw to get it</small>
         </a>
       </label>
-      <button onClick={close}>Close</button>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          close();
+        }}
+      >
+        Close
+      </button>
       <input type="submit" value="Save" />
     </form>
   );

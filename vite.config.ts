@@ -24,4 +24,13 @@ export default defineConfig({
     // produce sourcemaps for debug builds
     sourcemap: !!process.env.TAURI_DEBUG,
   },
+  // @ts-ignore 🤷
+  test: {
+    globals: true,
+    environment: 'jsdom',
+  },
 });
+
+if (process.env.NODE_ENV === 'test') {
+  console.clear();
+}

@@ -30,4 +30,6 @@ export const store = {
     window.localStorage.setItem(key, JSON.stringify(value));
     appWindow.emit('store-changed', { key, value });
   },
+  // For tests.
+  clear: () => window.localStorage.clear(),
 };

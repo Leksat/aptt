@@ -56,5 +56,9 @@ export const Summary: React.FC<Props> = ({ entries, now }) => {
     result = '';
   }
 
-  return <pre className="summary">{result}</pre>;
+  return (
+    <pre className="summary" data-testid="summary">
+      {result}
+    </pre>
+  );
 };

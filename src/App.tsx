@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { appWindow } from '@tauri-apps/api/window';
 import { isTimeString, now as nowFunc, parseEntries } from './entries';
-import { Store, store, StoreChangedEvent } from './store';
+import { store, StoreChangedEvent } from './store';
 import { AppError } from './errors';
 import { Summary } from './Summary';
-import { core } from './core';
+import { core, init } from './core';
 import { Settings } from './Settings';
 import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
 import Egg from './Egg';
 
 function App() {
+  useEffect(() => {
+    init();
+  }, []);
+
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState('');
   const [entries, setEntries] = useState(store.get('entries'));
@@ -81,6 +85,7 @@ function App() {
       <div className="box">
         <div className="row max-height">
           <textarea
+            data-testid="textarea"
             onChange={(event) => onTextChange(event.target.value)}
             value={entries}
             ref={textarea}
@@ -126,7 +131,7 @@ function App() {
         </div>
       </div>
       {settingsOpened && (
-        <div className="settings-wrapper">
+        <div className="settings-wrapper" data-testid="settings">
           <Settings close={() => setSettingsOpened(false)} />
         </div>
       )}
