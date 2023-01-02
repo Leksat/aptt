@@ -12,6 +12,7 @@ import {
   diffInSeconds,
   isTimeString,
   now as nowFunc,
+  ParsedEntry,
   parseEntries,
   toHumanTime,
 } from '../lib/entries';
@@ -117,7 +118,12 @@ function App() {
                 }}
               >
                 {(text) => {
-                  const entries = parseEntries(text);
+                  let entries: ParsedEntry[];
+                  try {
+                    entries = parseEntries(text);
+                  } catch (e) {
+                    return text;
+                  }
                   return text.split('\n').map((line, i) => {
                     const lineNumber = i + 1;
                     const entryIndex = entries.findIndex(
