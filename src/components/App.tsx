@@ -124,7 +124,12 @@ function App() {
                       (entry) => entry.startLineNumber === lineNumber,
                     );
                     if (entryIndex === -1) {
-                      return <div key={i}>{line}</div>;
+                      const trimmed = line.trim();
+                      return trimmed ? (
+                        <div key={i}>{line}</div>
+                      ) : (
+                        <div key={i}>&nbsp;</div>
+                      );
                     }
                     const entry = entries[entryIndex]!;
                     const nextEntryStart =
