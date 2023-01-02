@@ -22,6 +22,10 @@ describe('Summary tests', () => {
           2000-01-01 05:00
           OH-7 5h
           2000-01-01 10:00
+          Description
+          2000-01-01 10:10
+          
+          2000-01-01 10:20
           A-25
           2000-01-01 12:30
           A-35
@@ -32,17 +36,28 @@ describe('Summary tests', () => {
       />,
     );
     expect(screen.getByTestId('summary').innerHTML).toMatchInlineSnapshot(`
-      "By ticket:
-      OH-7: 7h0m
-      OH-4: 4h0m
-      A-25: 2h30m
-      A-35: 3h30m
+      "Total: 17h0m
 
       By project:
+      A: 5h40m
       OH: 11h0m
-      A: 6h0m
+      [other]: 20m
 
-      Total: 17h0m"
+      By ticket:
+      A-25: 2h10m
+      A-35: 3h30m
+      OH-4: 4h0m
+      OH-7: 7h0m
+      [other]: 20m
+
+      By description:
+      A-25: 2h10m
+      A-35: 3h30m
+      Description: 10m
+      OH-4: 4h0m
+      OH-7 2h: 2h0m
+      OH-7 5h: 5h0m
+      [no description]: 10m"
     `);
   });
 
@@ -78,15 +93,20 @@ describe('Summary tests', () => {
       />,
     );
     expect(screen.getByTestId('summary').innerHTML).toMatchInlineSnapshot(`
-      "By ticket:
-      A-1: 0m
-      A-2: 0m
-      A-3: 6h0m
+      "Total: 6h0m
 
       By project:
       A: 6h0m
 
-      Total: 6h0m"
+      By ticket:
+      A-1: 0m
+      A-2: 0m
+      A-3: 6h0m
+
+      By description:
+      A-1: 0m
+      A-2: 0m
+      A-3: 6h0m"
     `);
   });
 });
