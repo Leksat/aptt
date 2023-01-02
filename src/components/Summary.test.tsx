@@ -1,6 +1,8 @@
-import { describe, expect, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+
+import { render, screen } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
+
 import { store } from '../lib/store';
 import { Summary } from './Summary';
 

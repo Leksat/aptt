@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { appWindow } from '@tauri-apps/api/window';
+import { useEffect, useState } from 'react';
 
 let isRunning = false;
 
@@ -57,6 +57,7 @@ export default function Egg() {
         <a
           href="https://github.com/Leksat/aptt/blob/bc65d99d647b542b65695be27e3d56cbb7ab0ba2/src-tauri/src/main.rs#L48-L51"
           target="_blank"
+          rel="noreferrer"
         >
           WTF
         </a>

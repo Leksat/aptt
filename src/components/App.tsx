@@ -1,17 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
-import { appWindow } from '@tauri-apps/api/window';
-import { isTimeString, now as nowFunc, parseEntries } from '../lib/entries';
-import { store, StoreChangedEvent } from '../lib/store';
-import { AppError } from '../lib/errors';
-import { Summary } from './Summary';
-import { core, init } from '../lib/core';
-import { Settings } from './Settings';
-import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
-import { ask, message } from '@tauri-apps/api/dialog';
-import Egg from './Egg';
-import { RichTextarea } from 'rich-textarea';
-import { Allotment } from 'allotment';
 import 'allotment/dist/style.css';
+
+import { ask, message } from '@tauri-apps/api/dialog';
+import { appWindow } from '@tauri-apps/api/window';
+import { Allotment } from 'allotment';
+import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
+import { useEffect, useRef, useState } from 'react';
+import { RichTextarea } from 'rich-textarea';
+
+import { core, init } from '../lib/core';
+import { isTimeString, now as nowFunc, parseEntries } from '../lib/entries';
+import { AppError } from '../lib/errors';
+import { store, StoreChangedEvent } from '../lib/store';
+import Egg from './Egg';
+import { Settings } from './Settings';
+import { Summary } from './Summary';
 
 function App() {
   useEffect(() => {

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { diffInSeconds, parseEntries, toHumanTime } from '../lib/entries';
 import { parseTicket } from '../lib/tickets';
 

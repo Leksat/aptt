@@ -1,5 +1,9 @@
-import { store, StoreChangedEvent } from './store';
-import { getTicketFromClipboard, parseTicket } from './tickets';
+import { globalShortcut } from '@tauri-apps/api';
+import { message } from '@tauri-apps/api/dialog';
+import { listen } from '@tauri-apps/api/event';
+import { Body, fetch } from '@tauri-apps/api/http';
+import { appWindow } from '@tauri-apps/api/window';
+
 import {
   addNewEntry,
   diffInSeconds,
@@ -10,11 +14,8 @@ import {
   stringifyEntries,
 } from './entries';
 import { AppError } from './errors';
-import { appWindow } from '@tauri-apps/api/window';
-import { message } from '@tauri-apps/api/dialog';
-import { listen } from '@tauri-apps/api/event';
-import { globalShortcut } from '@tauri-apps/api';
-import { Body, fetch } from '@tauri-apps/api/http';
+import { store, StoreChangedEvent } from './store';
+import { getTicketFromClipboard, parseTicket } from './tickets';
 
 export const init = async () => {
   await listen('clipboard-hotkey', () => {

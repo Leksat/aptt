@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { store } from '../lib/store';
 
 interface Props {
@@ -24,6 +25,7 @@ export const Settings: React.FC<Props> = ({ close }) => {
         <a
           target="_blank"
           href="https://community.atlassian.com/t5/Jira-questions/how-to-find-accountid/qaq-p/1111436"
+          rel="noreferrer"
         >
           <small>How to get it</small>
         </a>
@@ -34,6 +36,7 @@ export const Settings: React.FC<Props> = ({ close }) => {
         <a
           target="_blank"
           href="https://tempo-io.atlassian.net/wiki/spaces/THC/pages/840531971/Using+REST+API+Integrations+-+Tempo+Cloud#UsingRESTAPIIntegrations-TempoCloud-CreatingaNewToken"
+          rel="noreferrer"
         >
           <small>How to get it</small>
         </a>

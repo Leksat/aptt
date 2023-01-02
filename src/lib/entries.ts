@@ -1,5 +1,5 @@
-import { parseTicket } from './tickets';
 import { AppError } from './errors';
+import { parseTicket } from './tickets';
 
 export interface Entry {
   start: string;

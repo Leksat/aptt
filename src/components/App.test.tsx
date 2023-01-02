@@ -1,9 +1,11 @@
-import { describe, expect, test } from 'vitest';
-import App from './App';
-import { render, screen } from '@testing-library/react';
-import { mockIPC } from '@tauri-apps/api/mocks';
 import '@testing-library/jest-dom';
+
+import { mockIPC } from '@tauri-apps/api/mocks';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
+
 import { store } from '../lib/store';
+import App from './App';
 
 beforeEach(() => {
   store.clear();
