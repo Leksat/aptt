@@ -9,6 +9,9 @@ import { Settings } from './Settings';
 import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
 import { ask, message } from '@tauri-apps/api/dialog';
 import Egg from './Egg';
+import { RichTextarea } from 'rich-textarea';
+import { Allotment } from 'allotment';
+import 'allotment/dist/style.css';
 
 function App() {
   useEffect(() => {
@@ -89,13 +92,29 @@ function App() {
     <>
       <div className="box">
         <div className="row max-height">
-          <textarea
-            data-testid="textarea"
-            onChange={(event) => onTextChange(event.target.value)}
-            value={entries}
-            ref={textarea}
-          />
-          <Summary entries={entries} now={now} />
+          <Allotment>
+            <Allotment.Pane minSize={200}>
+              <RichTextarea
+                data-testid="textarea"
+                onChange={(event) => onTextChange(event.target.value)}
+                value={entries}
+                ref={textarea}
+                nonce=""
+                style={{
+                  height: '100%',
+                  width: '100%',
+                  padding: 0,
+                  border: 0,
+                  resize: 'none',
+                }}
+              >
+                {(text) => text}
+              </RichTextarea>
+            </Allotment.Pane>
+            <Allotment.Pane snap>
+              <Summary entries={entries} now={now} />
+            </Allotment.Pane>
+          </Allotment>
         </div>
         {error && <div className="row error">{error}</div>}
         {submitting && <div className="row submitting">{submitting}</div>}

@@ -25,15 +25,7 @@ body,
   flex: 1 1 auto;
 }
 
-.box .row.max-height textarea {
-  height: 100%;
-  width: 50%;
-  box-sizing: border-box;
-  float: left;
-}
-
 .summary {
-  float: right;
   width: 50%;
   box-sizing: border-box;
   padding: 0 10px;
@@ -53,6 +45,7 @@ body,
   top: 0;
   background-color: white;
   padding: 10px;
+  z-index: 10;
 }
 
 .settings-wrapper label {
@@ -72,4 +65,14 @@ body,
 
 textarea {
   font-family: monospace;
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 7px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }

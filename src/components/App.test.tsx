@@ -7,6 +7,11 @@ import { store } from '../lib/store';
 
 beforeEach(() => {
   store.clear();
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
 });
 
 describe('App tests', () => {
