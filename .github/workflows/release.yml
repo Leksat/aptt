@@ -24,7 +24,7 @@ jobs:
         with:
           workspaces: "src-tauri -> target"
       - name: install app dependencies
-        run: yarn
+        run: pnpm i
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
