@@ -35,6 +35,12 @@ fn main() {
 
             let mut tray = TrayItem::new("🕒", "").unwrap();
             let inner = tray.inner_mut();
+            let app_handle2 = app.handle();
+            inner
+                .add_menu_item("Settings", move || {
+                    app_handle2.emit_all("display-settings", ()).unwrap();
+                })
+                .unwrap();
             inner.add_quit_item("Quit");
             inner.display();
             let tray_handle: UnsafeCell<TrayItem> = tray.into();

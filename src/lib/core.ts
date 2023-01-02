@@ -21,6 +21,10 @@ export const init = async () => {
     core.addNewEntryFromClipboard();
   });
 
+  await listen('display-settings', () => {
+    core.displaySettings();
+  });
+
   await globalShortcut.register('Command+Alt+X', core.focusWindow);
   await listen('focus', core.focusWindow);
 
@@ -129,5 +133,10 @@ export const core = {
     await appWindow.emit('submitting', `Submitted: ${error ? '???' : 100}%`);
     setTimeout(() => appWindow.emit('submitting', ''), 3000);
     store.set('entries', stringifyEntries(entries));
+  },
+
+  displaySettings: async () => {
+    await appWindow.emit('displaySettings');
+    await appWindow.setFocus();
   },
 };
