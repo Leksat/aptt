@@ -8,7 +8,13 @@ import { useEffect, useRef, useState } from 'react';
 import { RichTextarea } from 'rich-textarea';
 
 import { core, init } from '../lib/core';
-import { isTimeString, now as nowFunc, parseEntries } from '../lib/entries';
+import {
+  diffInSeconds,
+  isTimeString,
+  now as nowFunc,
+  parseEntries,
+  toHumanTime,
+} from '../lib/entries';
 import { AppError } from '../lib/errors';
 import { store, StoreChangedEvent } from '../lib/store';
 import Egg from './Egg';
@@ -35,7 +41,7 @@ function App() {
       textarea.current.value
         .substring(0, textarea.current.selectionStart)
         .split('\n').length - 1;
-    const line = textarea.current.value.split('\n')[lineNr];
+    const line = textarea.current.value.split('\n')[lineNr]!;
     if (isTimeString(line)) {
       throw new AppError(
         'The line under cursor is a time string. Cannot use it to start a new entry.',
@@ -110,7 +116,28 @@ function App() {
                   resize: 'none',
                 }}
               >
-                {(text) => text}
+                {(text) => {
+                  const entries = parseEntries(text);
+                  return text.split('\n').map((line, i) => {
+                    const lineNumber = i + 1;
+                    const entryIndex = entries.findIndex(
+                      (entry) => entry.startLineNumber === lineNumber,
+                    );
+                    if (entryIndex === -1) {
+                      return <div key={i}>{line}</div>;
+                    }
+                    const entry = entries[entryIndex]!;
+                    const nextEntryStart =
+                      entries[entryIndex + 1]?.start || nowFunc();
+                    const duration = diffInSeconds(entry.start, nextEntryStart);
+                    return (
+                      <div key={i}>
+                        {line}{' '}
+                        <span className="hint">{toHumanTime(duration)}</span>
+                      </div>
+                    );
+                  });
+                }}
               </RichTextarea>
             </Allotment.Pane>
             <Allotment.Pane snap>

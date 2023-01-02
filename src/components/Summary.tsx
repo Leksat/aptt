@@ -36,7 +36,7 @@ export const Summary: React.FC<Props> = ({ entries, now }) => {
       }
       summary[ticket] += seconds;
 
-      const [project] = ticket.split('-');
+      const project = ticket.split('-')[0]!;
       if (!summaryByProject[project]) {
         summaryByProject[project] = 0;
       }

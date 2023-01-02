@@ -6,6 +6,10 @@ export interface Entry {
   description: string;
 }
 
+export interface ParsedEntry extends Entry {
+  startLineNumber: number;
+}
+
 export interface JiraTimeEntry {
   attributes: [];
   billableSeconds: number;
@@ -30,7 +34,7 @@ export const makeJiraTimeEntry = (args: {
     billableSeconds: args.seconds,
     authorAccountId: args.workerId,
     description: args.description.replace(args.ticket, '').trim(),
-    startDate: date,
+    startDate: date!,
     startTime: time + ':00',
     timeSpentSeconds: args.seconds,
     issueKey: args.ticket,
@@ -41,8 +45,8 @@ export const isTimeString = (text: string): boolean => {
   return !!text.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/);
 };
 
-export const parseEntries = (text: string): Entry[] => {
-  const entries: Entry[] = [];
+export const parseEntries = (text: string): ParsedEntry[] => {
+  const entries: ParsedEntry[] = [];
   let lineNumber = 0;
   for (const line of text.split('\n')) {
     lineNumber++;
@@ -61,6 +65,7 @@ export const parseEntries = (text: string): Entry[] => {
       entries.push({
         start: trimmed,
         description: '',
+        startLineNumber: lineNumber,
       });
     } else if (trimmed !== '') {
       const lastEntry = entries[entries.length - 1];
@@ -87,7 +92,7 @@ export const addNewEntry = (args: {
   description: string;
   existingEntries: string;
 }): string => {
-  let entries;
+  let entries: Entry[];
   try {
     entries = parseEntries(args.existingEntries);
   } catch (e) {
