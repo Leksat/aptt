@@ -32,7 +32,11 @@ export const Settings: React.FC<Props> = ({ close }) => {
       </label>
       <label>
         Tempo API token
-        <input name="jira.token" defaultValue={store.get('jira').token} />
+        <input
+          name="jira.token"
+          defaultValue={store.get('jira').token}
+          type="password"
+        />
         <a
           target="_blank"
           href="https://tempo-io.atlassian.net/wiki/spaces/THC/pages/840531971/Using+REST+API+Integrations+-+Tempo+Cloud#UsingRESTAPIIntegrations-TempoCloud-CreatingaNewToken"
