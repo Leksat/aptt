@@ -62,6 +62,10 @@ function App() {
       setSubmitting(event.payload as string);
     });
 
+    appWindow.listen('displaySettings', () => {
+      setSettingsOpened(true);
+    });
+
     const scheduler = new IntervalBasedCronScheduler(1_000);
     scheduler.registerTask(parseCronExpression('* * * * *'), () => {
       setNow(nowFunc());
@@ -135,13 +139,6 @@ Please update it to continue.`,
             }}
           >
             Submit
-          </button>
-          <button
-            onClick={() => {
-              setSettingsOpened(true);
-            }}
-          >
-            Settings
           </button>
         </div>
       </div>
