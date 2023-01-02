@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { store } from './store';
+import { store } from '../lib/store';
 import { Summary } from './Summary';
 
 beforeEach(() => {

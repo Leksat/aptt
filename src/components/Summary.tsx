@@ -1,6 +1,6 @@
 import React from 'react';
-import { diffInSeconds, parseEntries, toHumanTime } from './entries';
-import { parseTicket } from './tickets';
+import { diffInSeconds, parseEntries, toHumanTime } from '../lib/entries';
+import { parseTicket } from '../lib/tickets';
 
 interface Props {
   entries: string;

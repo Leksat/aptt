@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { appWindow } from '@tauri-apps/api/window';
-import { isTimeString, now as nowFunc, parseEntries } from './entries';
-import { store, StoreChangedEvent } from './store';
-import { AppError } from './errors';
+import { isTimeString, now as nowFunc, parseEntries } from '../lib/entries';
+import { store, StoreChangedEvent } from '../lib/store';
+import { AppError } from '../lib/errors';
 import { Summary } from './Summary';
-import { core, init } from './core';
+import { core, init } from '../lib/core';
 import { Settings } from './Settings';
 import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
 import { ask, message } from '@tauri-apps/api/dialog';

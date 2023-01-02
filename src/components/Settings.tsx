@@ -1,5 +1,5 @@
 import React from 'react';
-import { store } from './store';
+import { store } from '../lib/store';
 
 interface Props {
   close: () => void;
@@ -25,7 +25,7 @@ export const Settings: React.FC<Props> = ({ close }) => {
           target="_blank"
           href="https://community.atlassian.com/t5/Jira-questions/how-to-find-accountid/qaq-p/1111436"
         >
-          <small>Hpw to get it</small>
+          <small>How to get it</small>
         </a>
       </label>
       <label>
@@ -35,7 +35,7 @@ export const Settings: React.FC<Props> = ({ close }) => {
           target="_blank"
           href="https://tempo-io.atlassian.net/wiki/spaces/THC/pages/840531971/Using+REST+API+Integrations+-+Tempo+Cloud#UsingRESTAPIIntegrations-TempoCloud-CreatingaNewToken"
         >
-          <small>Hpw to get it</small>
+          <small>How to get it</small>
         </a>
       </label>
       <button
