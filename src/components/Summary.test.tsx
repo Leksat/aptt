@@ -36,7 +36,7 @@ describe('Summary tests', () => {
       />,
     );
     expect(screen.getByTestId('summary').innerHTML).toMatchInlineSnapshot(`
-      "Total: 17h0m
+      "Total billable: 16h40m
 
       By project:
       A: 5h40m
@@ -93,7 +93,7 @@ describe('Summary tests', () => {
       />,
     );
     expect(screen.getByTestId('summary').innerHTML).toMatchInlineSnapshot(`
-      "Total: 6h0m
+      "Total billable: 6h0m
 
       By project:
       A: 6h0m

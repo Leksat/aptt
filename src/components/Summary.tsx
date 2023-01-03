@@ -48,8 +48,13 @@ export const Summary: React.FC<Props> = ({ entries, now }) => {
       summaryByDescription[description] += seconds;
     }
     result =
-      'Total: ' +
-      toHumanTime(Object.values(summary).reduce((a, b) => a + b, 0)) +
+      'Total billable: ' +
+      toHumanTime(
+        Object.entries(summary)
+          .filter(([description]) => description !== '[other]')
+          .map(([, seconds]) => seconds)
+          .reduce((a, b) => a + b, 0),
+      ) +
       '\n\nBy project:\n' +
       Object.entries(summaryByProject)
         .sort(([a], [b]) => sort(a, b))
