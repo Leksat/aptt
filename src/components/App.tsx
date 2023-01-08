@@ -22,6 +22,7 @@ import { AppError } from '../lib/errors';
 import { store, StoreChangedEvent } from '../lib/store';
 import Egg from './Egg';
 import { History } from './History';
+import { Notes } from './Notes';
 import { Settings } from './Settings';
 import { Summary } from './Summary';
 
@@ -166,10 +167,14 @@ function App() {
               >
                 <TabList>
                   <Tab>Summary</Tab>
+                  <Tab>Notes</Tab>
                   <Tab>History</Tab>
                 </TabList>
                 <TabPanel style={tabsStyle}>
                   <Summary entries={entries} now={now} />
+                </TabPanel>
+                <TabPanel style={tabsStyle}>
+                  <Notes />
                 </TabPanel>
                 <TabPanel style={tabsStyle}>
                   <History />

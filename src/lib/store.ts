@@ -1,5 +1,7 @@
 import { appWindow } from '@tauri-apps/api/window';
 
+import { defaultNotes } from '../components/Notes';
+
 export type Store = {
   entries: string;
   jira: {
@@ -10,6 +12,7 @@ export type Store = {
     time: string;
     entries: string;
   }>;
+  notes: string;
 };
 
 const defaults: Store = {
@@ -19,6 +22,7 @@ const defaults: Store = {
     token: '',
   },
   history: [],
+  notes: defaultNotes,
 };
 
 export type StoreChangedEvent = {
