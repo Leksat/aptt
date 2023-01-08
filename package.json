@@ -6,6 +6,7 @@
   "scripts": {
     "test:static": "tsc --noEmit && eslint ./src",
     "test:unit": "CI=true vitest",
+    "release": "tsx release.ts",
     "dev": "vite",
     "tauri-dev": "tauri dev",
     "build": "tsc && vite build",
@@ -35,6 +36,7 @@
     "eslint": "^8.31.0",
     "jsdom": "^20.0.0",
     "prettier": "^2.7.1",
+    "tsx": "^3.12.1",
     "typescript": "^4.6.4",
     "vite": "^3.0.2",
     "vitest": "^0.23.2"
