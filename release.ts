@@ -24,8 +24,14 @@ const files: Array<{
   },
   {
     path: '.github/workflows/release.yml',
-    search: / {10}releaseBody: \|\n.*\n {10}releaseDraft: false/,
-    replace: '          releaseBody: # AXXX\n          releaseDraft: false',
+    search: / {10}releaseBody: \|\n.*\n {10}releaseDraft: false/s,
+    replace: `          releaseBody: | # AXXX
+            New features:
+            - 
+            
+            Bug fixes:
+            - 
+          releaseDraft: false`,
   },
 ];
 
