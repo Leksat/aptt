@@ -9,6 +9,7 @@ API. MacOS only.
 
 ## Installation
 
+- Download the [latest release](https://github.com/Leksat/aptt/releases/latest)
 - Install the app as usual
 - Go to `Systems Settings > Security & Privacy`
 - Grant the [required permissions](#required-permissions) to the app
