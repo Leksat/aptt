@@ -5,7 +5,7 @@ import { appWindow } from '@tauri-apps/api/window';
 import { Allotment } from 'allotment';
 import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
 import { useEffect, useRef, useState } from 'react';
-import { RichTextarea } from 'rich-textarea';
+import { RichTextarea, RichTextareaHandle } from 'rich-textarea';
 
 import { core, init } from '../lib/core';
 import {
@@ -32,7 +32,7 @@ function App() {
   const [entries, setEntries] = useState(store.get('entries'));
   const [now, setNow] = useState(nowFunc());
   const [settingsOpened, setSettingsOpened] = useState(false);
-  const textarea = useRef<HTMLTextAreaElement>(null);
+  const textarea = useRef<RichTextareaHandle>(null);
 
   const getEntryUnderCursor = (): string => {
     if (!textarea.current) {
@@ -61,7 +61,7 @@ function App() {
 
     appWindow.listen('focusToTextarea', () => {
       if (textarea.current) {
-        textarea.current.scrollTop = textarea.current.scrollHeight;
+        textarea.current.scroll({ top: textarea.current.scrollHeight });
         textarea.current.setSelectionRange(
           textarea.current.value.length,
           textarea.current.value.length,
