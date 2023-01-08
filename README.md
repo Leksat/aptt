@@ -3,11 +3,21 @@
 A desktop app for tracking time and submitting time logs to Jira via Tempo REST
 API. MacOS only.
 
+## Required permissions
+
+- `Input Monitoring` - to make the `cmd+c+c` shortcut work
+
 ## Installation
 
-Starting from version 3.0.0 the app requires the `Input Monitoring` permission.
-The app should automatically ask for it. If this does not happen, try to
-[grant the permission manually](docs/input-monitoring.png).
+- Install the app as usual
+- Go to `Systems Settings > Security & Privacy`
+- Grant the [required permissions](#required-permissions) to the app
+
+## Upgrade
+
+- Go to `Systems Settings > Security & Privacy`
+- Remove all permissions granted to the app
+- Follow the [installation instructions](#installation)
 
 ## Overview
 
