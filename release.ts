@@ -8,6 +8,11 @@ const files: Array<{
   replace: string;
 }> = [
   {
+    path: 'src-tauri/tauri.conf.json',
+    search: /"version": ".*"/,
+    replace: `"version": "${releaseVersion}"`,
+  },
+  {
     path: 'package.json',
     search: /"version": ".*"/,
     replace: `"version": "${releaseVersion}"`,
