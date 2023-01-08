@@ -35,10 +35,6 @@ jobs:
           releaseName: "aptt v__VERSION__"
           releaseBody: |
             New features:
-            - Submission history
-            
-            Bug fixes:
-            - Textarea auto-focus works again
-            - Submission errors were not caught 😱
+            - Notes
           releaseDraft: false
           prerelease: false
