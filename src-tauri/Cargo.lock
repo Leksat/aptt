@@ -55,7 +55,7 @@ checksum = "a26fa4d7e3f2eebadf743988fc8aec9fa9a9e82611acafd77c1462ed6262440a"
 
 [[package]]
 name = "aptt"
-version = "3.3.1"
+version = "3.4.0"
 dependencies = [
  "rdev",
  "serde",

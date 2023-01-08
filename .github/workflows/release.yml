@@ -34,6 +34,11 @@ jobs:
           tagName: app-v__VERSION__
           releaseName: "aptt v__VERSION__"
           releaseBody: |
-            - Total now includes only billable time
+            New features:
+            - Submission history
+            
+            Bug fixes:
+            - Textarea auto-focus works again
+            - Submission errors were not caught 😱
           releaseDraft: false
           prerelease: false
