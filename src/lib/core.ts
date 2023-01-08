@@ -83,54 +83,59 @@ export const core = {
     let current: ParsedEntry | undefined;
     let error = false;
     while ((current = entries.shift())) {
-      try {
-        submitted.push(current);
-        const next = entries[0];
-        if (!next) {
-          // That's the current active item.
-          entries.unshift(current);
-          break;
-        }
+      submitted.push(current);
+      const next = entries[0];
+      if (!next) {
+        // That's the current active item.
+        entries.unshift(current);
+        break;
+      }
 
-        await appWindow.emit(
-          'submitting',
-          `Submitted: ${
-            100 - Math.round((entries.length * 100) / initialAmount)
-          }%`,
-        );
+      await appWindow.emit(
+        'submitting',
+        `Submitted: ${
+          100 - Math.round((entries.length * 100) / initialAmount)
+        }%`,
+      );
 
-        const ticket = parseTicket(current.description);
-        if (!ticket) {
-          // Nothing to send to Jira.
-          continue;
-        }
+      const ticket = parseTicket(current.description);
+      if (!ticket) {
+        // Nothing to send to Jira.
+        continue;
+      }
 
-        const seconds = diffInSeconds(current.start, next.start);
+      const seconds = diffInSeconds(current.start, next.start);
 
-        // POST
-        const url = 'https://api.tempo.io/core/3/worklogs';
+      // POST
+      const url = 'https://api.tempo.io/core/3/worklogs';
 
-        const data = makeJiraTimeEntry({
-          workerId: store.get('jira').workerId,
-          ticket,
-          seconds,
-          ...current,
-        });
+      const data = makeJiraTimeEntry({
+        workerId: store.get('jira').workerId,
+        ticket,
+        seconds,
+        ...current,
+      });
 
-        await fetch(url, {
-          method: 'POST',
-          headers: {
-            Authorization: 'Bearer ' + store.get('jira').token,
-          },
-          body: Body.json(data),
-        });
-      } catch (e) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + store.get('jira').token,
+        },
+        body: Body.json(data),
+      });
+
+      if (!response.ok) {
         submitted.pop();
         entries.unshift(current);
-        await message(`Error during submission: ${e}`, {
-          type: 'error',
-          title: 'Whoops!',
-        });
+        await message(
+          `Error during submission
+Status: ${response.status}
+Response: ${JSON.stringify(response.data)}`,
+          {
+            type: 'error',
+            title: 'Whoops!',
+          },
+        );
         error = true;
         break;
       }
