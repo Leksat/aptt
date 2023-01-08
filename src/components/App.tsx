@@ -1,10 +1,12 @@
 import 'allotment/dist/style.css';
+import 'react-tabs/style/react-tabs.css';
 
 import { ask, message } from '@tauri-apps/api/dialog';
 import { appWindow } from '@tauri-apps/api/window';
 import { Allotment } from 'allotment';
 import { IntervalBasedCronScheduler, parseCronExpression } from 'cron-schedule';
-import { useEffect, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import { RichTextarea, RichTextareaHandle } from 'rich-textarea';
 
 import { core, init } from '../lib/core';
@@ -19,6 +21,7 @@ import {
 import { AppError } from '../lib/errors';
 import { store, StoreChangedEvent } from '../lib/store';
 import Egg from './Egg';
+import { History } from './History';
 import { Settings } from './Settings';
 import { Summary } from './Summary';
 
@@ -97,6 +100,8 @@ function App() {
     }
   };
 
+  const tabsStyle: CSSProperties = { flexGrow: 1, overflowY: 'scroll' };
+
   return (
     <>
       <div className="box">
@@ -152,7 +157,24 @@ function App() {
               </RichTextarea>
             </Allotment.Pane>
             <Allotment.Pane snap>
-              <Summary entries={entries} now={now} />
+              <Tabs
+                style={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <TabList>
+                  <Tab>Summary</Tab>
+                  <Tab>History</Tab>
+                </TabList>
+                <TabPanel style={tabsStyle}>
+                  <Summary entries={entries} now={now} />
+                </TabPanel>
+                <TabPanel style={tabsStyle}>
+                  <History />
+                </TabPanel>
+              </Tabs>
             </Allotment.Pane>
           </Allotment>
         </div>

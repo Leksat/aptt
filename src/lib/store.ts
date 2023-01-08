@@ -6,6 +6,10 @@ export type Store = {
     workerId: string;
     token: string;
   };
+  history: Array<{
+    time: string;
+    entries: string;
+  }>;
 };
 
 const defaults: Store = {
@@ -14,6 +18,7 @@ const defaults: Store = {
     workerId: '',
     token: '',
   },
+  history: [],
 };
 
 export type StoreChangedEvent = {

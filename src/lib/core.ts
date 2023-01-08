@@ -10,6 +10,7 @@ import {
   Entry,
   makeJiraTimeEntry,
   now,
+  ParsedEntry,
   parseEntries,
   stringifyEntries,
 } from './entries';
@@ -77,12 +78,14 @@ export const core = {
 
   submit: async (): Promise<void> => {
     const entries = parseEntries(store.get('entries'));
+    const submitted: Array<Entry> = [];
     const initialAmount = entries.length - 1;
-    let current;
+    let current: ParsedEntry | undefined;
     let error = false;
     while ((current = entries.shift())) {
       try {
-        const next = entries[0] as Entry | undefined;
+        submitted.push(current);
+        const next = entries[0];
         if (!next) {
           // That's the current active item.
           entries.unshift(current);
@@ -122,6 +125,7 @@ export const core = {
           body: Body.json(data),
         });
       } catch (e) {
+        submitted.pop();
         entries.unshift(current);
         await message(`Error during submission: ${e}`, {
           type: 'error',
@@ -134,6 +138,22 @@ export const core = {
     await appWindow.emit('submitting', `Submitted: ${error ? '???' : 100}%`);
     setTimeout(() => appWindow.emit('submitting', ''), 3000);
     store.set('entries', stringifyEntries(entries));
+
+    if (submitted.length > 0) {
+      store.set('history', [
+        {
+          time: now(),
+          entries: stringifyEntries(
+            submitted.map((entry, index) =>
+              index === submitted.length - 1
+                ? { ...entry, description: '' }
+                : entry,
+            ),
+          ),
+        },
+        ...store.get('history'),
+      ]);
+    }
   },
 
   displaySettings: async () => {
