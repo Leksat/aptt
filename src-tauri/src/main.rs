@@ -7,12 +7,29 @@ mod clipboard_hotkey;
 
 use crate::clipboard_hotkey::ClipboardHotkey;
 use rdev::listen_non_blocking;
-use std::cell::UnsafeCell;
-use tauri::{Manager, WindowEvent};
-use tray_item::TrayItem;
+use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, WindowEvent};
 
 fn main() {
     tauri::Builder::default()
+        .system_tray(
+            SystemTray::new().with_menu(
+                SystemTrayMenu::new()
+                    .add_item(CustomMenuItem::new("settings".to_string(), "Settings"))
+                    .add_item(CustomMenuItem::new("quit".to_string(), "Quit")),
+            ),
+        )
+        .on_system_tray_event(|app, event| match event {
+            SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
+                "settings" => {
+                    app.emit_all("display-settings", ()).unwrap();
+                }
+                "quit" => {
+                    std::process::exit(0);
+                }
+                _ => {}
+            },
+            _ => {}
+        })
         .setup(|app| {
             let app_handle = app.handle();
             let mut clipboard_hotkey = ClipboardHotkey::new();
@@ -33,20 +50,11 @@ fn main() {
             })
             .expect("Cannot listen to keyboard events");
 
-            let mut tray = TrayItem::new("🕒", "").unwrap();
-            let inner = tray.inner_mut();
-            let app_handle2 = app.handle();
-            inner
-                .add_menu_item("Settings", move || {
-                    app_handle2.emit_all("display-settings", ()).unwrap();
-                })
-                .unwrap();
-            inner.add_quit_item("Quit");
-            inner.display();
-            let tray_handle: UnsafeCell<TrayItem> = tray.into();
-            app.listen_global("set-text", move |event| unsafe {
-                let tray = &mut *tray_handle.get();
-                tray.set_label(event.payload().unwrap()).unwrap();
+            let tray_handle = app.tray_handle();
+            app.listen_global("set-text", move |event| {
+                tray_handle
+                    .set_title(event.payload().unwrap().trim_matches('"'))
+                    .unwrap();
             });
 
             Ok(())

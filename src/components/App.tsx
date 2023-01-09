@@ -57,7 +57,7 @@ function App() {
 
   useEffect(() => {
     appWindow.listen('store-changed', (event) => {
-      const data = JSON.parse(event.payload as string) as StoreChangedEvent;
+      const data = event.payload as StoreChangedEvent;
       if (data.key === 'entries') {
         setEntries(data.value);
       }

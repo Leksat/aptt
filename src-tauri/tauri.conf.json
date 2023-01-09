@@ -10,6 +10,10 @@
     "version": "3.5.1"
   },
   "tauri": {
+    "systemTray": {
+      "iconPath": "icons/clock.png",
+      "iconAsTemplate": false
+    },
     "allowlist": {
       "all": true,
       "http": {

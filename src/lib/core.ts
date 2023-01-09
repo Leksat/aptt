@@ -27,17 +27,21 @@ export const init = async () => {
     core.displaySettings();
   });
 
-  await globalShortcut.register('Command+Alt+X', core.focusWindow);
+  try {
+    await globalShortcut.register('Command+Alt+X', core.focusWindow);
+  } catch (e) {
+    // Already registered.
+  }
   await listen('focus', core.focusWindow);
 
   const setTrayText = (entries: string) => {
     const entry = parseEntries(entries).at(-1);
     const ticket = entry?.description ? parseTicket(entry.description) : '';
-    appWindow.emit('set-text', ticket ? '🕒 ' + ticket : '🕒');
+    appWindow.emit('set-text', ticket);
   };
   setTrayText(store.get('entries'));
   await appWindow.listen('store-changed', (event) => {
-    const data = JSON.parse(event.payload as string) as StoreChangedEvent;
+    const data = event.payload as StoreChangedEvent;
     if (data.key === 'entries') {
       setTrayText(data.value);
     }
