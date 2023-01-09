@@ -34,12 +34,8 @@ jobs:
           tagName: app-v__VERSION__
           releaseName: "aptt v__VERSION__"
           releaseBody: |
-            New features:
-            - Submission history
-            - Notes
-            
-            Bug fixes:
-            - Textarea auto-focus works again
-            - Submission errors were not caught 😱
+            Chores:
+            - Tauri updated to 1.2
+            - Tray menu is rebuilt with Tauri's new API
           releaseDraft: false
           prerelease: false
