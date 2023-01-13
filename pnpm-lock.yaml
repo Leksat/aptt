@@ -25,6 +25,7 @@ specifiers:
   tsx: ^3.12.1
   typescript: ^4.6.4
   vite: ^3.0.2
+  vite-plugin-fonts: ^0.7.0
   vitest: ^0.23.2
 
 dependencies:
@@ -54,6 +55,7 @@ devDependencies:
   tsx: 3.12.1
   typescript: 4.7.4
   vite: 3.1.0
+  vite-plugin-fonts: 0.7.0_vite@3.1.0
   vitest: 0.23.2_jsdom@20.0.0
 
 packages:
@@ -3830,6 +3832,15 @@ packages:
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+    dev: true
+
+  /vite-plugin-fonts/0.7.0_vite@3.1.0:
+    resolution: {integrity: sha512-fisKirkQrA2RFwcyI96SENLu1FyRYNIiC/l5DGdD8oV3OsAWGrYKs0e7/VZF6l0rm0QiYA2sOVTzYfrLAzP9cw==}
+    peerDependencies:
+      vite: ^2.0.0 || ^3.0.0 || ^4.0.0
+    dependencies:
+      fast-glob: 3.2.12
+      vite: 3.1.0
     dev: true
 
   /vite/3.1.0:

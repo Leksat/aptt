@@ -107,7 +107,7 @@ function App() {
     <>
       <div className="box">
         <div className="row max-height">
-          <Allotment>
+          <Allotment separator={false}>
             <Allotment.Pane minSize={200}>
               <RichTextarea
                 data-testid="textarea"

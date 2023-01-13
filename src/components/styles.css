@@ -6,6 +6,12 @@ body,
   margin: 0;
 }
 
+* {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.2rem;
+}
+
 /* Main controls */
 .box {
   display: flex;
@@ -59,10 +65,6 @@ body,
 .settings-wrapper label input {
   display: block;
   width: 80%;
-}
-
-textarea {
-  font-family: monospace;
 }
 
 ::-webkit-scrollbar {
