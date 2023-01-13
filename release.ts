@@ -31,10 +31,10 @@ const files: Array<{
     path: '.github/workflows/release.yml',
     search: / {10}releaseBody: \|\n.*\n {10}releaseDraft: false/s,
     replace: `          releaseBody: | # AXXX
-            New features:
+            ## New features
             - 
             
-            Bug fixes:
+            ## Bug fixes
             - 
           releaseDraft: false`,
   },
