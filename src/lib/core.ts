@@ -76,7 +76,12 @@ export const core = {
     core.addNewEntry(ticket);
   },
 
-  focusToTextarea: async (): Promise<void> => {
+  focusToTextarea: async (delay = 0): Promise<void> => {
+    if (delay) {
+      // After adding new entries it does not scroll enough id we don't add a
+      // delay.
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
     await appWindow.emit('focusToTextarea');
   },
 

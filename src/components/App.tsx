@@ -189,7 +189,7 @@ function App() {
           <button
             onClick={() => {
               core.addNewEntry('');
-              core.focusToTextarea();
+              core.focusToTextarea(100);
             }}
           >
             New/Stop
@@ -198,7 +198,7 @@ function App() {
             onClick={() => {
               const line = getEntryUnderCursor();
               core.addNewEntry(line);
-              core.focusToTextarea();
+              core.focusToTextarea(100);
             }}
           >
             New from selected

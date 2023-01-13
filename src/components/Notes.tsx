@@ -15,6 +15,7 @@ export const Notes = () => {
         disabled={!currentItem}
         onClick={() => {
           core.addNewEntry(currentItem);
+          core.focusToTextarea(100);
         }}
       >
         New from selected
