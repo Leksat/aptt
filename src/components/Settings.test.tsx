@@ -28,7 +28,7 @@ describe('Settings', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(store.get('jira').workerId).toBe('AccountId');
-    expect(store.get('jira').tempoToken).toBe('Token');
-    expect(store.get('jira').jiraToken).toBe('Token');
+    expect(store.get('jira').tempoToken).toBe('TempoToken');
+    expect(store.get('jira').jiraToken).toBe('JiraToken');
   });
 });
