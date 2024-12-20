@@ -17,6 +17,7 @@ import {
 import { AppError } from './errors';
 import { store, StoreChangedEvent } from './store';
 import { getTicketFromClipboard, parseTicket } from './tickets';
+import { getJiraTicketId } from './jira';
 
 export const init = async () => {
   await listen('clipboard-hotkey', () => {
@@ -112,11 +113,13 @@ export const core = {
         // Nothing to send to Jira.
         continue;
       }
+      // TODO get JIRA Ticket ID from ticket via REST call
+      const jiraTicketId = await getJiraTicketId(ticket);
 
       const seconds = diffInSeconds(current.start, next.start);
 
       // POST
-      const url = 'https://api.tempo.io/core/3/worklogs';
+      const url = 'https://api.tempo.io/4/worklogs';
 
       const data = makeJiraTimeEntry({
         workerId: store.get('jira').workerId,
@@ -128,7 +131,7 @@ export const core = {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer ' + store.get('jira').token,
+          Authorization: 'Bearer ' + store.get('jira').tempoToken,
         },
         body: Body.json(data),
       });

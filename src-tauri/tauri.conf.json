@@ -17,7 +17,7 @@
     "allowlist": {
       "all": true,
       "http": {
-        "scope": ["https://api.tempo.io/core/3/worklogs"]
+        "scope": ["https://api.tempo.io/4/worklogs"]
       }
     },
     "bundle": {

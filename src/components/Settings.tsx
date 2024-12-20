@@ -14,7 +14,8 @@ export const Settings: React.FC<Props> = ({ close }) => {
         const data = new FormData(event.target as HTMLFormElement);
         store.set('jira', {
           workerId: data.get('jira.workerId') as string,
-          token: data.get('jira.token') as string,
+          tempoToken: data.get('jira.tempoToken') as string,
+          jiraToken: data.get('jira.jiraToken') as string,
         });
         close();
       }}
@@ -33,13 +34,28 @@ export const Settings: React.FC<Props> = ({ close }) => {
       <label>
         Tempo API token
         <input
-          name="jira.token"
-          defaultValue={store.get('jira').token}
+          name="jira.tempoToken"
+          defaultValue={store.get('jira').tempoToken}
           type="password"
         />
         <a
           target="_blank"
           href="https://tempo-io.atlassian.net/wiki/spaces/THC/pages/840531971/Using+REST+API+Integrations+-+Tempo+Cloud#UsingRESTAPIIntegrations-TempoCloud-CreatingaNewToken"
+          rel="noreferrer"
+        >
+          <small>How to get it</small>
+        </a>
+      </label>
+      <label>
+        Jira API token
+        <input
+          name="jira.jiraToken"
+          defaultValue={store.get('jira').jiraToken}
+          type="password"
+        />
+        <a
+          target="_blank"
+          href="https://support.atlassian.com/jira-software-cloud/docs/how-to-create-a-jira-api-token/"
           rel="noreferrer"
         >
           <small>How to get it</small>

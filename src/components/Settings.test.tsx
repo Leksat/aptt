@@ -18,14 +18,17 @@ describe('Settings', () => {
     render(<Settings close={() => {}} />);
 
     await userEvent.type(screen.getByLabelText(/Jira Account ID/), 'AccountId');
-    await userEvent.type(screen.getByLabelText(/Tempo API token/), 'Token');
+    await userEvent.type(screen.getByLabelText(/Tempo API token/), 'TempoToken');
+    await userEvent.type(screen.getByLabelText(/Jira API token/), 'JiraToken');
 
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(store.get('jira').workerId).toBe('');
-    expect(store.get('jira').token).toBe('');
+    expect(store.get('jira').tempoToken).toBe('');
+    expect(store.get('jira').jiraToken).toBe('');
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(store.get('jira').workerId).toBe('AccountId');
-    expect(store.get('jira').token).toBe('Token');
+    expect(store.get('jira').tempoToken).toBe('Token');
+    expect(store.get('jira').jiraToken).toBe('Token');
   });
 });

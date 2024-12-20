@@ -6,7 +6,8 @@ export type Store = {
   entries: string;
   jira: {
     workerId: string;
-    token: string;
+    tempoToken: string;
+    jiraToken: string;
   };
   history: Array<{
     time: string;
@@ -19,7 +20,8 @@ const defaults: Store = {
   entries: '',
   jira: {
     workerId: '',
-    token: '',
+    tempoToken: '',
+    jiraToken: '',
   },
   history: [],
   notes: defaultNotes,
