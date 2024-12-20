@@ -55,7 +55,7 @@ export const Settings: React.FC<Props> = ({ close }) => {
         />
         <a
           target="_blank"
-          href="https://support.atlassian.com/jira-software-cloud/docs/how-to-create-a-jira-api-token/"
+          href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
           rel="noreferrer"
         >
           <small>How to get it</small>
