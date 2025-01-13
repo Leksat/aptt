@@ -22,10 +22,10 @@ describe('Settings', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(store.get('jira').workerId).toBe('');
-    expect(store.get('jira').token).toBe('');
+    expect(store.get('jira').jiraToken).toBe('');
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(store.get('jira').workerId).toBe('AccountId');
-    expect(store.get('jira').token).toBe('Token');
+    expect(store.get('jira').jiraToken).toBe('Token');
   });
 });

@@ -1,4 +1,7 @@
+import { fetch } from '@tauri-apps/api/http';
+
 import { AppError } from './errors';
+import { store } from './store';
 import { parseTicket } from './tickets';
 
 export interface Entry {
@@ -18,16 +21,30 @@ export interface JiraTimeEntry {
   startDate: string; // e.g. "2020-10-20"
   startTime: string; // e.g. "06:01:00"
   timeSpentSeconds: number;
-  issueKey: string; // e.g. "ABC-123"
+  issueId: string; // Integer
 }
 
-export const makeJiraTimeEntry = (args: {
+export const makeJiraTimeEntry = async (args: {
   workerId: string;
   ticket: string;
   start: string;
   seconds: number;
   description: string;
-}): JiraTimeEntry => {
+}): Promise<JiraTimeEntry> => {
+  const jiraInfo = await fetch<{ id: string }>(
+    `https://${store.get('jira').siteName}.atlassian.net/rest/api/3/issue/${
+      args.ticket
+    }`,
+    {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Basic ${btoa(
+          store.get('jira').email + ':' + store.get('jira').jiraToken,
+        )}`,
+      },
+    },
+  );
   const [date, time] = args.start.split(' ');
   return {
     attributes: [],
@@ -37,7 +54,7 @@ export const makeJiraTimeEntry = (args: {
     startDate: date!,
     startTime: time + ':00',
     timeSpentSeconds: args.seconds,
-    issueKey: args.ticket,
+    issueId: jiraInfo.data.id,
   };
 };
 

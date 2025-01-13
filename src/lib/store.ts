@@ -5,8 +5,11 @@ import { defaultNotes } from '../components/Notes';
 export type Store = {
   entries: string;
   jira: {
+    siteName: string;
+    email: string;
     workerId: string;
-    token: string;
+    jiraToken: string;
+    tempoToken: string;
   };
   history: Array<{
     time: string;
@@ -18,8 +21,11 @@ export type Store = {
 const defaults: Store = {
   entries: '',
   jira: {
+    siteName: '',
+    email: '',
     workerId: '',
-    token: '',
+    jiraToken: '',
+    tempoToken: '',
   },
   history: [],
   notes: defaultNotes,

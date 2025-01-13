@@ -116,9 +116,9 @@ export const core = {
       const seconds = diffInSeconds(current.start, next.start);
 
       // POST
-      const url = 'https://api.tempo.io/core/3/worklogs';
+      const url = 'https://api.tempo.io/4/worklogs';
 
-      const data = makeJiraTimeEntry({
+      const data = await makeJiraTimeEntry({
         workerId: store.get('jira').workerId,
         ticket,
         seconds,
@@ -128,7 +128,7 @@ export const core = {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer ' + store.get('jira').token,
+          Authorization: 'Bearer ' + store.get('jira').tempoToken,
         },
         body: Body.json(data),
       });

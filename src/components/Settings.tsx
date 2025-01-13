@@ -13,12 +13,28 @@ export const Settings: React.FC<Props> = ({ close }) => {
         event.preventDefault();
         const data = new FormData(event.target as HTMLFormElement);
         store.set('jira', {
+          siteName: data.get('jira.siteName') as string,
+          email: data.get('jira.email') as string,
           workerId: data.get('jira.workerId') as string,
-          token: data.get('jira.token') as string,
+          jiraToken: data.get('jira.jiraToken') as string,
+          tempoToken: data.get('jira.tempoToken') as string,
         });
         close();
       }}
     >
+      <label>
+        Jira site name
+        <input name="jira.siteName" defaultValue={store.get('jira').siteName} />
+        <small>
+          E.g. `ivanproduction` (if the Jira URL is
+          `https://ivanproduction.atlassian.net`)
+        </small>
+      </label>
+      <label>
+        Jira email
+        <input name="jira.email" defaultValue={store.get('jira').email} />
+        <small>E.g. `vasya@ivanproduction.com`</small>
+      </label>
       <label>
         Jira Account ID
         <input name="jira.workerId" defaultValue={store.get('jira').workerId} />
@@ -31,15 +47,30 @@ export const Settings: React.FC<Props> = ({ close }) => {
         </a>
       </label>
       <label>
-        Tempo API token
+        Jira API token
         <input
-          name="jira.token"
-          defaultValue={store.get('jira').token}
+          name="jira.jiraToken"
+          defaultValue={store.get('jira').jiraToken}
           type="password"
         />
         <a
           target="_blank"
-          href="https://tempo-io.atlassian.net/wiki/spaces/THC/pages/840531971/Using+REST+API+Integrations+-+Tempo+Cloud#UsingRESTAPIIntegrations-TempoCloud-CreatingaNewToken"
+          href="https://id.atlassian.com/manage-profile/security/api-tokens"
+          rel="noreferrer"
+        >
+          <small>Create it here</small>
+        </a>
+      </label>
+      <label>
+        Tempo API token
+        <input
+          name="jira.tempoToken"
+          defaultValue={store.get('jira').tempoToken}
+          type="password"
+        />
+        <a
+          target="_blank"
+          href="https://apidocs.tempo.io/#section/Authentication"
           rel="noreferrer"
         >
           <small>How to get it</small>
