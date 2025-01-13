@@ -34,10 +34,7 @@ jobs:
           tagName: app-v__VERSION__
           releaseName: "aptt v__VERSION__"
           releaseBody: |
-            ## Bug fixes
-            - Fixed scrolling after adding new items
-            
-            ## Other
-            - Did some styling 🙈
+            ## New features
+            - Switched to Tempo API v4
           releaseDraft: false
           prerelease: false
