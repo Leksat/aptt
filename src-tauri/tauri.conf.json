@@ -13,8 +13,9 @@
     "windows": [
       {
         "title": "aptt",
-        "width": 800,
-        "height": 600
+        "width": 900,
+        "height": 700,
+        "center": true
       }
     ],
     "security": {
@@ -23,7 +24,8 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["app"],
+    "category": "Productivity",
     "icon": ["icons/icon.png", "icons/icon.icns"]
   }
 }
