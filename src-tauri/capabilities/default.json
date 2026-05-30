@@ -3,5 +3,12 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    "fs:default",
+    { "identifier": "fs:scope", "allow": [{ "path": "$APPDATA/**" }] },
+    "global-shortcut:default",
+    "clipboard-manager:allow-read-text",
+    "window-state:default"
+  ]
 }
