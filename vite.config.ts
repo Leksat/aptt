@@ -1,7 +1,7 @@
 import process from "node:process";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -16,5 +16,10 @@ export default defineConfig({
     watch: {
       ignored: ["**/src-tauri/**"],
     },
+  },
+  test: {
+    environment: "node",
+    globals: false,
+    include: ["src/**/*.test.{ts,tsx}"],
   },
 });

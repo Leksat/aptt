@@ -9,10 +9,14 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "check": "biome check --write --unsafe"
+    "check": "biome check --write --unsafe && tsc --noEmit",
+    "test": "vitest"
   },
   "dependencies": {
+    "@effect/platform": "^0.96.1",
+    "@effect/platform-browser": "^0.76.0",
     "@tauri-apps/api": "^2",
+    "effect": "^3.21.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
@@ -24,8 +28,10 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "@vitest/ui": "^4.1.7",
     "tailwindcss": "^4.3.0",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.4",
+    "vitest": "^4.1.7"
   }
 }
