@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
-import { runtime } from "./core/runtime";
-import { FileService } from "./core/services/FileService";
+import { runtime } from "../core/runtime";
+import { FileService } from "../core/services/FileService";
 
 const SAVE_DEBOUNCE_MS = 300;
 
@@ -22,7 +22,12 @@ const saveEntries = (text: string) =>
     Effect.ignore,
   );
 
-export default function App() {
+export interface UseEntries {
+  readonly text: string | null;
+  readonly onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+}
+
+export const useEntries = (): UseEntries => {
   const [text, setText] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -30,7 +35,7 @@ export default function App() {
     void runtime.runPromise(loadEntries).then(setText);
   }, []);
 
-  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+  const onChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const value = event.currentTarget.value;
     setText(value);
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -39,18 +44,5 @@ export default function App() {
     }, SAVE_DEBOUNCE_MS);
   };
 
-  if (text === null) {
-    return <main className="p-4">Loading…</main>;
-  }
-
-  return (
-    <main className="h-screen p-4">
-      <textarea
-        value={text}
-        onChange={handleChange}
-        className="h-full w-full resize-none border border-gray-300 p-2 font-mono"
-        spellCheck={false}
-      />
-    </main>
-  );
-}
+  return { text, onChange };
+};

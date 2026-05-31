@@ -1,15 +1,21 @@
+import { listen } from "@tauri-apps/api/event";
 import { Effect } from "effect";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import { runtime } from "./core/runtime";
 import { HotkeyService } from "./core/services/HotkeyService";
 import { WindowService } from "./core/services/WindowService";
-import "./index.css";
+import App from "./ui/App";
+import "./ui/index.css";
 
 const toggleWindow = Effect.gen(function* () {
   const window = yield* WindowService;
   yield* window.toggle;
+});
+
+const showAndFocus = Effect.gen(function* () {
+  const window = yield* WindowService;
+  yield* window.showAndFocus;
 });
 
 const bootHotkeys = Effect.gen(function* () {
@@ -20,6 +26,9 @@ const bootHotkeys = Effect.gen(function* () {
 });
 
 void runtime.runPromise(bootHotkeys);
+void listen("window:show", () => {
+  void runtime.runPromise(showAndFocus);
+});
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

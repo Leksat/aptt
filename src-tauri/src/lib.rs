@@ -1,5 +1,5 @@
 use tauri::{
-    Manager,
+    Emitter,
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
 };
@@ -12,7 +12,7 @@ pub fn run() {
     {
         builder = builder
             .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-                show_main_window(app);
+                let _ = app.emit("window:show", ());
             }))
             .plugin(tauri_plugin_global_shortcut::Builder::new().build())
             .plugin(tauri_plugin_window_state::Builder::default().build());
@@ -22,9 +22,8 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
-            let show = MenuItemBuilder::with_id("show", "Show").build(app)?;
             let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
-            let menu = MenuBuilder::new(app).items(&[&show, &quit]).build()?;
+            let menu = MenuBuilder::new(app).items(&[&quit]).build()?;
 
             TrayIconBuilder::with_id("main")
                 .icon(
@@ -34,10 +33,10 @@ pub fn run() {
                 )
                 .title("—")
                 .menu(&menu)
-                .on_menu_event(|app, event| match event.id().as_ref() {
-                    "show" => show_main_window(app),
-                    "quit" => app.exit(0),
-                    _ => {}
+                .on_menu_event(|app, event| {
+                    if event.id().as_ref() == "quit" {
+                        app.exit(0);
+                    }
                 })
                 .build(app)?;
 
@@ -57,14 +56,7 @@ pub fn run() {
                 ..
             } = event
             {
-                show_main_window(app);
+                let _ = app.emit("window:show", ());
             }
         });
-}
-
-fn show_main_window<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.show();
-        let _ = window.set_focus();
-    }
 }
