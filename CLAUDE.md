@@ -1,4 +1,6 @@
 @README.md
+@CONTEXT.md
+@PLAN.md
 
 Tools (node, pnpm, cargo, etc) are auto-loaded into environment via direnv when user cd into the project root.
 
