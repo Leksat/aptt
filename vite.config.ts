@@ -21,5 +21,6 @@ export default defineConfig({
     environment: "node",
     globals: false,
     include: ["src/**/*.test.{ts,tsx}"],
+    env: { TZ: "UTC" },
   },
 });

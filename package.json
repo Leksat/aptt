@@ -33,6 +33,7 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "@vitest/ui": "^4.1.7",
+    "dedent": "^1.7.2",
     "tailwindcss": "^4.3.0",
     "typescript": "~5.8.3",
     "vite": "^7.0.4",

@@ -51,3 +51,7 @@ When merging shallow modules into a deeper one, classify the dependencies — th
 ### Designing an interface — design it twice
 
 First idea is unlikely to be best (Ousterhout). When the interface matters, sketch at least two radically different shapes and contrast them by depth (leverage at the interface), locality (where change concentrates), and seam placement. Then pick — opinionated, not a menu.
+
+## Test snapshots
+
+Never `vitest -u` after changing implementation — it silently overwrites snapshots that broke. To accept a specific change, empty its `toMatchInlineSnapshot()` body and re-run; vitest fills only empty ones.

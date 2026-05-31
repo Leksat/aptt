@@ -13,7 +13,7 @@ One time entry start plus the description that follows it, up to the next time e
 _Avoid_: activity, segment, record, block.
 
 **Time entry start**:
-A line of the form `YYYY-MM-DD HH:MM`. Marks a wall-clock moment. Anchors the beginning of one time entry and the end of the previous one. A trailing start (last line of the log, no description below) closes the previous time entry without opening a new one.
+A line of the form `YYYY-MM-DD HH:MM`. Marks a wall-clock moment. Anchors the beginning of one time entry and the end of the previous one. A trailing start (last line of the log, no description below) closes the previous time entry and opens a new active time entry whose description is empty.
 _Avoid_: marker, boundary, header, timestamp.
 
 **Time entry description**:
@@ -25,7 +25,7 @@ The identifier of the external thing time is being logged against (e.g. `ABC-123
 _Avoid_: ticket ID, issue key, target, reference, subject.
 
 **Active time entry**:
-The trailing time entry when the log ends with a description line. Its end is "now" and it is never submitted. If the log ends with a time entry start instead, there is no active time entry — all entries are closed, and on submit the entire log is emptied.
+The trailing time entry of a non-empty log. Its end is "now" and it is never submitted. Its description is the line after its start, or empty if the log ends on the start itself. The empty log has no active time entry.
 _Avoid_: current entry, in-progress entry, open entry.
 
 **Billable**:

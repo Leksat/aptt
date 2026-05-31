@@ -4,19 +4,6 @@ Working spec for what aptt should do. Each section is a concrete behavioural tar
 
 For domain terms see [CONTEXT.md](./CONTEXT.md). For user-facing description see [README.md](./README.md).
 
-## Time log
-
-- Stored on disk as `~/Library/Application Support/com.leksat.aptt/entries.txt`. Loaded into the textarea on startup. Every keystroke writes the textarea contents to disk (no debounce).
-- Strict zebra structure: odd lines (1, 3, 5…) are time entry starts; even lines (2, 4, 6…) are time entry descriptions. The parser is positional, not content-driven.
-- Time entry start format: `YYYY-MM-DD HH:MM`, 24-hour, fixed width, leading zeros required, local time, no timezone offset.
-- Description: any text, single line, may be empty.
-- Two terminal shapes:
-  - Even line count → the trailing time entry is the active time entry.
-  - Odd line count → no active time entry; all entries are closed.
-- Empty log is valid.
-- A line on an even position that happens to read like a timestamp is still a description.
-- A line on an odd position that does not match the time entry start format makes the whole log invalid.
-
 ## Submitter plugin interface
 
 Replace the current `Submitter.ts` shape with:
