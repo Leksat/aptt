@@ -12,7 +12,7 @@ export const MainLive = Layer.mergeAll(
   TrayService.Default,
   HotkeyService.Default,
   ClipboardTriggerService.Default,
-  buildSubmitterLayer("stub", {}),
+  buildSubmitterLayer("void", {}),
 );
 
 export const runtime = ManagedRuntime.make(MainLive);

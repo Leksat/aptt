@@ -1,9 +1,9 @@
 import { Effect, Layer } from "effect";
 import { type SubmitterInitError, UnknownPluginError } from "../../errors";
 import { Submitter, type SubmitterImpl, type SubmitterPlugin } from "../Submitter";
-import { stubPlugin } from "./stub";
+import { voidPlugin } from "./void";
 
-export const plugins: ReadonlyArray<SubmitterPlugin> = [stubPlugin];
+export const plugins: ReadonlyArray<SubmitterPlugin> = [voidPlugin];
 
 const pluginById = (id: string): SubmitterPlugin | undefined => plugins.find((p) => p.id === id);
 

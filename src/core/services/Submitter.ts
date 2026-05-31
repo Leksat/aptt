@@ -1,10 +1,17 @@
 import { Context, type Effect } from "effect";
 import type { SubmitError, SubmitterInitError } from "../errors";
-import type { TimeEntry } from "../types";
+
+export interface BillableEntry {
+  readonly targetId: string;
+  readonly start: Date;
+  readonly end: Date;
+  readonly comment: string;
+}
 
 export interface SubmitterImpl {
   readonly id: string;
-  readonly submit: (entry: TimeEntry) => Effect.Effect<void, SubmitError>;
+  readonly parseTargetId: (text: string) => string | null;
+  readonly submit: (entry: BillableEntry) => Effect.Effect<void, SubmitError>;
 }
 
 export class Submitter extends Context.Tag("Submitter")<Submitter, SubmitterImpl>() {}

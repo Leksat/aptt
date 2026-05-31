@@ -4,32 +4,6 @@ Working spec for what aptt should do. Each section is a concrete behavioural tar
 
 For domain terms see [CONTEXT.md](./CONTEXT.md). For user-facing description see [README.md](./README.md).
 
-## Submitter plugin interface
-
-Replace the current `Submitter.ts` shape with:
-
-```ts
-interface SubmitterImpl {
-  readonly id: string;
-  readonly parseTargetId: (text: string) => string | null;
-  readonly submit: (entry: BillableEntry) => Effect.Effect<void, SubmitError>;
-}
-
-interface BillableEntry {
-  readonly targetId: string;
-  readonly start: Date;
-  readonly end: Date;
-  readonly comment: string;
-}
-```
-
-- `parseTargetId` is pure and synchronous. Returns the first target ID found anywhere in the input, or `null`.
-- Core decides how to apply it:
-  - Clipboard text → take the returned id directly.
-  - Description → trim, call `parseTargetId(trimmed)`; accept only if `trimmed.startsWith(id)`; `comment = trimmed.slice(id.length).trim()`. Otherwise the entry is non-billable.
-- Plugin registry keeps the existing `SubmitterPlugin` shape (`id`, `displayName`, `settings`, `make`).
-- Rename the stub plugin to "Void" (`id: "void"`). Void is the default active plugin on first launch.
-
 ## Main window layout
 
 Top to bottom:
