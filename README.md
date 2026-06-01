@@ -2,18 +2,15 @@
 
 A Perfect Time Tracker. Personal-use macOS app.
 
-A single text buffer where you type time records in a known format. No timer. Submit entries to an external system (Jira, Toggl, etc.) and they disappear from the buffer. The textarea is the source of truth; every edit is mirrored to a text file on disk for persistence.
+A single time log where you type time entries in a known format. No timer. Submit closed entries to an external system (Jira, Toggl, etc.) and they disappear from the log. The textarea is the source of truth.
 
 ## How it works
 
 - `cmd+alt+x` toggles the window.
-- Menu bar item with a dynamic title is always present.
-- `cmd+c` listener: second press within 500ms acts on the clipboard; third press brings the window to the front.
-- Closing the window hides it; `cmd+q` quits.
-
-## Submitters
-
-Pluggable, one active at a time. Each plugin declares its own key/value settings. Adding a submitter is one new file in `src/core/services/submitters/`. First plugin is a stub.
+- Clipboard capture:
+  - copy a target (e.g. a Jira key)
+  - copy again within 500ms to start a new time entry against it
+  - copy a third time within 500ms to bring the window to the front with the textarea focused
 
 ## Architecture
 
@@ -23,6 +20,6 @@ Pluggable, one active at a time. Each plugin declares its own key/value settings
 
 Data lives at `~/Library/Application Support/com.leksat.aptt/`.
 
-## Stack
+## Development
 
-Tauri 2, React, TypeScript (strict), Effect, Tailwind v4, Biome, Vitest. Toolchain via devbox + direnv.
+See CLAUDE.md.
