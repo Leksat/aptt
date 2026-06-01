@@ -5,15 +5,10 @@ import ReactDOM from "react-dom/client";
 import { runtime } from "./core/runtime";
 import { HotkeyService } from "./core/services/HotkeyService";
 import { WindowService } from "./core/services/WindowService";
+import { surfaced, surfaceError } from "./core/surfaceError";
 import App from "./ui/App";
 import { bootCore } from "./ui/useCore";
 import "./ui/index.css";
-
-const logged = <A, E, R>(label: string, effect: Effect.Effect<A, E, R>) =>
-  effect.pipe(
-    Effect.tapError((err) => Effect.logError(`${label} failed`, err, JSON.stringify(err, null, 2))),
-    Effect.ignore,
-  );
 
 const toggleWindow = Effect.gen(function* () {
   const window = yield* WindowService;
@@ -25,17 +20,42 @@ const showAndFocus = Effect.gen(function* () {
   yield* window.showAndFocus;
 });
 
+const HOTKEY = "cmd+alt+x";
+
 const bootHotkeys = Effect.gen(function* () {
   const hotkeys = yield* HotkeyService;
-  yield* hotkeys.register("cmd+alt+x", () => {
-    void runtime.runPromise(logged("hotkey toggleWindow", toggleWindow));
+  yield* hotkeys.unregister(HOTKEY).pipe(Effect.ignore);
+  yield* hotkeys.register(HOTKEY, () => {
+    void runtime.runPromise(surfaced("hotkey toggleWindow", toggleWindow));
   });
 });
 
-void runtime.runPromise(logged("hotkey boot", bootHotkeys));
-void listen("window:show", () => {
-  void runtime.runPromise(logged("window:show", showAndFocus));
+const setupListen = Effect.tryPromise({
+  try: () =>
+    listen("window:show", () => {
+      void runtime.runPromise(surfaced("window:show", showAndFocus));
+    }),
+  catch: (cause) => cause,
 });
+
+void runtime.runPromise(surfaced("hotkey boot", bootHotkeys));
+const listenPromise = runtime.runPromise(surfaced("window:show listen", setupListen));
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(async () => {
+    const unlisten = await listenPromise;
+    if (unlisten !== undefined) unlisten();
+    await runtime.runPromise(
+      surfaced(
+        "hotkey HMR cleanup",
+        Effect.gen(function* () {
+          const hotkeys = yield* HotkeyService;
+          yield* hotkeys.unregister(HOTKEY).pipe(Effect.ignore);
+        }),
+      ),
+    );
+  });
+}
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -43,10 +63,15 @@ if (!rootElement) {
 }
 const root = ReactDOM.createRoot(rootElement);
 
-void bootCore().then(() => {
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>,
-  );
-});
+bootCore().then(
+  () => {
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>,
+    );
+  },
+  (cause: unknown) => {
+    void runtime.runPromise(surfaceError("bootCore failed", cause));
+  },
+);

@@ -1,4 +1,4 @@
-import { Effect, Either } from "effect";
+import { Effect } from "effect";
 import { type ChangeEvent, useCallback, useSyncExternalStore } from "react";
 import { runtime } from "../core/runtime";
 import { ConfigService, type ConfigSnapshot } from "../core/services/ConfigService";
@@ -6,8 +6,8 @@ import { EntriesService } from "../core/services/EntriesService";
 import { SubmitService } from "../core/services/SubmitService";
 import type { SubmitterImpl } from "../core/services/Submitter";
 import type { SubmitResult, SubmitState } from "../core/submit";
+import { surfaced, surfaceError } from "../core/surfaceError";
 import type { TimeLog } from "../core/timeLog";
-import { showError } from "./showError";
 
 const resolveServices = Effect.gen(function* () {
   const entries = yield* EntriesService;
@@ -67,11 +67,7 @@ export const useCore = (): Core => {
   );
 
   const setText = (value: string) => {
-    void runtime.runPromise(services.entries.setText(value).pipe(Effect.either)).then((result) => {
-      if (Either.isLeft(result)) {
-        showError(`Save failed: ${String(result.left.cause)}`);
-      }
-    });
+    void runtime.runPromise(surfaced("Save failed", services.entries.setText(value)));
   };
   const onChange = (event: ChangeEvent<HTMLTextAreaElement>) => setText(event.currentTarget.value);
 
@@ -85,7 +81,7 @@ export const useCore = (): Core => {
   const submit = async (log: TimeLog, submitter: SubmitterImpl): Promise<SubmitResult> => {
     const result = await runtime.runPromise(services.submit.submit(log, submitter));
     if (result.tag === "error") {
-      showError(`Submit failed: ${String(result.error.cause)}`);
+      void runtime.runPromise(surfaceError("Submit failed", result.error.cause));
     }
     return result;
   };

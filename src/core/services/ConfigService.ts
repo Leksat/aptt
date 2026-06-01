@@ -7,6 +7,7 @@ import {
   withActivePluginId,
   withSetting,
 } from "../config";
+import { surfaced } from "../surfaceError";
 import { FileService } from "./FileService";
 import type { SubmitterImpl } from "./Submitter";
 import { buildSubmitter, defaultPlugin, pluginById } from "./submitters/registry";
@@ -40,11 +41,9 @@ export class ConfigService extends Effect.Service<ConfigService>()("ConfigServic
 
     const apply = (next: Config) =>
       Effect.gen(function* () {
-        yield* fs.writeConfig(`${JSON.stringify(next, null, 2)}\n`).pipe(
-          Effect.tapError((err) =>
-            Effect.logError(`Failed to write config.json: ${String(err.cause)}`),
-          ),
-          Effect.ignore,
+        yield* surfaced(
+          "Failed to write config.json",
+          fs.writeConfig(`${JSON.stringify(next, null, 2)}\n`),
         );
         state = snapshotOf(next);
         notify();
