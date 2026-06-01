@@ -53,7 +53,7 @@ describe("totalBillableMinutes", () => {
     expect(totalBillableMinutes(log, acceptABC, new Date("2026-01-01T10:30"))).toBe(0);
   });
 
-  it("treats every entry as non-billable when parseTargetId rejects all", () => {
+  it("treats every entry as non-billable when findTargetId rejects all", () => {
     const log = Either.getOrThrow(
       parseTimeLog(dedent`
         2026-01-01 10:00

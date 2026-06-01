@@ -1,4 +1,5 @@
-import { Effect } from "effect";
+import { FetchHttpClient, type HttpClient } from "@effect/platform";
+import { Effect, Layer } from "effect";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SubmitError } from "../errors";
 import type { SubmitState } from "../submit";
@@ -14,7 +15,7 @@ const fakeSubmitter = (
   let count = 0;
   return {
     id: "fake",
-    parseTargetId: acceptABC,
+    findTargetId: acceptABC,
     submit: (entry) =>
       Effect.suspend(() => {
         count += 1;
@@ -40,12 +41,14 @@ const sampleLog: TimeLog = {
   active: null,
 };
 
-const runWithService = <A>(body: (svc: SubmitService) => Effect.Effect<A>): Promise<A> =>
+const runWithService = <A>(
+  body: (svc: SubmitService) => Effect.Effect<A, never, HttpClient.HttpClient>,
+): Promise<A> =>
   Effect.runPromise(
     Effect.gen(function* () {
       const svc = yield* SubmitService;
       return yield* body(svc);
-    }).pipe(Effect.provide(SubmitService.Default)),
+    }).pipe(Effect.provide(Layer.mergeAll(SubmitService.Default, FetchHttpClient.layer))),
   );
 
 const formatTransition = (s: SubmitState): string => {

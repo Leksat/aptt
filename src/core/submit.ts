@@ -1,5 +1,6 @@
+import type { HttpClient } from "@effect/platform";
 import { Effect, Either } from "effect";
-import type { ParseTargetId } from "./billable";
+import type { FindTargetId } from "./billable";
 import type { SubmitError } from "./errors";
 import type { BillableEntry } from "./services/Submitter";
 import type { ClosedTimeEntry, TimeLog } from "./timeLog";
@@ -24,34 +25,36 @@ export interface SubmitFailure {
 
 export type SubmitResult = SubmitOk | SubmitFailure;
 
-export type SubmitFn = (entry: BillableEntry) => Effect.Effect<void, SubmitError>;
+export type SubmitFn = (
+  entry: BillableEntry,
+) => Effect.Effect<void, SubmitError, HttpClient.HttpClient>;
 export type OnProgress = (current: number, total: number) => void;
 
 export const countBillable = (
   closed: readonly ClosedTimeEntry[],
-  parseTargetId: ParseTargetId,
+  findTargetId: FindTargetId,
 ): number => {
   let n = 0;
   for (const entry of closed) {
-    if (billableEntryOf(entry, parseTargetId) !== null) n += 1;
+    if (billableEntryOf(entry, findTargetId) !== null) n += 1;
   }
   return n;
 };
 
 export const submitTimeLog = (
   log: TimeLog,
-  parseTargetId: ParseTargetId,
+  findTargetId: FindTargetId,
   submit: SubmitFn,
   onProgress: OnProgress,
-): Effect.Effect<SubmitResult> =>
+): Effect.Effect<SubmitResult, never, HttpClient.HttpClient> =>
   Effect.gen(function* () {
-    const total = countBillable(log.closed, parseTargetId);
+    const total = countBillable(log.closed, findTargetId);
     let attempted = 0;
 
     for (let i = 0; i < log.closed.length; i++) {
       const entry = log.closed[i];
       if (entry === undefined) throw new Error("unreachable: closed index in range");
-      const info = billableEntryOf(entry, parseTargetId);
+      const info = billableEntryOf(entry, findTargetId);
       if (info === null) continue;
       attempted += 1;
       yield* Effect.sync(() => onProgress(attempted, total));
@@ -75,13 +78,13 @@ export const submitTimeLog = (
 
 const billableEntryOf = (
   entry: ClosedTimeEntry,
-  parseTargetId: ParseTargetId,
+  findTargetId: FindTargetId,
 ): BillableEntry | null => {
   const trimmed = entry.description.trim();
   const firstSpace = trimmed.search(/\s/);
   const firstToken = firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace);
   if (firstToken === "") return null;
-  const targetId = parseTargetId(firstToken);
+  const targetId = findTargetId(firstToken);
   if (targetId === null) return null;
   const comment = firstSpace === -1 ? "" : trimmed.slice(firstSpace).trim();
   return { targetId, start: entry.start, end: entry.end, comment };

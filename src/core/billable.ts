@@ -1,27 +1,25 @@
 import type { TimeLog } from "./timeLog";
 
-export type ParseTargetId = (text: string) => string | null;
+export type FindTargetId = (text: string) => string | null;
 
-export const activeBillableTargetId = (
-  log: TimeLog,
-  parseTargetId: ParseTargetId,
-): string | null => {
+export const activeBillableTargetId = (log: TimeLog, findTargetId: FindTargetId): string | null => {
   if (log.active === null) return null;
-  const firstToken = log.active.description.trim().split(/\s+/, 1)[0] ?? "";
-  if (firstToken === "") return null;
-  return parseTargetId(firstToken);
+  return billableTargetId(log.active.description, findTargetId);
 };
 
-const isBillable = (description: string, parseTargetId: ParseTargetId): boolean => {
+const isBillable = (description: string, findTargetId: FindTargetId): boolean =>
+  billableTargetId(description, findTargetId) !== null;
+
+const billableTargetId = (description: string, findTargetId: FindTargetId): string | null => {
   const firstToken = description.trim().split(/\s+/, 1)[0] ?? "";
-  if (firstToken === "") return false;
-  return parseTargetId(firstToken) !== null;
+  if (firstToken === "") return null;
+  return findTargetId(firstToken);
 };
 
-export const closedBillableMinutes = (log: TimeLog, parseTargetId: ParseTargetId): number => {
+export const closedBillableMinutes = (log: TimeLog, findTargetId: FindTargetId): number => {
   let minutes = 0;
   for (const entry of log.closed) {
-    if (!isBillable(entry.description, parseTargetId)) continue;
+    if (!isBillable(entry.description, findTargetId)) continue;
     minutes += diffMinutes(entry.start, entry.end);
   }
   return minutes;
@@ -29,15 +27,15 @@ export const closedBillableMinutes = (log: TimeLog, parseTargetId: ParseTargetId
 
 export const totalBillableMinutes = (
   log: TimeLog,
-  parseTargetId: ParseTargetId,
+  findTargetId: FindTargetId,
   now: Date,
 ): number => {
   let minutes = 0;
   for (const entry of log.closed) {
-    if (!isBillable(entry.description, parseTargetId)) continue;
+    if (!isBillable(entry.description, findTargetId)) continue;
     minutes += diffMinutes(entry.start, entry.end);
   }
-  if (log.active !== null && isBillable(log.active.description, parseTargetId)) {
+  if (log.active !== null && isBillable(log.active.description, findTargetId)) {
     const end = floorToMinute(now);
     if (end.getTime() > log.active.start.getTime()) {
       minutes += diffMinutes(log.active.start, end);

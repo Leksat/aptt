@@ -1,3 +1,4 @@
+import type { HttpClient } from "@effect/platform";
 import { Effect } from "effect";
 import { type SubmitResult, type SubmitState, submitTimeLog } from "../submit";
 import type { TimeLog } from "../timeLog";
@@ -32,13 +33,16 @@ export class SubmitService extends Effect.Service<SubmitService>()("SubmitServic
           listeners.delete(listener);
         };
       },
-      submit: (log: TimeLog, submitter: SubmitterImpl) =>
+      submit: (
+        log: TimeLog,
+        submitter: SubmitterImpl,
+      ): Effect.Effect<SubmitResult, never, HttpClient.HttpClient> =>
         Effect.gen(function* () {
           cancelLinger();
           setState({ tag: "submitting", current: 0, total: 0 });
           const result: SubmitResult = yield* submitTimeLog(
             log,
-            submitter.parseTargetId,
+            submitter.findTargetId,
             submitter.submit,
             (current, total) => setState({ tag: "submitting", current, total }),
           );

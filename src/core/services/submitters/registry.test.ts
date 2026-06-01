@@ -3,8 +3,7 @@ import { defaultPlugin, pluginById } from "./registry";
 
 describe("pluginById", () => {
   it("returns the matching plugin when the id is known", () => {
-    expect(pluginById("echo").id).toBe("echo");
-    expect(pluginById("void").id).toBe("void");
+    expect(pluginById("jiratempo").id).toBe("jiratempo");
   });
 
   it("falls back to the default plugin when the id is unknown", () => {

@@ -4,50 +4,50 @@ import { defaultConfig, parseConfig, settingsFor, withActivePluginId, withSettin
 
 describe("defaultConfig", () => {
   it("uses the default plugin and an empty settings map", () => {
-    expect(defaultConfig).toEqual({ activePluginId: "void", pluginSettings: {} });
+    expect(defaultConfig).toEqual({ activePluginId: "jiratempo", pluginSettings: {} });
   });
 });
 
 describe("settingsFor", () => {
   it("returns the stored map for a plugin", () => {
-    const cfg = { activePluginId: "echo", pluginSettings: { echo: { prefix: "X" } } };
-    expect(settingsFor(cfg, "echo")).toEqual({ prefix: "X" });
+    const cfg = { activePluginId: "jiratempo", pluginSettings: { jiratempo: { siteName: "X" } } };
+    expect(settingsFor(cfg, "jiratempo")).toEqual({ siteName: "X" });
   });
 
   it("returns empty for an unknown plugin id", () => {
-    expect(settingsFor(defaultConfig, "echo")).toEqual({});
+    expect(settingsFor(defaultConfig, "other")).toEqual({});
   });
 });
 
 describe("withActivePluginId", () => {
   it("replaces the active id without touching settings", () => {
-    const cfg = { activePluginId: "void", pluginSettings: { echo: { prefix: "X" } } };
-    expect(withActivePluginId(cfg, "echo")).toEqual({
-      activePluginId: "echo",
-      pluginSettings: { echo: { prefix: "X" } },
+    const cfg = { activePluginId: "jiratempo", pluginSettings: { jiratempo: { siteName: "X" } } };
+    expect(withActivePluginId(cfg, "other")).toEqual({
+      activePluginId: "other",
+      pluginSettings: { jiratempo: { siteName: "X" } },
     });
   });
 });
 
 describe("withSetting", () => {
   it("creates the plugin entry when missing", () => {
-    expect(withSetting(defaultConfig, "echo", "prefix", "X").pluginSettings).toEqual({
-      echo: { prefix: "X" },
+    expect(withSetting(defaultConfig, "jiratempo", "siteName", "X").pluginSettings).toEqual({
+      jiratempo: { siteName: "X" },
     });
   });
 
   it("merges into an existing plugin entry", () => {
-    const cfg = { activePluginId: "echo", pluginSettings: { echo: { prefix: "X" } } };
-    expect(withSetting(cfg, "echo", "apiToken", "T").pluginSettings).toEqual({
-      echo: { prefix: "X", apiToken: "T" },
+    const cfg = { activePluginId: "jiratempo", pluginSettings: { jiratempo: { siteName: "X" } } };
+    expect(withSetting(cfg, "jiratempo", "email", "e@x").pluginSettings).toEqual({
+      jiratempo: { siteName: "X", email: "e@x" },
     });
   });
 
   it("does not affect other plugins' settings", () => {
-    const cfg = { activePluginId: "void", pluginSettings: { void: { x: "1" } } };
-    expect(withSetting(cfg, "echo", "prefix", "X").pluginSettings).toEqual({
-      void: { x: "1" },
-      echo: { prefix: "X" },
+    const cfg = { activePluginId: "jiratempo", pluginSettings: { jiratempo: { siteName: "X" } } };
+    expect(withSetting(cfg, "other", "k", "v").pluginSettings).toEqual({
+      jiratempo: { siteName: "X" },
+      other: { k: "v" },
     });
   });
 });
@@ -55,8 +55,8 @@ describe("withSetting", () => {
 describe("parseConfig", () => {
   it("decodes a valid object", () => {
     const result = parseConfig({
-      activePluginId: "echo",
-      pluginSettings: { echo: { prefix: "X" } },
+      activePluginId: "jiratempo",
+      pluginSettings: { jiratempo: { siteName: "X" } },
     });
     expect(Either.isRight(result)).toBe(true);
   });
@@ -67,8 +67,8 @@ describe("parseConfig", () => {
 
   it("rejects non-string setting values", () => {
     const result = parseConfig({
-      activePluginId: "echo",
-      pluginSettings: { echo: { prefix: 42 } },
+      activePluginId: "jiratempo",
+      pluginSettings: { jiratempo: { siteName: 42 } },
     });
     expect(Either.isLeft(result)).toBe(true);
   });

@@ -1,13 +1,17 @@
+import { FetchHttpClient } from "@effect/platform";
 import dedent from "dedent";
 import { Effect, Either } from "effect";
 import { describe, expect, it } from "vitest";
-import type { ParseTargetId } from "./billable";
+import type { FindTargetId } from "./billable";
 import { SubmitError } from "./errors";
 import type { BillableEntry } from "./services/Submitter";
-import { type SubmitFn, submitTimeLog } from "./submit";
+import { type SubmitFn, type SubmitResult, submitTimeLog } from "./submit";
 import { formatTimeLog, parseTimeLog } from "./timeLog";
 
-const acceptABC: ParseTargetId = (token) => (/^ABC-\d+$/.test(token) ? token : null);
+const run = (effect: ReturnType<typeof submitTimeLog>): Promise<SubmitResult> =>
+  Effect.runPromise(effect.pipe(Effect.provide(FetchHttpClient.layer)));
+
+const acceptABC: FindTargetId = (token) => (/^ABC-\d+$/.test(token) ? token : null);
 
 const recordingSubmit = (
   decide: (attempt: number, entry: BillableEntry) => "ok" | string,
@@ -38,7 +42,7 @@ describe("submitTimeLog", () => {
     );
     const { submit, calls } = recordingSubmit(() => "ok");
     const progress: { current: number; total: number }[] = [];
-    const result = await Effect.runPromise(
+    const result = await run(
       submitTimeLog(log, acceptABC, submit, (current, total) => {
         progress.push({ current, total });
       }),
@@ -71,7 +75,7 @@ describe("submitTimeLog", () => {
     );
     const { submit, calls } = recordingSubmit(() => "ok");
     const progress: { current: number; total: number }[] = [];
-    const result = await Effect.runPromise(
+    const result = await run(
       submitTimeLog(log, acceptABC, submit, (current, total) => {
         progress.push({ current, total });
       }),
@@ -96,7 +100,7 @@ describe("submitTimeLog", () => {
       `),
     );
     const { submit, calls } = recordingSubmit(() => "ok");
-    await Effect.runPromise(submitTimeLog(log, acceptABC, submit, () => {}));
+    await run(submitTimeLog(log, acceptABC, submit, () => {}));
     expect(calls).toMatchInlineSnapshot(`
       [
         {
@@ -127,7 +131,7 @@ describe("submitTimeLog", () => {
       `),
     );
     const { submit, calls } = recordingSubmit((attempt) => (attempt === 2 ? "boom" : "ok"));
-    const result = await Effect.runPromise(submitTimeLog(log, acceptABC, submit, () => {}));
+    const result = await run(submitTimeLog(log, acceptABC, submit, () => {}));
     expect(calls.map((c) => c.targetId)).toEqual(["ABC-1", "ABC-2"]);
     expect(result.tag).toBe("error");
     expect(result.submitted).toBe(1);
@@ -158,7 +162,7 @@ describe("submitTimeLog", () => {
     );
     const { submit, calls } = recordingSubmit(() => "ok");
     const progress: { current: number; total: number }[] = [];
-    const result = await Effect.runPromise(
+    const result = await run(
       submitTimeLog(log, acceptABC, submit, (current, total) => {
         progress.push({ current, total });
       }),

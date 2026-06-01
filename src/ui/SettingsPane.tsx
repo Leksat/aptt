@@ -1,6 +1,35 @@
-import { type ChangeEvent, useId } from "react";
+import { type ChangeEvent, Fragment, type ReactNode, useId } from "react";
 import { pluginById, plugins } from "../core/services/submitters/registry";
 import { useCore } from "./useCore";
+
+const LINK_RE = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+const renderDescription = (description: string): ReactNode => {
+  const parts: ReactNode[] = [];
+  let cursor = 0;
+  for (const match of description.matchAll(LINK_RE)) {
+    const start = match.index;
+    if (start > cursor) {
+      parts.push(<Fragment key={`t-${cursor}`}>{description.slice(cursor, start)}</Fragment>);
+    }
+    parts.push(
+      <a
+        key={`a-${start}`}
+        href={match[2]}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-600 underline"
+      >
+        {match[1]}
+      </a>,
+    );
+    cursor = start + match[0].length;
+  }
+  if (cursor < description.length) {
+    parts.push(<Fragment key={`t-${cursor}`}>{description.slice(cursor)}</Fragment>);
+  }
+  return parts;
+};
 
 export const SettingsPane = () => {
   const submitterLabelId = useId();
@@ -45,6 +74,11 @@ export const SettingsPane = () => {
                 autoComplete="off"
                 spellCheck={false}
               />
+              {field.description !== undefined && field.description !== "" && (
+                <span className="text-gray-500 text-xs">
+                  {renderDescription(field.description)}
+                </span>
+              )}
             </label>
           ))}
         </div>

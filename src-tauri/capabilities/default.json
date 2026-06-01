@@ -24,6 +24,10 @@
     "notification:default",
     "notification:allow-notify",
     "notification:allow-is-permission-granted",
-    "notification:allow-request-permission"
+    "notification:allow-request-permission",
+    {
+      "identifier": "http:default",
+      "allow": [{ "url": "https://*.atlassian.net/*" }, { "url": "https://api.tempo.io/*" }]
+    }
   ]
 }

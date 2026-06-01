@@ -1,10 +1,9 @@
 import type { SubmitterImpl, SubmitterPlugin } from "../Submitter";
-import { echoPlugin } from "./echo";
-import { voidPlugin } from "./void";
+import { jiraTempoPlugin } from "./jiraTempo";
 
-export const defaultPlugin: SubmitterPlugin = voidPlugin;
+export const defaultPlugin: SubmitterPlugin = jiraTempoPlugin;
 
-export const plugins: ReadonlyArray<SubmitterPlugin> = [voidPlugin, echoPlugin];
+export const plugins: ReadonlyArray<SubmitterPlugin> = [jiraTempoPlugin];
 
 export const pluginById = (id: string): SubmitterPlugin =>
   plugins.find((p) => p.id === id) ?? defaultPlugin;

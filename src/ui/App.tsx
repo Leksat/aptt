@@ -34,10 +34,10 @@ export default function App() {
   const logIsValid = Either.isRight(parsed);
   const closedCount = Either.isRight(parsed) ? parsed.right.closed.length : 0;
   const closedBillable = Either.isRight(parsed)
-    ? closedBillableMinutes(parsed.right, submitter.parseTargetId)
+    ? closedBillableMinutes(parsed.right, submitter.findTargetId)
     : 0;
   const trayTitle = Either.isRight(parsed)
-    ? activeBillableTargetId(parsed.right, submitter.parseTargetId)
+    ? activeBillableTargetId(parsed.right, submitter.findTargetId)
     : null;
   useTrayTitle(trayTitle);
   const submitDisabled = !logIsValid || closedCount === 0 || core.submit.isInFlight;

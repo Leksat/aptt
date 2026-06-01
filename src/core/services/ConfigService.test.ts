@@ -22,20 +22,20 @@ describe("ConfigService", () => {
     const fs = makeFakeFileService();
     const snap = await runWithFs(fs, (svc) => Effect.sync(() => svc.snapshot()));
     expect(snap.config).toEqual(defaultConfig);
-    expect(snap.submitter.id).toBe("void");
+    expect(snap.submitter.id).toBe("jiratempo");
   });
 
   it("loads a valid config from disk", async () => {
     const fs = makeFakeFileService({
       config: JSON.stringify({
-        activePluginId: "echo",
-        pluginSettings: { echo: { prefix: "ABC", apiToken: "" } },
+        activePluginId: "jiratempo",
+        pluginSettings: { jiratempo: { siteName: "acme" } },
       }),
     });
     const snap = await runWithFs(fs, (svc) => Effect.sync(() => svc.snapshot()));
-    expect(snap.config.activePluginId).toBe("echo");
-    expect(snap.submitter.id).toBe("echo");
-    expect(snap.submitter.parseTargetId("ABC-1")).toBe("ABC-1");
+    expect(snap.config.activePluginId).toBe("jiratempo");
+    expect(snap.submitter.id).toBe("jiratempo");
+    expect(snap.submitter.findTargetId("ABC-1")).toBe("ABC-1");
   });
 
   it("normalises an unknown active plugin id to the default plugin", async () => {
@@ -46,8 +46,8 @@ describe("ConfigService", () => {
       }),
     });
     const snap = await runWithFs(fs, (svc) => Effect.sync(() => svc.snapshot()));
-    expect(snap.config.activePluginId).toBe("void");
-    expect(snap.submitter.id).toBe("void");
+    expect(snap.config.activePluginId).toBe("jiratempo");
+    expect(snap.submitter.id).toBe("jiratempo");
   });
 
   it("falls back to defaults when the config on disk is malformed", async () => {
@@ -56,40 +56,35 @@ describe("ConfigService", () => {
     expect(snap.config).toEqual(defaultConfig);
   });
 
-  it("setSetting writes to disk, rebuilds the submitter, and notifies subscribers", async () => {
-    const fs = makeFakeFileService({
-      config: JSON.stringify({
-        activePluginId: "echo",
-        pluginSettings: { echo: { prefix: "", apiToken: "" } },
-      }),
-    });
+  it("setSetting writes to disk and notifies subscribers", async () => {
+    const fs = makeFakeFileService();
     const notifications: string[] = [];
     await runWithFs(fs, (svc) =>
       Effect.gen(function* () {
         svc.subscribe(() =>
-          notifications.push(svc.snapshot().submitter.parseTargetId("ABC-1") ?? "miss"),
+          notifications.push(JSON.stringify(svc.snapshot().config.pluginSettings)),
         );
-        yield* svc.setSetting("echo", "prefix", "ABC");
+        yield* svc.setSetting("jiratempo", "siteName", "acme");
       }),
     );
-    expect(notifications).toEqual(["ABC-1"]);
+    expect(notifications).toEqual([JSON.stringify({ jiratempo: { siteName: "acme" } })]);
     expect(JSON.parse(fs.state.config)).toEqual({
-      activePluginId: "echo",
-      pluginSettings: { echo: { prefix: "ABC", apiToken: "" } },
+      activePluginId: "jiratempo",
+      pluginSettings: { jiratempo: { siteName: "acme" } },
     });
   });
 
-  it("setActivePluginId rebuilds the submitter and notifies", async () => {
+  it("setActivePluginId writes to disk and notifies", async () => {
     const fs = makeFakeFileService();
     const ids: string[] = [];
     await runWithFs(fs, (svc) =>
       Effect.gen(function* () {
-        svc.subscribe(() => ids.push(svc.snapshot().submitter.id));
-        yield* svc.setActivePluginId("echo");
+        svc.subscribe(() => ids.push(svc.snapshot().config.activePluginId));
+        yield* svc.setActivePluginId("other");
       }),
     );
-    expect(ids).toEqual(["echo"]);
-    expect(JSON.parse(fs.state.config).activePluginId).toBe("echo");
+    expect(ids).toEqual(["other"]);
+    expect(JSON.parse(fs.state.config).activePluginId).toBe("other");
   });
 
   it("subscribe returns an unsubscribe that stops further notifications", async () => {
@@ -98,11 +93,11 @@ describe("ConfigService", () => {
     await runWithFs(fs, (svc) =>
       Effect.gen(function* () {
         const unsubscribe = svc.subscribe(() => calls.push(svc.snapshot().config.activePluginId));
-        yield* svc.setActivePluginId("echo");
+        yield* svc.setActivePluginId("first");
         unsubscribe();
-        yield* svc.setActivePluginId("void");
+        yield* svc.setActivePluginId("second");
       }),
     );
-    expect(calls).toEqual(["echo"]);
+    expect(calls).toEqual(["first"]);
   });
 });

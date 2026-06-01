@@ -1,3 +1,5 @@
+import { FetchHttpClient } from "@effect/platform";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { Layer, ManagedRuntime } from "effect";
 import { ClipboardCaptureService } from "./services/ClipboardCaptureService";
 import { ClipboardTriggerService } from "./services/ClipboardTriggerService";
@@ -19,6 +21,7 @@ export const MainLive = Layer.mergeAll(
   ConfigService.Default,
   EntriesService.Default,
   SubmitService.Default,
+  FetchHttpClient.layer.pipe(Layer.provide(Layer.succeed(FetchHttpClient.Fetch, tauriFetch))),
 );
 
 export const runtime = ManagedRuntime.make(MainLive);

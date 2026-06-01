@@ -1,10 +1,10 @@
 import dedent from "dedent";
 import { describe, expect, it } from "vitest";
-import type { ParseTargetId } from "./billable";
+import type { FindTargetId } from "./billable";
 import { statusOf } from "./status";
 import type { SubmitState } from "./submit";
 
-const acceptABC: ParseTargetId = (token) => (/^ABC-\d+$/.test(token) ? token : null);
+const acceptABC: FindTargetId = (token) => (/^ABC-\d+$/.test(token) ? token : null);
 const NOW = new Date("2026-01-01T12:00");
 
 describe("statusOf", () => {
