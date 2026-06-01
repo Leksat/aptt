@@ -34,7 +34,7 @@
       },
       "suspicious": {
         "noExplicitAny": "error",
-        "noConsole": "error"
+        "noConsole": { "level": "warn", "fix": "none" }
       },
       "correctness": {
         "useExhaustiveDependencies": "error"

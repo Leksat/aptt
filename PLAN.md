@@ -25,8 +25,6 @@ Three clipboard events within 500ms windows:
   - Brings the window to focus, focuses the textarea, places cursor at the end of the log.
 - Implementation note: detection is via clipboard-change polling, not a registered global shortcut (registering cmd+c globally would suppress the system copy).
 
-## Hotkeys
+## Audit silent error swallowing
 
-- `cmd+alt+x` global → toggle window (show + focus / hide). `HotkeyService` exists; needs wiring at startup.
-- `cmd+q` → quit.
-- Window close button / `cmd+w` → hide window, do not quit.
+Walk every `runPromise` / `.catch` / `Effect.ignore` site and make sure failures surface (log or UI). No silent drops.
