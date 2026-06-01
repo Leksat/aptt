@@ -1,13 +1,17 @@
 import type { HttpClient } from "@effect/platform";
 import { Effect } from "effect";
+import { carveHistory, historyFilename } from "../history";
 import { type SubmitResult, type SubmitState, submitTimeLog } from "../submit";
 import type { TimeLog } from "../timeLog";
+import { FileService } from "./FileService";
 import type { SubmitterImpl } from "./Submitter";
 
 const SUCCESS_LINGER_MS = 3000;
 
 export class SubmitService extends Effect.Service<SubmitService>()("SubmitService", {
-  effect: Effect.sync(() => {
+  dependencies: [FileService.Default],
+  effect: Effect.gen(function* () {
+    const fs = yield* FileService;
     let state: SubmitState = { tag: "idle" };
     const listeners = new Set<() => void>();
     const notify = () => {
@@ -46,6 +50,10 @@ export class SubmitService extends Effect.Service<SubmitService>()("SubmitServic
             submitter.submit,
             (current, total) => setState({ tag: "submitting", current, total }),
           );
+          const historyText = carveHistory(log, result);
+          if (historyText !== null) {
+            yield* fs.writeHistory(historyFilename(new Date()), historyText).pipe(Effect.ignore);
+          }
           if (result.tag === "ok") {
             setState({ tag: "success", total: result.submitted });
             lingerTimer = setTimeout(() => {
@@ -57,6 +65,7 @@ export class SubmitService extends Effect.Service<SubmitService>()("SubmitServic
           }
           return result;
         }),
-    } as const;
+      openHistoryDir: fs.openHistoryDir.pipe(Effect.ignore),
+    };
   }),
 }) {}

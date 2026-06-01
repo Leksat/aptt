@@ -13,6 +13,7 @@
     "core:window:allow-is-focused",
     "fs:default",
     "fs:allow-write-text-file",
+    "fs:allow-mkdir",
     { "identifier": "fs:scope", "allow": [{ "path": "$APPDATA/**" }] },
     "global-shortcut:default",
     "global-shortcut:allow-register",
@@ -28,6 +29,10 @@
     {
       "identifier": "http:default",
       "allow": [{ "url": "https://*.atlassian.net/*" }, { "url": "https://api.tempo.io/*" }]
+    },
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [{ "path": "$APPDATA/history" }, { "path": "$APPDATA/history/" }]
     }
   ]
 }

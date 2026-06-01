@@ -1,10 +1,18 @@
-import { appDataDir } from "@tauri-apps/api/path";
+import { appDataDir, join } from "@tauri-apps/api/path";
 import { BaseDirectory, exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { openPath } from "@tauri-apps/plugin-opener";
 import { Effect } from "effect";
 import { FileInitError, FileReadError, FileWriteError } from "../errors";
 
+const ensureDir = (path: string) =>
+  Effect.tryPromise({
+    try: () => mkdir(path, { baseDir: BaseDirectory.AppData, recursive: true }),
+    catch: (cause) => new FileInitError({ cause }),
+  });
+
 const ENTRIES = "entries.txt";
 const CONFIG = "config.json";
+const HISTORY_DIR = "history";
 
 const readOrEmpty = (path: string) =>
   Effect.gen(function* () {
@@ -27,19 +35,22 @@ const writeText = (path: string, contents: string) =>
 
 export class FileService extends Effect.Service<FileService>()("FileService", {
   effect: Effect.gen(function* () {
-    yield* Effect.tryPromise({
-      try: async () => {
-        const dir = await appDataDir();
-        await mkdir(dir, { recursive: true });
-      },
-      catch: (cause) => new FileInitError({ cause }),
-    }).pipe(Effect.orElse(() => Effect.void));
+    yield* ensureDir(HISTORY_DIR).pipe(Effect.orElse(() => Effect.void));
 
     return {
       readEntries: readOrEmpty(ENTRIES),
       writeEntries: (text: string) => writeText(ENTRIES, text),
       readConfig: readOrEmpty(CONFIG),
       writeConfig: (json: string) => writeText(CONFIG, json),
+      writeHistory: (filename: string, contents: string) =>
+        writeText(`${HISTORY_DIR}/${filename}`, contents),
+      openHistoryDir: Effect.tryPromise({
+        try: async () => {
+          const path = await join(await appDataDir(), HISTORY_DIR);
+          await openPath(path);
+        },
+        catch: (cause) => new FileReadError({ path: HISTORY_DIR, cause }),
+      }),
     };
   }),
 }) {}

@@ -91,6 +91,13 @@ export default function App() {
         >
           {submitDisabled ? "Submit" : `Submit ${formatDurationShort(closedBillable)}`}
         </button>
+        <button
+          type="button"
+          onClick={core.history.open}
+          className="rounded border border-gray-300 px-3 py-1"
+        >
+          History
+        </button>
       </div>
       <StatusLine />
     </main>

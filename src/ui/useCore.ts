@@ -48,6 +48,9 @@ export interface Core {
     readonly isInFlight: boolean;
     readonly submit: (log: TimeLog, submitter: SubmitterImpl) => Promise<SubmitResult>;
   };
+  readonly history: {
+    readonly open: () => void;
+  };
 }
 
 export const useCore = (): Core => {
@@ -86,6 +89,10 @@ export const useCore = (): Core => {
     return result;
   };
 
+  const openHistory = () => {
+    void runtime.runPromise(services.submit.openHistoryDir);
+  };
+
   return {
     entries: { text, setText, onChange },
     config: { snapshot: configSnapshot, setActivePluginId, setSetting },
@@ -94,5 +101,6 @@ export const useCore = (): Core => {
       isInFlight: submitState.tag === "submitting",
       submit,
     },
+    history: { open: openHistory },
   };
 };

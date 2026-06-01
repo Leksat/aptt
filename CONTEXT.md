@@ -31,3 +31,11 @@ _Avoid_: current entry, in-progress entry, open entry.
 **Billable**:
 A time entry whose description begins with a valid target ID for the active submitter. Only closed billable entries are submitted; non-billable closed entries are removed without being sent. The active entry can also be billable; its running duration counts toward live totals even though it is never submitted.
 _Avoid_: loggable, sendable.
+
+**History file**:
+A time-log-formatted snapshot of the entries removed from the live log by a single submit. Contains the verbatim prefix of the pre-submit log up to (and including) the start line of the first entry that was not submitted (or the active entry's start, on full success). Non-billable entries inside that prefix are included. Filename is the submit's local time in compact form: `YYYYMMDD-HHMMSS±HHMM.txt`. Written whenever any entry left the live log (including the case where every removed entry was non-billable and nothing was sent).
+_Avoid_: backup, archive, snapshot, log file.
+
+**History directory**:
+`{appDataDir}/history/`. Contains all history files. Created on app start. Opened by the History button.
+_Avoid_: archive, backup folder.

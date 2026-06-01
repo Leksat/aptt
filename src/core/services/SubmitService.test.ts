@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SubmitError } from "../errors";
 import type { SubmitState } from "../submit";
 import type { TimeLog } from "../timeLog";
+import { type FakeFileService, makeFakeFileService } from "./fakeFileService";
 import { SubmitService } from "./SubmitService";
 import type { BillableEntry, SubmitterImpl } from "./Submitter";
 
@@ -42,14 +43,20 @@ const sampleLog: TimeLog = {
 };
 
 const runWithService = <A>(
-  body: (svc: SubmitService) => Effect.Effect<A, never, HttpClient.HttpClient>,
-): Promise<A> =>
-  Effect.runPromise(
+  body: (svc: SubmitService, fs: FakeFileService) => Effect.Effect<A, never, HttpClient.HttpClient>,
+): Promise<A> => {
+  const fs = makeFakeFileService();
+  const layer = Layer.mergeAll(
+    SubmitService.DefaultWithoutDependencies.pipe(Layer.provide(fs.layer)),
+    FetchHttpClient.layer,
+  );
+  return Effect.runPromise(
     Effect.gen(function* () {
       const svc = yield* SubmitService;
-      return yield* body(svc);
-    }).pipe(Effect.provide(Layer.mergeAll(SubmitService.Default, FetchHttpClient.layer))),
+      return yield* body(svc, fs);
+    }).pipe(Effect.provide(layer)),
   );
+};
 
 const formatTransition = (s: SubmitState): string => {
   switch (s.tag) {
@@ -110,6 +117,77 @@ describe("SubmitService", () => {
         );
         expect(result.tag).toBe("error");
         expect(svc.snapshot()).toEqual({ tag: "idle" });
+      }),
+    );
+  });
+
+  it("writes a history file on successful submit", async () => {
+    await runWithService((svc, fs) =>
+      Effect.gen(function* () {
+        yield* svc.submit(
+          sampleLog,
+          fakeSubmitter(() => "ok"),
+        );
+        const filenames = Object.keys(fs.state.history);
+        expect(filenames).toHaveLength(1);
+        expect(filenames[0]).toMatch(/^\d{8}-\d{6}[+-]\d{4}\.txt$/);
+        expect(fs.state.history[filenames[0] ?? ""]).toContain("ABC-1 a");
+        expect(fs.state.history[filenames[0] ?? ""]).toContain("ABC-2 b");
+      }),
+    );
+  });
+
+  it("writes a history file when only non-billable entries are removed", async () => {
+    const nothingLog: TimeLog = {
+      closed: [
+        {
+          start: new Date("2026-01-01T10:00"),
+          end: new Date("2026-01-01T11:00"),
+          description: "nothing",
+        },
+      ],
+      active: { start: new Date("2026-01-01T11:00"), description: "" },
+    };
+    await runWithService((svc, fs) =>
+      Effect.gen(function* () {
+        yield* svc.submit(
+          nothingLog,
+          fakeSubmitter(() => "ok"),
+        );
+        const filenames = Object.keys(fs.state.history);
+        expect(filenames).toHaveLength(1);
+        expect(fs.state.history[filenames[0] ?? ""]).toContain("nothing");
+      }),
+    );
+  });
+
+  it("does not write a history file when nothing was removed from the live log", async () => {
+    const failedFirstLog: TimeLog = {
+      closed: [
+        {
+          start: new Date("2026-01-01T10:00"),
+          end: new Date("2026-01-01T11:00"),
+          description: "ABC-1 a",
+        },
+      ],
+      active: { start: new Date("2026-01-01T11:00"), description: "" },
+    };
+    await runWithService((svc, fs) =>
+      Effect.gen(function* () {
+        yield* svc.submit(
+          failedFirstLog,
+          fakeSubmitter(() => "boom"),
+        );
+        expect(Object.keys(fs.state.history)).toHaveLength(0);
+      }),
+    );
+  });
+
+  it("openHistoryDir delegates to FileService", async () => {
+    await runWithService((svc, fs) =>
+      Effect.gen(function* () {
+        yield* svc.openHistoryDir;
+        expect(fs.state.historyOpened).toBe(1);
       }),
     );
   });
