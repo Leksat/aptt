@@ -1,8 +1,8 @@
-@README.md
-@CONTEXT.md
-@PLAN.md
-
-Tools (node, pnpm, cargo, etc) are auto-loaded into environment via direnv when user cd into the project root.
+- Overrall: @README.md
+- Vocabulary: @CONTEXT.md
+- Not yet implemented: @PLAN.md
+- Local env: @.envrc, @devbox.json
+- Package: package.json
 
 ## Typing rules
 
