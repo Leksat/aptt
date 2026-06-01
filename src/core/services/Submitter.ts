@@ -27,6 +27,7 @@ export interface SettingField {
 export interface SubmitterPlugin {
   readonly id: string;
   readonly displayName: string;
+  readonly dev: boolean;
   readonly settings: ReadonlyArray<SettingField>;
   readonly make: (settings: Readonly<Record<string, string>>) => SubmitterImpl;
 }

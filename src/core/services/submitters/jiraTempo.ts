@@ -25,6 +25,7 @@ interface ResolvedSettings {
 export const jiraTempoPlugin: SubmitterPlugin = {
   id: "jiratempo",
   displayName: "JiraTempo",
+  dev: false,
   settings: [
     {
       key: "siteName",
