@@ -1,46 +1,24 @@
-import { Either } from "effect";
-import { formatDurationShort, totalBillableMinutes } from "../core/billable";
-import { parseTimeLog } from "../core/timeLog";
-import { useMinuteTick } from "./useMinuteTick";
-import { useParseTargetId } from "./useParseTargetId";
-import type { SubmitState } from "./useSubmit";
+import { formatDurationShort } from "../core/billable";
+import type { Status } from "../core/status";
+import { useStatus } from "./useStatus";
 
-interface Props {
-  readonly text: string;
-  readonly submitState: SubmitState;
-}
+export const StatusLine = () => {
+  const status = useStatus();
+  return <div className={lineClass(status)}>{lineText(status)}</div>;
+};
 
-export const StatusLine = ({ text, submitState }: Props) => {
-  const now = useMinuteTick();
-  const parseTargetId = useParseTargetId();
+const lineClass = (status: Status): string =>
+  status.tag === "parseError" ? "min-h-5 text-red-600 text-sm" : "min-h-5 text-gray-600 text-sm";
 
-  if (submitState.tag === "submitting") {
-    return (
-      <div className="min-h-5 text-gray-600 text-sm">
-        Submitting {submitState.current}/{submitState.total}…
-      </div>
-    );
+const lineText = (status: Status): string => {
+  switch (status.tag) {
+    case "submitting":
+      return `Submitting ${status.current}/${status.total}…`;
+    case "success":
+      return `Submitted ${status.total} ${status.total === 1 ? "entry" : "entries"}`;
+    case "parseError":
+      return `Line ${status.line}: ${status.message}`;
+    case "billable":
+      return `Total billable: ${formatDurationShort(status.minutes)}`;
   }
-  if (submitState.tag === "success") {
-    return (
-      <div className="min-h-5 text-gray-600 text-sm">
-        Submitted {submitState.total} {submitState.total === 1 ? "entry" : "entries"}
-      </div>
-    );
-  }
-
-  const parsed = parseTimeLog(text);
-  if (Either.isLeft(parsed)) {
-    return (
-      <div className="min-h-5 text-red-600 text-sm">
-        Line {parsed.left.line}: {parsed.left.message}
-      </div>
-    );
-  }
-  const minutes = totalBillableMinutes(parsed.right, parseTargetId, now);
-  return (
-    <div className="min-h-5 text-gray-600 text-sm">
-      Total billable: {formatDurationShort(minutes)}
-    </div>
-  );
 };

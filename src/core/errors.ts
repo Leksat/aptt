@@ -41,11 +41,3 @@ export class HotkeyUnregisterError extends Data.TaggedError("HotkeyUnregisterErr
 export class SubmitError extends Data.TaggedError("SubmitError")<{
   readonly cause: unknown;
 }> {}
-
-export class SubmitterInitError extends Data.TaggedError("SubmitterInitError")<{
-  readonly cause: unknown;
-}> {}
-
-export class UnknownPluginError extends Data.TaggedError("UnknownPluginError")<{
-  readonly pluginId: string;
-}> {}

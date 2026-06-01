@@ -355,7 +355,7 @@ describe("parseTimeLog", () => {
 describe("appendNewStart", () => {
   it("opens an active entry on an empty log", () => {
     const log = Either.getOrThrow(parseTimeLog(""));
-    const next = appendNewStart(log, new Date(2026, 0, 1, 10, 0, 30));
+    const next = appendNewStart(log, new Date("2026-01-01T10:00:30"));
     expect(formatTimeLog(next)).toMatchInlineSnapshot(`
       "2026-01-01 10:00
       "
@@ -369,7 +369,7 @@ describe("appendNewStart", () => {
         ABC-123 hi
       `),
     );
-    const next = appendNewStart(log, new Date(2026, 0, 1, 11, 30, 0));
+    const next = appendNewStart(log, new Date("2026-01-01T11:30"));
     expect(formatTimeLog(next)).toMatchInlineSnapshot(`
       "2026-01-01 10:00
       ABC-123 hi
@@ -380,7 +380,7 @@ describe("appendNewStart", () => {
 
   it("floors now to the minute", () => {
     const log = Either.getOrThrow(parseTimeLog(""));
-    const next = appendNewStart(log, new Date(2026, 0, 1, 10, 0, 59, 999));
+    const next = appendNewStart(log, new Date("2026-01-01T10:00:59.999"));
     expect(formatTimeLog(next)).toMatchInlineSnapshot(`
       "2026-01-01 10:00
       "
@@ -389,13 +389,13 @@ describe("appendNewStart", () => {
 
   it("is a no-op when now floored equals the active entry's start", () => {
     const log = Either.getOrThrow(parseTimeLog("2026-01-01 10:00"));
-    const next = appendNewStart(log, new Date(2026, 0, 1, 10, 0, 45));
+    const next = appendNewStart(log, new Date("2026-01-01T10:00:45"));
     expect(next).toBe(log);
   });
 
   it("preserves an empty active description when closing", () => {
     const log = Either.getOrThrow(parseTimeLog("2026-01-01 10:00"));
-    const next = appendNewStart(log, new Date(2026, 0, 1, 10, 30, 0));
+    const next = appendNewStart(log, new Date("2026-01-01T10:30"));
     expect(formatTimeLog(next)).toMatchInlineSnapshot(`
       "2026-01-01 10:00
 

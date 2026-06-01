@@ -4,6 +4,11 @@ import type { SubmitError } from "./errors";
 import type { BillableEntry } from "./services/Submitter";
 import type { ClosedTimeEntry, TimeLog } from "./timeLog";
 
+export type SubmitState =
+  | { readonly tag: "idle" }
+  | { readonly tag: "submitting"; readonly current: number; readonly total: number }
+  | { readonly tag: "success"; readonly total: number };
+
 export interface SubmitOk {
   readonly tag: "ok";
   readonly log: TimeLog;

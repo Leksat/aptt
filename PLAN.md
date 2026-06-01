@@ -25,23 +25,6 @@ Three clipboard events within 500ms windows:
   - Brings the window to focus, focuses the textarea, places cursor at the end of the log.
 - Implementation note: detection is via clipboard-change polling, not a registered global shortcut (registering cmd+c globally would suppress the system copy).
 
-## Settings UX (right pane)
-
-- Right pane is the settings form.
-- Top of the pane: "Submitter:" dropdown listing all registered plugins.
-- Below the dropdown: dynamic fields built from the selected plugin's `settings: SettingField[]`. Fields with `secret: true` render as password inputs.
-- No save / apply button. Every keystroke immediately:
-  1. Writes `config.json` to disk (no debounce).
-  2. Rebuilds the active submitter from the new settings.
-- `config.json` shape: `{ activePluginId: string, pluginSettings: { [pluginId]: { [key]: string } } }`. Inactive plugins' settings persist so the user can flip back without re-entering.
-- Switching the dropdown updates `activePluginId` and re-renders the form with that plugin's stored values.
-- If the rebuild fails (`SubmitterInitError`): keep the last good submitter active; surface the init error in the status line; Submit is disabled until the build succeeds again.
-
-## First launch
-
-- No `entries.txt` → empty time log.
-- No `config.json` → `activePluginId = "void"`, `pluginSettings = {}`.
-
 ## Hotkeys
 
 - `cmd+alt+x` global → toggle window (show + focus / hide). `HotkeyService` exists; needs wiring at startup.

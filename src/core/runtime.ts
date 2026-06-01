@@ -1,8 +1,10 @@
 import { Layer, ManagedRuntime } from "effect";
 import { ClipboardTriggerService } from "./services/ClipboardTriggerService";
+import { ConfigService } from "./services/ConfigService";
+import { EntriesService } from "./services/EntriesService";
 import { FileService } from "./services/FileService";
 import { HotkeyService } from "./services/HotkeyService";
-import { buildSubmitterLayer } from "./services/submitters/registry";
+import { SubmitService } from "./services/SubmitService";
 import { TrayService } from "./services/TrayService";
 import { WindowService } from "./services/WindowService";
 
@@ -12,7 +14,9 @@ export const MainLive = Layer.mergeAll(
   TrayService.Default,
   HotkeyService.Default,
   ClipboardTriggerService.Default,
-  buildSubmitterLayer("void", {}),
+  ConfigService.Default,
+  EntriesService.Default,
+  SubmitService.Default,
 );
 
 export const runtime = ManagedRuntime.make(MainLive);

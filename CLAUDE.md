@@ -4,6 +4,10 @@
 - Local env: @.envrc, @devbox.json
 - Package: package.json
 
+## After changes
+
+Run `pnpm check` (tsc + biome --write) and `pnpm test` (vitest) after every change.
+
 ## Typing rules
 
 - Max typing — every value's type is known and narrow.

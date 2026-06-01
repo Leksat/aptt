@@ -1,19 +1,15 @@
-import { Effect, Layer } from "effect";
-import { type SubmitterInitError, UnknownPluginError } from "../../errors";
-import { Submitter, type SubmitterImpl, type SubmitterPlugin } from "../Submitter";
+import type { SubmitterImpl, SubmitterPlugin } from "../Submitter";
+import { echoPlugin } from "./echo";
 import { voidPlugin } from "./void";
 
-export const plugins: ReadonlyArray<SubmitterPlugin> = [voidPlugin];
+export const defaultPlugin: SubmitterPlugin = voidPlugin;
 
-const pluginById = (id: string): SubmitterPlugin | undefined => plugins.find((p) => p.id === id);
+export const plugins: ReadonlyArray<SubmitterPlugin> = [voidPlugin, echoPlugin];
 
-export const buildSubmitterLayer = (
+export const pluginById = (id: string): SubmitterPlugin =>
+  plugins.find((p) => p.id === id) ?? defaultPlugin;
+
+export const buildSubmitter = (
   pluginId: string,
   settings: Readonly<Record<string, string>>,
-): Layer.Layer<Submitter, SubmitterInitError | UnknownPluginError> => {
-  const plugin = pluginById(pluginId);
-  const make: Effect.Effect<SubmitterImpl, SubmitterInitError | UnknownPluginError> = plugin
-    ? plugin.make(settings)
-    : Effect.fail(new UnknownPluginError({ pluginId }));
-  return Layer.effect(Submitter, make);
-};
+): SubmitterImpl => pluginById(pluginId).make(settings);

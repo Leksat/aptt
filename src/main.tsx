@@ -6,6 +6,7 @@ import { runtime } from "./core/runtime";
 import { HotkeyService } from "./core/services/HotkeyService";
 import { WindowService } from "./core/services/WindowService";
 import App from "./ui/App";
+import { bootCore } from "./ui/useCore";
 import "./ui/index.css";
 
 const toggleWindow = Effect.gen(function* () {
@@ -34,9 +35,12 @@ const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("Root element #root not found");
 }
+const root = ReactDOM.createRoot(rootElement);
 
-ReactDOM.createRoot(rootElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
+void bootCore().then(() => {
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+});

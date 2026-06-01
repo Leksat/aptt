@@ -8,25 +8,24 @@ export const voidPlugin: SubmitterPlugin = {
   id: "void",
   displayName: "Void",
   settings: [],
-  make: () =>
-    Effect.sync(() => {
-      let count = 0;
-      return {
-        id: "void",
-        parseTargetId: (text) => (JIRA_ISSUE_KEY_RE.test(text) ? text : null),
-        submit: () =>
-          Effect.gen(function* () {
-            count += 1;
-            yield* Effect.sleep(Duration.millis(500));
-            if (count === 3) {
-              count = 0;
-              return yield* Effect.fail(
-                new SubmitError({
-                  cause: "Void submitter rejects every 3rd entry (for testing)",
-                }),
-              );
-            }
-          }),
-      };
-    }),
+  make: () => {
+    let count = 0;
+    return {
+      id: "void",
+      parseTargetId: (text) => (JIRA_ISSUE_KEY_RE.test(text) ? text : null),
+      submit: () =>
+        Effect.gen(function* () {
+          count += 1;
+          yield* Effect.sleep(Duration.millis(500));
+          if (count === 3) {
+            count = 0;
+            return yield* Effect.fail(
+              new SubmitError({
+                cause: "Void submitter rejects every 3rd entry (for testing)",
+              }),
+            );
+          }
+        }),
+    };
+  },
 };

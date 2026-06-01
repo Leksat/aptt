@@ -1,5 +1,5 @@
-import { Context, type Effect } from "effect";
-import type { SubmitError, SubmitterInitError } from "../errors";
+import type { Effect } from "effect";
+import type { SubmitError } from "../errors";
 
 export interface BillableEntry {
   readonly targetId: string;
@@ -14,8 +14,6 @@ export interface SubmitterImpl {
   readonly submit: (entry: BillableEntry) => Effect.Effect<void, SubmitError>;
 }
 
-export class Submitter extends Context.Tag("Submitter")<Submitter, SubmitterImpl>() {}
-
 export interface SettingField {
   readonly key: string;
   readonly label: string;
@@ -26,7 +24,8 @@ export interface SubmitterPlugin {
   readonly id: string;
   readonly displayName: string;
   readonly settings: ReadonlyArray<SettingField>;
-  readonly make: (
-    settings: Readonly<Record<string, string>>,
-  ) => Effect.Effect<SubmitterImpl, SubmitterInitError>;
+  readonly make: (settings: Readonly<Record<string, string>>) => SubmitterImpl;
 }
+
+export const getSetting = (settings: Readonly<Record<string, string>>, key: string): string =>
+  settings[key] ?? "";
