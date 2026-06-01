@@ -3,6 +3,7 @@ import { Effect } from "effect";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { runtime } from "./core/runtime";
+import { ClipboardCaptureService } from "./core/services/ClipboardCaptureService";
 import { HotkeyService } from "./core/services/HotkeyService";
 import { WindowService } from "./core/services/WindowService";
 import { surfaced, surfaceError } from "./core/surfaceError";
@@ -18,6 +19,11 @@ const toggleWindow = Effect.gen(function* () {
 const showAndFocus = Effect.gen(function* () {
   const window = yield* WindowService;
   yield* window.showAndFocus;
+});
+
+const handleClipboardChange = Effect.gen(function* () {
+  const capture = yield* ClipboardCaptureService;
+  yield* capture.handleClipboardChange;
 });
 
 const HOTKEY = "cmd+alt+x";
@@ -38,13 +44,26 @@ const setupListen = Effect.tryPromise({
   catch: (cause) => cause,
 });
 
+const setupClipboardListen = Effect.tryPromise({
+  try: () =>
+    listen("clipboard:changed", () => {
+      void runtime.runPromise(surfaced("clipboard:changed", handleClipboardChange));
+    }),
+  catch: (cause) => cause,
+});
+
 void runtime.runPromise(surfaced("hotkey boot", bootHotkeys));
 const listenPromise = runtime.runPromise(surfaced("window:show listen", setupListen));
+const clipboardListenPromise = runtime.runPromise(
+  surfaced("clipboard:changed listen", setupClipboardListen),
+);
 
 if (import.meta.hot) {
   import.meta.hot.dispose(async () => {
     const unlisten = await listenPromise;
     if (unlisten !== undefined) unlisten();
+    const clipboardUnlisten = await clipboardListenPromise;
+    if (clipboardUnlisten !== undefined) clipboardUnlisten();
     await runtime.runPromise(
       surfaced(
         "hotkey HMR cleanup",

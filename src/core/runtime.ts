@@ -1,4 +1,5 @@
 import { Layer, ManagedRuntime } from "effect";
+import { ClipboardCaptureService } from "./services/ClipboardCaptureService";
 import { ClipboardTriggerService } from "./services/ClipboardTriggerService";
 import { ConfigService } from "./services/ConfigService";
 import { EntriesService } from "./services/EntriesService";
@@ -14,6 +15,7 @@ export const MainLive = Layer.mergeAll(
   TrayService.Default,
   HotkeyService.Default,
   ClipboardTriggerService.Default,
+  ClipboardCaptureService.Default,
   ConfigService.Default,
   EntriesService.Default,
   SubmitService.Default,

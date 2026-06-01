@@ -1,3 +1,5 @@
+mod clipboard_watch;
+
 use tauri::{
     Emitter,
     menu::{MenuBuilder, MenuItemBuilder},
@@ -22,6 +24,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
             let menu = MenuBuilder::new(app).items(&[&quit]).build()?;
@@ -40,6 +43,8 @@ pub fn run() {
                     }
                 })
                 .build(app)?;
+
+            clipboard_watch::spawn(app.handle().clone());
 
             Ok(())
         })

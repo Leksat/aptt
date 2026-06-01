@@ -1,12 +1,13 @@
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { Either } from "effect";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
 import {
   activeBillableTargetId,
   closedBillableMinutes,
   formatDurationShort,
 } from "../core/billable";
+import { FOCUS_TEXTAREA_EVENT } from "../core/services/ClipboardCaptureService";
 import { appendNewStart, formatTimeLog, parseTimeLog } from "../core/timeLog";
 import { SettingsPane } from "./SettingsPane";
 import { StatusLine } from "./StatusLine";
@@ -17,6 +18,17 @@ export default function App() {
   const core = useCore();
   const submitter = core.config.snapshot.submitter;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const onFocus = () => {
+      const el = textareaRef.current;
+      if (el === null) return;
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    };
+    window.addEventListener(FOCUS_TEXTAREA_EVENT, onFocus);
+    return () => window.removeEventListener(FOCUS_TEXTAREA_EVENT, onFocus);
+  }, []);
 
   const parsed = parseTimeLog(core.entries.text);
   const logIsValid = Either.isRight(parsed);
