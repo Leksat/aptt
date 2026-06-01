@@ -1,7 +1,12 @@
 import dedent from "dedent";
 import { Either } from "effect";
 import { describe, expect, it } from "vitest";
-import { closedBillableMinutes, formatDurationShort, totalBillableMinutes } from "./billable";
+import {
+  activeBillableTargetId,
+  closedBillableMinutes,
+  formatDurationShort,
+  totalBillableMinutes,
+} from "./billable";
 import { parseTimeLog } from "./timeLog";
 
 const acceptABC = (token: string): string | null => (/^ABC-\d+$/.test(token) ? token : null);
@@ -112,6 +117,64 @@ describe("closedBillableMinutes", () => {
       `),
     );
     expect(closedBillableMinutes(log, acceptABC)).toBe(0);
+  });
+});
+
+describe("activeBillableTargetId", () => {
+  it("returns null for an empty log", () => {
+    const log = Either.getOrThrow(parseTimeLog(""));
+    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+  });
+
+  it("returns the target ID when the active entry's first token is accepted", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        ABC-123 working on it
+      `),
+    );
+    expect(activeBillableTargetId(log, acceptABC)).toBe("ABC-123");
+  });
+
+  it("returns null when the active entry has an empty description", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+      `),
+    );
+    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+  });
+
+  it("returns null when the first token is not a target ID", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        nothing
+      `),
+    );
+    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+  });
+
+  it("ignores closed entries", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        ABC-1 done
+        2026-01-01 11:00
+        nothing
+      `),
+    );
+    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+  });
+
+  it("returns null when the target ID is not the first token", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        foo ABC-123 bar
+      `),
+    );
+    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
   });
 });
 

@@ -2,7 +2,11 @@ import { confirm } from "@tauri-apps/plugin-dialog";
 import { Either } from "effect";
 import { useRef } from "react";
 import { flushSync } from "react-dom";
-import { closedBillableMinutes, formatDurationShort } from "../core/billable";
+import {
+  activeBillableTargetId,
+  closedBillableMinutes,
+  formatDurationShort,
+} from "../core/billable";
 import { appendNewStart, formatTimeLog, parseTimeLog } from "../core/timeLog";
 import { SettingsPane } from "./SettingsPane";
 import { StatusLine } from "./StatusLine";
@@ -11,7 +15,6 @@ import { useTrayTitle } from "./useTrayTitle";
 
 export default function App() {
   const core = useCore();
-  useTrayTitle(core.entries.text);
   const submitter = core.config.snapshot.submitter;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -21,6 +24,10 @@ export default function App() {
   const closedBillable = Either.isRight(parsed)
     ? closedBillableMinutes(parsed.right, submitter.parseTargetId)
     : 0;
+  const trayTitle = Either.isRight(parsed)
+    ? activeBillableTargetId(parsed.right, submitter.parseTargetId)
+    : null;
+  useTrayTitle(trayTitle);
   const submitDisabled = !logIsValid || closedCount === 0 || core.submit.isInFlight;
 
   const handleNew = () => {

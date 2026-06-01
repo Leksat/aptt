@@ -15,9 +15,9 @@ export class TrayService extends Effect.Service<TrayService>()("TrayService", {
       catch: (cause) => new TrayInitError({ cause }),
     });
     return {
-      setTitle: (title: string) =>
+      setTitle: (title: string | null) =>
         Effect.tryPromise({
-          try: () => tray.setTitle(title),
+          try: () => tray.setTitle(title ?? ""),
           catch: (cause) => new TrayOpError({ op: "setTitle", cause }),
         }),
     };

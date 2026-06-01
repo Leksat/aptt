@@ -2,6 +2,16 @@ import type { TimeLog } from "./timeLog";
 
 export type ParseTargetId = (text: string) => string | null;
 
+export const activeBillableTargetId = (
+  log: TimeLog,
+  parseTargetId: ParseTargetId,
+): string | null => {
+  if (log.active === null) return null;
+  const firstToken = log.active.description.trim().split(/\s+/, 1)[0] ?? "";
+  if (firstToken === "") return null;
+  return parseTargetId(firstToken);
+};
+
 const isBillable = (description: string, parseTargetId: ParseTargetId): boolean => {
   const firstToken = description.trim().split(/\s+/, 1)[0] ?? "";
   if (firstToken === "") return false;
