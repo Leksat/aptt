@@ -2,6 +2,7 @@ import { Either } from "effect";
 import { useRef } from "react";
 import { flushSync } from "react-dom";
 import { appendNewStart, formatTimeLog, parseTimeLog } from "../core/timeLog";
+import { StatusLine } from "./StatusLine";
 import { useEntries } from "./useEntries";
 import { useTrayTitle } from "./useTrayTitle";
 
@@ -57,7 +58,7 @@ export default function App() {
           Submit
         </button>
       </div>
-      <div className="min-h-5 text-gray-600 text-sm" />
+      <StatusLine text={text} />
     </main>
   );
 }

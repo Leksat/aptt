@@ -21,20 +21,13 @@ For domain terms see [CONTEXT.md](./CONTEXT.md). For user-facing description see
 
 Submit is enabled when: the log is valid AND has at least one closed time entry AND no submission is in flight.
 
-## Status line
+## Status line — submit states
 
-Single line at the bottom of the window. Priority order (first match wins):
+The status line is implemented for invalid-log and `Total billable` cases. Still pending, to land with Submit flow:
 
-1. Log is invalid → error message (which line and what was expected).
-2. Submitting → progress (`Submitting N/M…`). Lingers 3 seconds after the loop ends, then clears.
-3. Otherwise → `Total billable: NhMm`.
-
-`Total billable` format:
-
-- Under 1h → `30m`.
-- 1h or more → `1h30m` (always include both units).
-- Sums durations of all billable time entries (closed + active). Active entry's end = "now" floored to the minute.
-- Recomputes on every minute boundary.
+- While submitting → `Submitting N/M…` takes priority over `Total billable`.
+- After the loop ends, the submit message lingers 3 seconds, then clears.
+- On a submit error, the error message takes priority over `Total billable` until the next user edit.
 
 ## Tray title
 

@@ -1,5 +1,7 @@
-import { Effect } from "effect";
+import { Duration, Effect } from "effect";
 import type { SubmitterPlugin } from "../Submitter";
+
+const JIRA_ISSUE_KEY_RE = /^[A-Z][A-Z0-9]+-\d+$/;
 
 export const voidPlugin: SubmitterPlugin = {
   id: "void",
@@ -8,7 +10,7 @@ export const voidPlugin: SubmitterPlugin = {
   make: () =>
     Effect.succeed({
       id: "void",
-      parseTargetId: () => null,
-      submit: () => Effect.void,
+      parseTargetId: (text) => (JIRA_ISSUE_KEY_RE.test(text) ? text : null),
+      submit: () => Effect.sleep(Duration.millis(500)),
     }),
 };

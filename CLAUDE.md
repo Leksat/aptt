@@ -32,6 +32,7 @@ Aim for deep modules. The goal is testability and AI-navigability — change, bu
 - The interface is the test surface. Callers and tests cross the same seam. Wanting to test past the interface means the module is the wrong shape.
 - One adapter = hypothetical seam. Two adapters = real seam. Don't introduce a port unless something actually varies across it (typically production + test).
 - Pure-function extraction "for testability" is a smell when real bugs hide in how the function is called — that destroys locality. Test through the interface that owns the behaviour.
+- Export only what callers outside the module use. `export` is part of the interface; default to no export, add it when a caller appears. Internal helpers stay unexported even if tests want at them — test through the interface.
 
 ### Deepening dependencies
 
