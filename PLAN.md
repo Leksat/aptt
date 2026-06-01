@@ -4,31 +4,6 @@ Working spec for what aptt should do. Each section is a concrete behavioural tar
 
 For domain terms see [CONTEXT.md](./CONTEXT.md). For user-facing description see [README.md](./README.md).
 
-## Submit flow
-
-1. User clicks Submit.
-2. Confirm dialog: "Are you sure?" (OK / Cancel).
-3. On confirm:
-   - Textarea becomes readonly.
-   - Parse the log into closed time entries in chronological order.
-   - For each closed entry:
-     - If billable, send `{ targetId, start, end, comment }` to the active submitter.
-     - On success, the entry is removed from the in-memory log (billable or not).
-     - On the first error, stop. Show the error in the status line.
-   - Rebuild the time log text from: the entry that failed (if any) + every entry not yet attempted + the active entry (if any). Write it back to the textarea.
-   - Textarea becomes writable again.
-4. Cancel returns to editable state with nothing changed.
-
-Submit is enabled when: the log is valid AND has at least one closed time entry AND no submission is in flight.
-
-## Status line — submit states
-
-The status line is implemented for invalid-log and `Total billable` cases. Still pending, to land with Submit flow:
-
-- While submitting → `Submitting N/M…` takes priority over `Total billable`.
-- After the loop ends, the submit message lingers 3 seconds, then clears.
-- On a submit error, the error message takes priority over `Total billable` until the next user edit.
-
 ## Tray title
 
 - Active time entry has a billable target ID → show that target ID (e.g. `ABC-123`).

@@ -8,6 +8,15 @@ const isBillable = (description: string, parseTargetId: ParseTargetId): boolean 
   return parseTargetId(firstToken) !== null;
 };
 
+export const closedBillableMinutes = (log: TimeLog, parseTargetId: ParseTargetId): number => {
+  let minutes = 0;
+  for (const entry of log.closed) {
+    if (!isBillable(entry.description, parseTargetId)) continue;
+    minutes += diffMinutes(entry.start, entry.end);
+  }
+  return minutes;
+};
+
 export const totalBillableMinutes = (
   log: TimeLog,
   parseTargetId: ParseTargetId,

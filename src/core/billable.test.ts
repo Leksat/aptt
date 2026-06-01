@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { Either } from "effect";
 import { describe, expect, it } from "vitest";
-import { formatDurationShort, totalBillableMinutes } from "./billable";
+import { closedBillableMinutes, formatDurationShort, totalBillableMinutes } from "./billable";
 import { parseTimeLog } from "./timeLog";
 
 const acceptABC = (token: string): string | null => (/^ABC-\d+$/.test(token) ? token : null);
@@ -79,6 +79,39 @@ describe("totalBillableMinutes", () => {
       `),
     );
     expect(totalBillableMinutes(log, acceptABC, new Date("2026-01-01T09:00"))).toBe(0);
+  });
+});
+
+describe("closedBillableMinutes", () => {
+  it("sums only closed billable entries and ignores the active one", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        ABC-1 first
+        2026-01-01 10:30
+        nothing
+        2026-01-01 11:00
+        ABC-2 second
+        2026-01-01 11:45
+        ABC-3 still running
+      `),
+    );
+    expect(closedBillableMinutes(log, acceptABC)).toBe(75);
+  });
+
+  it("returns 0 for an empty log", () => {
+    const log = Either.getOrThrow(parseTimeLog(""));
+    expect(closedBillableMinutes(log, acceptABC)).toBe(0);
+  });
+
+  it("returns 0 when the only billable entry is the active one", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        ABC-1 hi
+      `),
+    );
+    expect(closedBillableMinutes(log, acceptABC)).toBe(0);
   });
 });
 

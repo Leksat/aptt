@@ -1,7 +1,8 @@
-import { Effect } from "effect";
+import { Effect, Either } from "effect";
 import { type ChangeEvent, useEffect, useState } from "react";
 import { runtime } from "../core/runtime";
 import { FileService } from "../core/services/FileService";
+import { showError } from "./showError";
 
 const loadEntries = Effect.gen(function* () {
   const fs = yield* FileService;
@@ -15,10 +16,7 @@ const saveEntries = (text: string) =>
   Effect.gen(function* () {
     const fs = yield* FileService;
     yield* fs.writeEntries(text);
-  }).pipe(
-    Effect.tapError((err) => Effect.logError(`Failed to save entries: ${String(err)}`)),
-    Effect.ignore,
-  );
+  }).pipe(Effect.either);
 
 export interface UseEntries {
   readonly text: string | null;
@@ -35,7 +33,11 @@ export const useEntries = (): UseEntries => {
 
   const setText = (value: string) => {
     setTextState(value);
-    void runtime.runPromise(saveEntries(value));
+    void runtime.runPromise(saveEntries(value)).then((result) => {
+      if (Either.isLeft(result)) {
+        showError(`Save failed: ${String(result.left.cause)}`);
+      }
+    });
   };
 
   const onChange = (event: ChangeEvent<HTMLTextAreaElement>) => {

@@ -1,14 +1,20 @@
+import { confirm } from "@tauri-apps/plugin-dialog";
 import { Either } from "effect";
 import { useRef } from "react";
 import { flushSync } from "react-dom";
+import { closedBillableMinutes, formatDurationShort } from "../core/billable";
 import { appendNewStart, formatTimeLog, parseTimeLog } from "../core/timeLog";
 import { StatusLine } from "./StatusLine";
 import { useEntries } from "./useEntries";
+import { useParseTargetId } from "./useParseTargetId";
+import { useSubmit } from "./useSubmit";
 import { useTrayTitle } from "./useTrayTitle";
 
 export default function App() {
   const { text, setText, onChange } = useEntries();
   useTrayTitle(text);
+  const submit = useSubmit();
+  const parseTargetId = useParseTargetId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   if (text === null) {
@@ -17,6 +23,11 @@ export default function App() {
 
   const parsed = parseTimeLog(text);
   const logIsValid = Either.isRight(parsed);
+  const closedCount = Either.isRight(parsed) ? parsed.right.closed.length : 0;
+  const closedBillable = Either.isRight(parsed)
+    ? closedBillableMinutes(parsed.right, parseTargetId)
+    : 0;
+  const submitDisabled = !logIsValid || closedCount === 0 || submit.isInFlight;
 
   const handleNew = () => {
     if (Either.isLeft(parsed)) return;
@@ -29,6 +40,15 @@ export default function App() {
     el.setSelectionRange(next.length, next.length);
   };
 
+  const handleSubmit = async () => {
+    if (Either.isLeft(parsed)) return;
+    const ok = await confirm("Are you sure?", { title: "aptt", kind: "warning" });
+    if (!ok) return;
+    const result = await submit.submit(parsed.right);
+    setText(formatTimeLog(result.log));
+  };
+
+
   return (
     <main className="flex h-screen flex-col gap-3 p-4">
       <div className="flex min-h-0 flex-1 gap-3">
@@ -36,7 +56,8 @@ export default function App() {
           ref={textareaRef}
           value={text}
           onChange={onChange}
-          className="flex-1 resize-none border border-gray-300 p-2 font-mono"
+          readOnly={submit.isInFlight}
+          className="flex-1 resize-none border border-gray-300 p-2 font-mono read-only:bg-gray-100"
           spellCheck={false}
         />
         <aside className="flex-1 border border-gray-300 p-2 text-gray-500 text-sm">Settings</aside>
@@ -45,20 +66,21 @@ export default function App() {
         <button
           type="button"
           onClick={handleNew}
-          disabled={!logIsValid}
+          disabled={!logIsValid || submit.isInFlight}
           className="rounded border border-gray-300 px-3 py-1 disabled:opacity-50"
         >
           New
         </button>
         <button
           type="button"
-          disabled
+          onClick={handleSubmit}
+          disabled={submitDisabled}
           className="rounded border border-gray-300 px-3 py-1 disabled:opacity-50"
         >
-          Submit
+          {submitDisabled ? "Submit" : `Submit ${formatDurationShort(closedBillable)}`}
         </button>
       </div>
-      <StatusLine text={text} />
+      <StatusLine text={text} submitState={submit.state} />
     </main>
   );
 }

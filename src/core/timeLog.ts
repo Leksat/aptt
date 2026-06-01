@@ -27,6 +27,9 @@ export const parseTimeLog = (text: string): Either.Either<TimeLog, TimeLogParseE
   }
 
   const lines = text.split("\n");
+  if (lines.length % 2 === 1 && (lines[lines.length - 1] ?? "").trim() === "") {
+    lines.pop();
+  }
   const starts: Date[] = [];
   const descriptions: string[] = [];
 

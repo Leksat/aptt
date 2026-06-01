@@ -6,9 +6,12 @@
   "permissions": [
     "core:default",
     "fs:default",
+    "fs:allow-write-text-file",
     { "identifier": "fs:scope", "allow": [{ "path": "$APPDATA/**" }] },
     "global-shortcut:default",
     "clipboard-manager:allow-read-text",
-    "window-state:default"
+    "window-state:default",
+    "dialog:allow-confirm",
+    "dialog:allow-message"
   ]
 }

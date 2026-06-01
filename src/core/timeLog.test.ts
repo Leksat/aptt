@@ -238,6 +238,23 @@ describe("parseTimeLog", () => {
     `);
   });
 
+  it("tolerates a trailing empty line after a description (cursor parked below)", () => {
+    const log = "2026-01-01 10:00\nABC-123\n";
+    expect(parseTimeLog(log)).toMatchInlineSnapshot(`
+      {
+        "_id": "Either",
+        "_tag": "Right",
+        "right": {
+          "active": {
+            "description": "ABC-123",
+            "start": 2026-01-01T10:00:00.000Z,
+          },
+          "closed": [],
+        },
+      }
+    `);
+  });
+
   it("rejects a malformed start on line 1", () => {
     expect(parseTimeLog("nope")).toMatchInlineSnapshot(`
       {

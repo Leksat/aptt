@@ -1,4 +1,5 @@
 import { Duration, Effect } from "effect";
+import { SubmitError } from "../../errors";
 import type { SubmitterPlugin } from "../Submitter";
 
 const JIRA_ISSUE_KEY_RE = /^[A-Z][A-Z0-9]+-\d+$/;
@@ -8,9 +9,24 @@ export const voidPlugin: SubmitterPlugin = {
   displayName: "Void",
   settings: [],
   make: () =>
-    Effect.succeed({
-      id: "void",
-      parseTargetId: (text) => (JIRA_ISSUE_KEY_RE.test(text) ? text : null),
-      submit: () => Effect.sleep(Duration.millis(500)),
+    Effect.sync(() => {
+      let count = 0;
+      return {
+        id: "void",
+        parseTargetId: (text) => (JIRA_ISSUE_KEY_RE.test(text) ? text : null),
+        submit: () =>
+          Effect.gen(function* () {
+            count += 1;
+            yield* Effect.sleep(Duration.millis(500));
+            if (count === 3) {
+              count = 0;
+              return yield* Effect.fail(
+                new SubmitError({
+                  cause: "Void submitter rejects every 3rd entry (for testing)",
+                }),
+              );
+            }
+          }),
+      };
     }),
 };
