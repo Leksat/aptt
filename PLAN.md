@@ -4,21 +4,6 @@ Working spec for what aptt should do. Each section is a concrete behavioural tar
 
 For domain terms see [CONTEXT.md](./CONTEXT.md). For user-facing description see [README.md](./README.md).
 
-## Main window layout
-
-Top to bottom:
-
-- Main area, split vertically:
-  - Left: time log textarea.
-  - Right: settings pane.
-- Buttons row: at minimum, "New" and "Submit".
-- Status line.
-
-## "New" button
-
-- Appends the current time as a new time entry start, then puts the cursor on the description line below.
-- Closes any previously active time entry as a side effect.
-
 ## Submit flow
 
 1. User clicks Submit.

@@ -22,21 +22,25 @@ const saveEntries = (text: string) =>
 
 export interface UseEntries {
   readonly text: string | null;
+  readonly setText: (value: string) => void;
   readonly onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
 export const useEntries = (): UseEntries => {
-  const [text, setText] = useState<string | null>(null);
+  const [text, setTextState] = useState<string | null>(null);
 
   useEffect(() => {
-    void runtime.runPromise(loadEntries).then(setText);
+    void runtime.runPromise(loadEntries).then(setTextState);
   }, []);
 
-  const onChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const value = event.currentTarget.value;
-    setText(value);
+  const setText = (value: string) => {
+    setTextState(value);
     void runtime.runPromise(saveEntries(value));
   };
 
-  return { text, onChange };
+  const onChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setText(event.currentTarget.value);
+  };
+
+  return { text, setText, onChange };
 };

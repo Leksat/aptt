@@ -1,7 +1,7 @@
 import dedent from "dedent";
 import { Either } from "effect";
 import { describe, expect, it } from "vitest";
-import { formatTimeLog, parseTimeLog } from "./timeLog";
+import { appendNewStart, formatTimeLog, parseTimeLog } from "./timeLog";
 
 describe("parseTimeLog", () => {
   it("accepts an empty log", () => {
@@ -331,6 +331,59 @@ describe("parseTimeLog", () => {
           "message": "Minute must be 00-59, got 60",
         },
       }
+    `);
+  });
+});
+
+describe("appendNewStart", () => {
+  it("opens an active entry on an empty log", () => {
+    const log = Either.getOrThrow(parseTimeLog(""));
+    const next = appendNewStart(log, new Date(2026, 0, 1, 10, 0, 30));
+    expect(formatTimeLog(next)).toMatchInlineSnapshot(`
+      "2026-01-01 10:00
+      "
+    `);
+  });
+
+  it("closes the previous active entry and opens a new empty one", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        ABC-123 hi
+      `),
+    );
+    const next = appendNewStart(log, new Date(2026, 0, 1, 11, 30, 0));
+    expect(formatTimeLog(next)).toMatchInlineSnapshot(`
+      "2026-01-01 10:00
+      ABC-123 hi
+      2026-01-01 11:30
+      "
+    `);
+  });
+
+  it("floors now to the minute", () => {
+    const log = Either.getOrThrow(parseTimeLog(""));
+    const next = appendNewStart(log, new Date(2026, 0, 1, 10, 0, 59, 999));
+    expect(formatTimeLog(next)).toMatchInlineSnapshot(`
+      "2026-01-01 10:00
+      "
+    `);
+  });
+
+  it("is a no-op when now floored equals the active entry's start", () => {
+    const log = Either.getOrThrow(parseTimeLog("2026-01-01 10:00"));
+    const next = appendNewStart(log, new Date(2026, 0, 1, 10, 0, 45));
+    expect(next).toBe(log);
+  });
+
+  it("preserves an empty active description when closing", () => {
+    const log = Either.getOrThrow(parseTimeLog("2026-01-01 10:00"));
+    const next = appendNewStart(log, new Date(2026, 0, 1, 10, 30, 0));
+    expect(formatTimeLog(next)).toMatchInlineSnapshot(`
+      "2026-01-01 10:00
+
+      2026-01-01 10:30
+      "
     `);
   });
 });

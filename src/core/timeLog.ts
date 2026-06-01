@@ -67,6 +67,22 @@ export const parseTimeLog = (text: string): Either.Either<TimeLog, TimeLogParseE
   return Either.right({ closed, active });
 };
 
+export const appendNewStart = (log: TimeLog, now: Date): TimeLog => {
+  const truncated = new Date(now);
+  truncated.setSeconds(0, 0);
+  if (log.active !== null && truncated.getTime() <= log.active.start.getTime()) {
+    return log;
+  }
+  const closed =
+    log.active === null
+      ? log.closed
+      : [
+          ...log.closed,
+          { start: log.active.start, end: truncated, description: log.active.description },
+        ];
+  return { closed, active: { start: truncated, description: "" } };
+};
+
 export const formatTimeLog = (log: TimeLog): string => {
   const lines: string[] = [];
   for (const entry of log.closed) {
