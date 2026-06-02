@@ -91,7 +91,7 @@ describe("submitTimeLog", () => {
     `);
   });
 
-  it("splits the description into target id and comment", async () => {
+  it("strips the target id from the description before sending", async () => {
     const log = Either.getOrThrow(
       parseTimeLog(dedent`
         2026-01-01 10:00
@@ -104,7 +104,7 @@ describe("submitTimeLog", () => {
     expect(calls).toMatchInlineSnapshot(`
       [
         {
-          "comment": "wrote the spec",
+          "description": "wrote the spec",
           "end": 2026-01-01T11:00:00.000Z,
           "start": 2026-01-01T10:00:00.000Z,
           "targetId": "ABC-7",

@@ -142,7 +142,7 @@ const postWorklog = (
       attributes: [],
       billableSeconds: durationSeconds,
       authorAccountId: s.workerId,
-      description: entry.comment,
+      description: entry.description,
       startDate: localDate(entry.start),
       startTime: localTime(entry.start),
       timeSpentSeconds: durationSeconds,

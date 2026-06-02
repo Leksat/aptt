@@ -1,4 +1,4 @@
-import { confirm } from "@tauri-apps/plugin-dialog";
+import { confirm, message } from "@tauri-apps/plugin-dialog";
 import { Either } from "effect";
 import { useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
@@ -7,6 +7,7 @@ import {
   closedBillableMinutes,
   formatDurationShort,
 } from "../core/billable";
+import { findBlocker } from "../core/blocker";
 import {
   selectedDescriptionFromNotes,
   selectedDescriptionFromTimeLog,
@@ -100,6 +101,17 @@ const AppInner = () => {
 
   const handleSubmit = async () => {
     if (Either.isLeft(parsed)) return;
+    const blocker = findBlocker(parsed.right, submitter.findTargetId);
+    if (blocker !== null) {
+      await message(
+        `Submission is blocked because line ${blocker.line} contains the exclamation mark.`,
+        {
+          title: "aptt",
+          kind: "error",
+        },
+      );
+      return;
+    }
     const ok = await confirm("Are you sure?", { title: "aptt", kind: "warning" });
     if (!ok) return;
     const result = await core.submit.submit(parsed.right, submitter);

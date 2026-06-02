@@ -59,7 +59,7 @@ const sampleEntry: BillableEntry = {
   targetId: "ABC-123",
   start: new Date("2026-01-01T10:00:00"),
   end: new Date("2026-01-01T11:30:00"),
-  comment: "fix login",
+  description: "fix login",
 };
 
 const runSubmit = (
@@ -198,12 +198,12 @@ describe("jiraTempoPlugin.submit", () => {
     ]);
   });
 
-  it("sends only the comment (without the target id) as the description", async () => {
+  it("sends only the description (without the target id) as Tempo's description", async () => {
     const { layer, captured } = stubClient((req) => {
       if (req.method === "GET") return { status: 200, body: JSON.stringify({ id: "1" }) };
       return { status: 200, body: "{}" };
     });
-    await runSubmit(completeSettings, { ...sampleEntry, comment: "fix login" }, layer);
+    await runSubmit(completeSettings, { ...sampleEntry, description: "fix login" }, layer);
     const tempo = captured[1];
     if (tempo === undefined) throw new Error("missing tempo request");
     expect(JSON.parse(tempo.body).description).toBe("fix login");

@@ -86,6 +86,6 @@ const billableEntryOf = (
   if (firstToken === "") return null;
   const targetId = findTargetId(firstToken);
   if (targetId === null) return null;
-  const comment = firstSpace === -1 ? "" : trimmed.slice(firstSpace).trim();
-  return { targetId, start: entry.start, end: entry.end, comment };
+  const description = firstSpace === -1 ? "" : trimmed.slice(firstSpace).trim();
+  return { targetId, start: entry.start, end: entry.end, description };
 };

@@ -6,7 +6,7 @@ export interface BillableEntry {
   readonly targetId: string;
   readonly start: Date;
   readonly end: Date;
-  readonly comment: string;
+  readonly description: string;
 }
 
 export interface SubmitterImpl {

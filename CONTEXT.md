@@ -32,6 +32,10 @@ _Avoid_: current entry, in-progress entry, open entry.
 A time entry whose description begins with a valid target ID for the active submitter. Only closed billable entries are submitted; non-billable closed entries are removed without being sent. The active entry can also be billable; its running duration counts toward live totals even though it is never submitted.
 _Avoid_: loggable, sendable.
 
+**Blocker**:
+A `!` appearing as its own whitespace-delimited token at the start of a time entry's description (e.g. `! stuff`) or immediately after the target ID (e.g. `ABC-123 ! stuff`). A `!` attached to another token (e.g. `!stuff`) is not a blocker. While any time entry has a blocker, the log cannot be submitted; clicking Submit reports the first line that contains one.
+_Avoid_: hold, flag, bang, exclamation marker.
+
 **History file**:
 A time-log-formatted snapshot of the entries removed from the live log by a single submit. Contains the verbatim prefix of the pre-submit log up to (and including) the start line of the first entry that was not submitted (or the active entry's start, on full success). Non-billable entries inside that prefix are included. Filename is the submit's local time in compact form: `YYYYMMDD-HHMMSS±HHMM.txt`. Written whenever any entry left the live log (including the case where every removed entry was non-billable and nothing was sent).
 _Avoid_: backup, archive, snapshot, log file.
