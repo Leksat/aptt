@@ -1,5 +1,6 @@
 import { Effect } from "effect";
 import { type ChangeEvent, useCallback, useSyncExternalStore } from "react";
+import type { ThemeMode } from "../core/config";
 import { runtime } from "../core/runtime";
 import { ConfigService, type ConfigSnapshot } from "../core/services/ConfigService";
 import { EntriesService } from "../core/services/EntriesService";
@@ -42,6 +43,7 @@ export interface Core {
     readonly snapshot: ConfigSnapshot;
     readonly setActivePluginId: (id: string) => void;
     readonly setSetting: (pluginId: string, key: string, value: string) => void;
+    readonly setThemeMode: (mode: ThemeMode) => void;
   };
   readonly submit: {
     readonly state: SubmitState;
@@ -80,6 +82,9 @@ export const useCore = (): Core => {
   const setSetting = (pluginId: string, key: string, value: string) => {
     void runtime.runPromise(services.config.setSetting(pluginId, key, value));
   };
+  const setThemeMode = (mode: ThemeMode) => {
+    void runtime.runPromise(services.config.setThemeMode(mode));
+  };
 
   const submit = async (log: TimeLog, submitter: SubmitterImpl): Promise<SubmitResult> => {
     const result = await runtime.runPromise(services.submit.submit(log, submitter));
@@ -95,7 +100,7 @@ export const useCore = (): Core => {
 
   return {
     entries: { text, setText, onChange },
-    config: { snapshot: configSnapshot, setActivePluginId, setSetting },
+    config: { snapshot: configSnapshot, setActivePluginId, setSetting, setThemeMode },
     submit: {
       state: submitState,
       isInFlight: submitState.tag === "submitting",

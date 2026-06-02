@@ -8,7 +8,9 @@ export const StatusLine = () => {
 };
 
 const lineClass = (status: Status): string =>
-  status.tag === "parseError" ? "min-h-5 text-red-600 text-sm" : "min-h-5 text-gray-600 text-sm";
+  status.tag === "parseError"
+    ? "min-h-5 text-[var(--color-attention)]"
+    : "min-h-5 text-[var(--color-muted)]";
 
 const lineText = (status: Status): string => {
   switch (status.tag) {

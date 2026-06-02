@@ -1,12 +1,16 @@
 import { Schema } from "effect";
 import { defaultPlugin } from "./services/submitters/registry";
 
+export const ThemeModeSchema = Schema.Literal("system", "light", "dark");
+export type ThemeMode = typeof ThemeModeSchema.Type;
+
 export const ConfigSchema = Schema.Struct({
   activePluginId: Schema.String,
   pluginSettings: Schema.Record({
     key: Schema.String,
     value: Schema.Record({ key: Schema.String, value: Schema.String }),
   }),
+  themeMode: Schema.optionalWith(ThemeModeSchema, { default: () => "system" as const }),
 });
 
 export type Config = typeof ConfigSchema.Type;
@@ -14,6 +18,7 @@ export type Config = typeof ConfigSchema.Type;
 export const defaultConfig: Config = {
   activePluginId: defaultPlugin.id,
   pluginSettings: {},
+  themeMode: "system",
 };
 
 export const parseConfig = Schema.decodeUnknownEither(ConfigSchema);
@@ -25,6 +30,11 @@ export const settingsFor = (config: Config, pluginId: string): Readonly<Record<s
 export const withActivePluginId = (config: Config, pluginId: string): Config => ({
   ...config,
   activePluginId: pluginId,
+});
+
+export const withThemeMode = (config: Config, themeMode: ThemeMode): Config => ({
+  ...config,
+  themeMode,
 });
 
 export const withSetting = (

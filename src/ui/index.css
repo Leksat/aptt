@@ -1,1 +1,64 @@
+@import "@fontsource-variable/jetbrains-mono";
 @import "tailwindcss";
+
+@theme {
+  --text-base: 14px;
+  --text-base--line-height: 20px;
+}
+
+@layer base {
+  body {
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+  }
+}
+
+:root {
+  --color-bg: #f0efed;
+  --color-surface: #e7e5e4;
+  --color-text: #1c1917;
+  --color-muted: #78716c;
+  --color-border: #d6d3d1;
+  --color-attention: #b91c1c;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --color-bg: #1e1e1e;
+  --color-surface: #252526;
+  --color-text: #d4d4d4;
+  --color-muted: #969696;
+  --color-border: #3c3c3c;
+  --color-attention: #ef4444;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 1px solid var(--color-text);
+  outline-offset: 1px;
+}
+
+textarea:focus,
+textarea:focus-visible {
+  outline: none;
+}

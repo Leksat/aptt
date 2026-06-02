@@ -71,7 +71,21 @@ describe("ConfigService", () => {
     expect(JSON.parse(fs.state.config)).toEqual({
       activePluginId: "jiratempo",
       pluginSettings: { jiratempo: { siteName: "acme" } },
+      themeMode: "system",
     });
+  });
+
+  it("setThemeMode writes to disk and notifies", async () => {
+    const fs = makeFakeFileService();
+    const modes: string[] = [];
+    await runWithFs(fs, (svc) =>
+      Effect.gen(function* () {
+        svc.subscribe(() => modes.push(svc.snapshot().config.themeMode));
+        yield* svc.setThemeMode("dark");
+      }),
+    );
+    expect(modes).toEqual(["dark"]);
+    expect(JSON.parse(fs.state.config).themeMode).toBe("dark");
   });
 
   it("setActivePluginId writes to disk and notifies", async () => {

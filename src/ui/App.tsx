@@ -9,14 +9,16 @@ import {
 } from "../core/billable";
 import { FOCUS_TEXTAREA_EVENT } from "../core/services/ClipboardCaptureService";
 import { appendNewStart, formatTimeLog, parseTimeLog } from "../core/timeLog";
-import { SettingsPane } from "./SettingsPane";
+import { RightPane } from "./RightPane";
 import { StatusLine } from "./StatusLine";
 import { useCore } from "./useCore";
+import { useThemeApplication } from "./useThemeApplication";
 import { useTrayTitle } from "./useTrayTitle";
 
 export default function App() {
   const core = useCore();
   const submitter = core.config.snapshot.submitter;
+  useThemeApplication(core.config.snapshot.config.themeMode);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -62,24 +64,24 @@ export default function App() {
   };
 
   return (
-    <main className="flex h-screen flex-col gap-3 p-4">
+    <main className="flex h-screen flex-col gap-3 p-3">
       <div className="flex min-h-0 flex-1 gap-3">
         <textarea
           ref={textareaRef}
           value={core.entries.text}
           onChange={core.entries.onChange}
           readOnly={core.submit.isInFlight}
-          className="flex-1 resize-none border border-gray-300 p-2 font-mono read-only:bg-gray-100"
+          className="flex-1 resize-none read-only:bg-[var(--color-surface)]"
           spellCheck={false}
         />
-        <SettingsPane />
+        <RightPane />
       </div>
       <div className="flex gap-2">
         <button
           type="button"
           onClick={handleNew}
           disabled={!logIsValid || core.submit.isInFlight}
-          className="rounded border border-gray-300 px-3 py-1 disabled:opacity-50"
+          className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
         >
           New
         </button>
@@ -87,14 +89,14 @@ export default function App() {
           type="button"
           onClick={handleSubmit}
           disabled={submitDisabled}
-          className="rounded border border-gray-300 px-3 py-1 disabled:opacity-50"
+          className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
         >
           {submitDisabled ? "Submit" : `Submit ${formatDurationShort(closedBillable)}`}
         </button>
         <button
           type="button"
           onClick={core.history.open}
-          className="rounded border border-gray-300 px-3 py-1"
+          className="rounded border border-[var(--color-border)] px-3 py-1"
         >
           History
         </button>

@@ -4,8 +4,10 @@ import {
   defaultConfig,
   parseConfig,
   settingsFor,
+  type ThemeMode,
   withActivePluginId,
   withSetting,
+  withThemeMode,
 } from "../config";
 import { surfaced } from "../surfaceError";
 import { FileService } from "./FileService";
@@ -60,6 +62,7 @@ export class ConfigService extends Effect.Service<ConfigService>()("ConfigServic
       setActivePluginId: (id: string) => apply(withActivePluginId(state.config, id)),
       setSetting: (pluginId: string, key: string, value: string) =>
         apply(withSetting(state.config, pluginId, key, value)),
+      setThemeMode: (mode: ThemeMode) => apply(withThemeMode(state.config, mode)),
     } as const;
   }),
 }) {}
