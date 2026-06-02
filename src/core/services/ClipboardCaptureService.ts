@@ -5,7 +5,7 @@ import {
   sendNotification,
 } from "@tauri-apps/plugin-notification";
 import { Effect, Either } from "effect";
-import { appendNewStart, formatTimeLog, parseTimeLog, type TimeLog } from "../timeLog";
+import { appendNewStart, formatTimeLog, parseTimeLog, withActiveDescription } from "../timeLog";
 import { ClipboardTriggerService } from "./ClipboardTriggerService";
 import { ConfigService } from "./ConfigService";
 import { EntriesService } from "./EntriesService";
@@ -84,8 +84,3 @@ export class ClipboardCaptureService extends Effect.Service<ClipboardCaptureServ
     }),
   },
 ) {}
-
-const withActiveDescription = (log: TimeLog, description: string): TimeLog => {
-  if (log.active === null) return log;
-  return { closed: log.closed, active: { start: log.active.start, description } };
-};

@@ -7,8 +7,18 @@ import {
   closedBillableMinutes,
   formatDurationShort,
 } from "../core/billable";
+import {
+  selectedDescriptionFromNotes,
+  selectedDescriptionFromTimeLog,
+} from "../core/selectedDescription";
 import { FOCUS_TEXTAREA_EVENT } from "../core/services/ClipboardCaptureService";
-import { appendNewStart, formatTimeLog, parseTimeLog } from "../core/timeLog";
+import {
+  appendNewStart,
+  formatTimeLog,
+  parseTimeLog,
+  withActiveDescription,
+} from "../core/timeLog";
+import { caretOf, FocusedSourceProvider, useFocusedSource } from "./FocusedSourceContext";
 import { RightPane } from "./RightPane";
 import { StatusLine } from "./StatusLine";
 import { useCore } from "./useCore";
@@ -16,10 +26,19 @@ import { useThemeApplication } from "./useThemeApplication";
 import { useTrayTitle } from "./useTrayTitle";
 
 export default function App() {
+  return (
+    <FocusedSourceProvider>
+      <AppInner />
+    </FocusedSourceProvider>
+  );
+}
+
+const AppInner = () => {
   const core = useCore();
   const submitter = core.config.snapshot.submitter;
   useThemeApplication(core.config.snapshot.config.themeMode);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const focused = useFocusedSource();
 
   useEffect(() => {
     const onFocus = () => {
@@ -44,10 +63,34 @@ export default function App() {
   useTrayTitle(trayTitle);
   const submitDisabled = !logIsValid || closedCount === 0 || core.submit.isInFlight;
 
+  const derivedDescription = deriveDescription(
+    focused.state,
+    core.entries.text,
+    core.notes.text,
+    submitter.findTargetId,
+  );
+  const newFromSelectedDisabled =
+    !logIsValid || core.submit.isInFlight || derivedDescription === null;
+
+  const trackCaret = (el: HTMLTextAreaElement) =>
+    focused.set({ source: "timeLog", caret: caretOf(el) });
+
   const handleNew = () => {
     if (Either.isLeft(parsed)) return;
     const next = formatTimeLog(appendNewStart(parsed.right, new Date()));
     if (next === core.entries.text) return;
+    flushSync(() => core.entries.setText(next));
+    const el = textareaRef.current;
+    if (el === null) return;
+    el.focus();
+    el.setSelectionRange(next.length, next.length);
+  };
+
+  const handleNewFromSelected = () => {
+    if (Either.isLeft(parsed) || derivedDescription === null) return;
+    const next = formatTimeLog(
+      withActiveDescription(appendNewStart(parsed.right, new Date()), `${derivedDescription} `),
+    );
     flushSync(() => core.entries.setText(next));
     const el = textareaRef.current;
     if (el === null) return;
@@ -70,6 +113,9 @@ export default function App() {
           ref={textareaRef}
           value={core.entries.text}
           onChange={core.entries.onChange}
+          onFocus={(e) => trackCaret(e.currentTarget)}
+          onSelect={(e) => trackCaret(e.currentTarget)}
+          onBlur={() => focused.set(null)}
           readOnly={core.submit.isInFlight}
           className="flex-1 resize-none read-only:bg-[var(--color-surface)]"
           spellCheck={false}
@@ -84,6 +130,15 @@ export default function App() {
           className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
         >
           New
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleNewFromSelected}
+          disabled={newFromSelectedDisabled}
+          className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
+        >
+          New from cursor
         </button>
         <button
           type="button"
@@ -104,4 +159,15 @@ export default function App() {
       <StatusLine />
     </main>
   );
-}
+};
+
+const deriveDescription = (
+  state: ReturnType<typeof useFocusedSource>["state"],
+  timeLogText: string,
+  notesText: string,
+  findTargetId: (text: string) => string | null,
+): string | null => {
+  if (state === null) return null;
+  if (state.source === "timeLog") return selectedDescriptionFromTimeLog(timeLogText, state.caret);
+  return selectedDescriptionFromNotes(notesText, state.caret, findTargetId);
+};

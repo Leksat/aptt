@@ -70,6 +70,11 @@ export const parseTimeLog = (text: string): Either.Either<TimeLog, TimeLogParseE
   return Either.right({ closed, active });
 };
 
+export const withActiveDescription = (log: TimeLog, description: string): TimeLog => {
+  if (log.active === null) return log;
+  return { closed: log.closed, active: { start: log.active.start, description } };
+};
+
 export const appendNewStart = (log: TimeLog, now: Date): TimeLog => {
   const truncated = new Date(now);
   truncated.setSeconds(0, 0);
