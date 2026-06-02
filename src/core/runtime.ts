@@ -7,6 +7,7 @@ import { ConfigService } from "./services/ConfigService";
 import { EntriesService } from "./services/EntriesService";
 import { FileService } from "./services/FileService";
 import { HotkeyService } from "./services/HotkeyService";
+import { NotesService } from "./services/NotesService";
 import { SubmitService } from "./services/SubmitService";
 import { TrayService } from "./services/TrayService";
 import { WindowService } from "./services/WindowService";
@@ -20,6 +21,7 @@ export const MainLive = Layer.mergeAll(
   ClipboardCaptureService.Default,
   ConfigService.Default,
   EntriesService.Default,
+  NotesService.Default,
   SubmitService.Default,
   FetchHttpClient.layer.pipe(Layer.provide(Layer.succeed(FetchHttpClient.Fetch, tauriFetch))),
 );

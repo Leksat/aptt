@@ -5,6 +5,7 @@ export interface FakeFileService {
   readonly layer: Layer.Layer<FileService>;
   readonly state: {
     entries: string;
+    notes: string;
     config: string;
     history: Record<string, string>;
     historyOpened: number;
@@ -12,10 +13,11 @@ export interface FakeFileService {
 }
 
 export const makeFakeFileService = (
-  init: { entries?: string; config?: string } = {},
+  init: { entries?: string; notes?: string; config?: string } = {},
 ): FakeFileService => {
   const state = {
     entries: init.entries ?? "",
+    notes: init.notes ?? "",
     config: init.config ?? "",
     history: {} as Record<string, string>,
     historyOpened: 0,
@@ -27,6 +29,11 @@ export const makeFakeFileService = (
       writeEntries: (text: string) =>
         Effect.sync(() => {
           state.entries = text;
+        }),
+      readNotes: Effect.sync(() => state.notes),
+      writeNotes: (text: string) =>
+        Effect.sync(() => {
+          state.notes = text;
         }),
       readConfig: Effect.sync(() => state.config),
       writeConfig: (json: string) =>

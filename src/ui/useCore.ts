@@ -4,6 +4,7 @@ import type { ThemeMode } from "../core/config";
 import { runtime } from "../core/runtime";
 import { ConfigService, type ConfigSnapshot } from "../core/services/ConfigService";
 import { EntriesService } from "../core/services/EntriesService";
+import { NotesService } from "../core/services/NotesService";
 import { SubmitService } from "../core/services/SubmitService";
 import type { SubmitterImpl } from "../core/services/Submitter";
 import type { SubmitResult, SubmitState } from "../core/submit";
@@ -12,9 +13,10 @@ import type { TimeLog } from "../core/timeLog";
 
 const resolveServices = Effect.gen(function* () {
   const entries = yield* EntriesService;
+  const notes = yield* NotesService;
   const config = yield* ConfigService;
   const submit = yield* SubmitService;
-  return { entries, config, submit };
+  return { entries, notes, config, submit };
 });
 
 type Services = Effect.Effect.Success<typeof resolveServices>;
@@ -35,6 +37,11 @@ const requireServices = (): Services => {
 
 export interface Core {
   readonly entries: {
+    readonly text: string;
+    readonly setText: (value: string) => void;
+    readonly onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  };
+  readonly notes: {
     readonly text: string;
     readonly setText: (value: string) => void;
     readonly onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -62,6 +69,10 @@ export const useCore = (): Core => {
     useCallback((listener: () => void) => services.entries.subscribe(listener), [services]),
     useCallback(() => services.entries.snapshot(), [services]),
   );
+  const notesText = useSyncExternalStore(
+    useCallback((listener: () => void) => services.notes.subscribe(listener), [services]),
+    useCallback(() => services.notes.snapshot(), [services]),
+  );
   const configSnapshot = useSyncExternalStore(
     useCallback((listener: () => void) => services.config.subscribe(listener), [services]),
     useCallback(() => services.config.snapshot(), [services]),
@@ -75,6 +86,12 @@ export const useCore = (): Core => {
     void runtime.runPromise(surfaced("Save failed", services.entries.setText(value)));
   };
   const onChange = (event: ChangeEvent<HTMLTextAreaElement>) => setText(event.currentTarget.value);
+
+  const setNotesText = (value: string) => {
+    void runtime.runPromise(surfaced("Save failed", services.notes.setText(value)));
+  };
+  const onNotesChange = (event: ChangeEvent<HTMLTextAreaElement>) =>
+    setNotesText(event.currentTarget.value);
 
   const setActivePluginId = (id: string) => {
     void runtime.runPromise(services.config.setActivePluginId(id));
@@ -100,6 +117,7 @@ export const useCore = (): Core => {
 
   return {
     entries: { text, setText, onChange },
+    notes: { text: notesText, setText: setNotesText, onChange: onNotesChange },
     config: { snapshot: configSnapshot, setActivePluginId, setSetting, setThemeMode },
     submit: {
       state: submitState,

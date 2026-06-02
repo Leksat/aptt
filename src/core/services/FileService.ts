@@ -11,6 +11,7 @@ const ensureDir = (path: string) =>
   });
 
 const ENTRIES = "entries.txt";
+const NOTES = "notes.txt";
 const CONFIG = "config.json";
 const HISTORY_DIR = "history";
 
@@ -40,6 +41,8 @@ export class FileService extends Effect.Service<FileService>()("FileService", {
     return {
       readEntries: readOrEmpty(ENTRIES),
       writeEntries: (text: string) => writeText(ENTRIES, text),
+      readNotes: readOrEmpty(NOTES),
+      writeNotes: (text: string) => writeText(NOTES, text),
       readConfig: readOrEmpty(CONFIG),
       writeConfig: (json: string) => writeText(CONFIG, json),
       writeHistory: (filename: string, contents: string) =>
