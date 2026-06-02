@@ -32,32 +32,32 @@ export const jiraTempoPlugin: SubmitterPlugin = {
       label: "Jira site name",
       secret: false,
       description:
-        "E.g. `ivanproduction` (if the Jira URL is `https://ivanproduction.atlassian.net`).",
+        "E.g. `ivanproduction` (if the Jira URL is `https://ivanproduction.atlassian.net`)",
     },
     {
       key: "email",
       label: "Jira email",
       secret: false,
-      description: "E.g. `vasya@ivanproduction.com`.",
+      description: "E.g. `vasya@ivanproduction.com`",
     },
     {
       key: "workerId",
       label: "Jira Account ID",
       secret: false,
       description:
-        "[How to find it](https://community.atlassian.com/t5/Jira-questions/how-to-find-accountid/qaq-p/1111436).",
+        "[How to find it](https://community.atlassian.com/t5/Jira-questions/how-to-find-accountid/qaq-p/1111436)",
     },
     {
       key: "jiraToken",
       label: "Jira API token",
       secret: true,
-      description: "[Create it here](https://id.atlassian.com/manage-profile/security/api-tokens).",
+      description: "[Create it here](https://id.atlassian.com/manage-profile/security/api-tokens)",
     },
     {
       key: "tempoToken",
       label: "Tempo API token",
       secret: true,
-      description: "[How to get it](https://apidocs.tempo.io/#section/Authentication).",
+      description: "[How to get it](https://apidocs.tempo.io/#section/Authentication)",
     },
   ],
   make: (settings) => ({
