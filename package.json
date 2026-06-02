@@ -9,6 +9,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "start": "tauri dev",
     "check": "tsc --noEmit && biome check --write --unsafe",
     "test": "vitest"
   },
