@@ -19,10 +19,12 @@ import {
   parseTimeLog,
   withActiveDescription,
 } from "../core/timeLog";
-import { caretOf, FocusedSourceProvider, useFocusedSource } from "./FocusedSourceContext";
+import { FocusedSourceProvider, useFocusedSource } from "./FocusedSourceContext";
 import { RightPane } from "./RightPane";
 import { StatusLine } from "./StatusLine";
+import { TimeLogEditor, type TimeLogEditorRef } from "./TimeLogEditor";
 import { useCore } from "./useCore";
+import { useMinuteTick } from "./useMinuteTick";
 import { useThemeApplication } from "./useThemeApplication";
 import { useTrayTitle } from "./useTrayTitle";
 
@@ -38,16 +40,12 @@ const AppInner = () => {
   const core = useCore();
   const submitter = core.config.snapshot.submitter;
   useThemeApplication(core.config.snapshot.config.themeMode);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<TimeLogEditorRef>(null);
   const focused = useFocusedSource();
+  const now = useMinuteTick();
 
   useEffect(() => {
-    const onFocus = () => {
-      const el = textareaRef.current;
-      if (el === null) return;
-      el.focus();
-      el.setSelectionRange(el.value.length, el.value.length);
-    };
+    const onFocus = () => editorRef.current?.focusEnd();
     window.addEventListener(FOCUS_TEXTAREA_EVENT, onFocus);
     return () => window.removeEventListener(FOCUS_TEXTAREA_EVENT, onFocus);
   }, []);
@@ -73,18 +71,12 @@ const AppInner = () => {
   const newFromSelectedDisabled =
     !logIsValid || core.submit.isInFlight || derivedDescription === null;
 
-  const trackCaret = (el: HTMLTextAreaElement) =>
-    focused.set({ source: "timeLog", caret: caretOf(el) });
-
   const handleNew = () => {
     if (Either.isLeft(parsed)) return;
     const next = formatTimeLog(appendNewStart(parsed.right, new Date()));
     if (next === core.entries.text) return;
     flushSync(() => core.entries.setText(next));
-    const el = textareaRef.current;
-    if (el === null) return;
-    el.focus();
-    el.setSelectionRange(next.length, next.length);
+    editorRef.current?.focusEnd();
   };
 
   const handleNewFromSelected = () => {
@@ -93,15 +85,12 @@ const AppInner = () => {
       withActiveDescription(appendNewStart(parsed.right, new Date()), `${derivedDescription} `),
     );
     flushSync(() => core.entries.setText(next));
-    const el = textareaRef.current;
-    if (el === null) return;
-    el.focus();
-    el.setSelectionRange(next.length, next.length);
+    editorRef.current?.focusEnd();
   };
 
   const handleSubmit = async () => {
     if (Either.isLeft(parsed)) return;
-    const blocker = findBlocker(parsed.right, submitter.findTargetId);
+    const blocker = findBlocker(parsed.right, core.entries.text, submitter.findTargetId);
     if (blocker !== null) {
       await message(
         `Submission is blocked because line ${blocker.line} contains the exclamation mark.`,
@@ -121,16 +110,15 @@ const AppInner = () => {
   return (
     <main className="flex h-screen flex-col gap-3 p-3">
       <div className="flex min-h-0 flex-1 gap-3">
-        <textarea
-          ref={textareaRef}
-          value={core.entries.text}
-          onChange={core.entries.onChange}
-          onFocus={(e) => trackCaret(e.currentTarget)}
-          onSelect={(e) => trackCaret(e.currentTarget)}
-          onBlur={() => focused.set(null)}
+        <TimeLogEditor
+          ref={editorRef}
+          text={core.entries.text}
+          now={now}
+          findTargetId={submitter.findTargetId}
           readOnly={core.submit.isInFlight}
-          className="flex-1 resize-none read-only:bg-[var(--color-surface)]"
-          spellCheck={false}
+          onChange={core.entries.setText}
+          onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}
+          onBlur={() => focused.set(null)}
         />
         <RightPane />
       </div>

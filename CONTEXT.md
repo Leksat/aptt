@@ -32,6 +32,10 @@ _Avoid_: current entry, in-progress entry, open entry.
 A time entry whose description begins with a valid target ID for the active submitter. Only closed billable entries are submitted; non-billable closed entries are removed without being sent. The active entry can also be billable; its running duration counts toward live totals even though it is never submitted.
 _Avoid_: loggable, sendable.
 
+**Duration**:
+The elapsed time of a time entry — `end - start` for a closed entry, `now - start` for the active time entry (recomputed each minute, shown literally even when negative because the start is in the future). Rendered as a read-only annotation after each time entry start in the time log.
+_Avoid_: elapsed, length, span.
+
 **Blocker**:
 A `!` appearing as its own whitespace-delimited token at the start of a time entry's description (e.g. `! stuff`) or immediately after the target ID (e.g. `ABC-123 ! stuff`). A `!` attached to another token (e.g. `!stuff`) is not a blocker. While any time entry has a blocker, the log cannot be submitted; clicking Submit reports the first line that contains one.
 _Avoid_: hold, flag, bang, exclamation marker.

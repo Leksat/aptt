@@ -5,6 +5,7 @@ import {
   activeBillableTargetId,
   closedBillableMinutes,
   formatDurationShort,
+  lineDurations,
   totalBillableMinutes,
 } from "./billable";
 import { parseTimeLog } from "./timeLog";
@@ -189,5 +190,56 @@ describe("formatDurationShort", () => {
     expect(formatDurationShort(60)).toBe("1h0m");
     expect(formatDurationShort(90)).toBe("1h30m");
     expect(formatDurationShort(125)).toBe("2h5m");
+  });
+
+  it("formats negative minutes with a leading dash and the same units", () => {
+    expect(formatDurationShort(-30)).toBe("-30m");
+    expect(formatDurationShort(-60)).toBe("-1h0m");
+    expect(formatDurationShort(-90)).toBe("-1h30m");
+  });
+});
+
+describe("lineDurations", () => {
+  it("returns an empty array for an empty log", () => {
+    const log = Either.getOrThrow(parseTimeLog(""));
+    expect(lineDurations(log, new Date("2026-01-01T12:00"))).toEqual([]);
+  });
+
+  it("emits one entry per closed time entry plus the active one", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        ABC-1 first
+        2026-01-01 10:30
+        nothing
+        2026-01-01 11:00
+        ABC-2 still going
+      `),
+    );
+    expect(lineDurations(log, new Date("2026-01-01T11:45"))).toEqual([
+      { line: 1, minutes: 30 },
+      { line: 3, minutes: 30 },
+      { line: 5, minutes: 45 },
+    ]);
+  });
+
+  it("floors the active entry's now to the minute", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 10:00
+        ABC-1 hi
+      `),
+    );
+    expect(lineDurations(log, new Date("2026-01-01T10:30:45"))).toEqual([{ line: 1, minutes: 30 }]);
+  });
+
+  it("emits a negative duration when the active entry's start is in the future", () => {
+    const log = Either.getOrThrow(
+      parseTimeLog(dedent`
+        2026-01-01 14:00
+        ABC-1 future
+      `),
+    );
+    expect(lineDurations(log, new Date("2026-01-01T12:00"))).toEqual([{ line: 1, minutes: -120 }]);
   });
 });

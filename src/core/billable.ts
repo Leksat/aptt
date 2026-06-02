@@ -45,10 +45,31 @@ export const totalBillableMinutes = (
 };
 
 export const formatDurationShort = (minutes: number): string => {
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  const remaining = minutes % 60;
-  return `${hours}h${remaining}m`;
+  const sign = minutes < 0 ? "-" : "";
+  const abs = Math.abs(minutes);
+  if (abs < 60) return `${sign}${abs}m`;
+  const hours = Math.floor(abs / 60);
+  const remaining = abs % 60;
+  return `${sign}${hours}h${remaining}m`;
+};
+
+export interface LineDuration {
+  readonly line: number;
+  readonly minutes: number;
+}
+
+export const lineDurations = (log: TimeLog, now: Date): LineDuration[] => {
+  const result: LineDuration[] = [];
+  for (let i = 0; i < log.closed.length; i++) {
+    const entry = log.closed[i];
+    if (entry === undefined) continue;
+    result.push({ line: 2 * i + 1, minutes: diffMinutes(entry.start, entry.end) });
+  }
+  if (log.active !== null) {
+    const line = 2 * log.closed.length + 1;
+    result.push({ line, minutes: diffMinutes(log.active.start, floorToMinute(now)) });
+  }
+  return result;
 };
 
 const diffMinutes = (start: Date, end: Date): number =>

@@ -14,6 +14,9 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.10.3",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.43.0",
     "@effect/platform": "^0.96.1",
     "@effect/platform-browser": "^0.76.0",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
