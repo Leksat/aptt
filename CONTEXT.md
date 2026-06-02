@@ -47,3 +47,11 @@ _Avoid_: backup, archive, snapshot, log file.
 **History directory**:
 `{appDataDir}/history/`. Contains all history files. Created on app start. Opened by the History button.
 _Avoid_: archive, backup folder.
+
+**Notes**:
+A free-form scratch area kept alongside the time log, persisted to `notes.txt`. Independent of the time log: notes are never submitted. A line whose first token is a valid target ID can be used as a candidate description (e.g. via the selection-driven status hookup); other lines are pure scratch.
+_Avoid_: scratchpad, memo, todo list, sidebar.
+
+**Comment**:
+The portion of a notes line from the first `#` to the end of the line, inclusive of the `#`. Stripped before a notes line is offered as a candidate description. No equivalent in the time log — there, descriptions are verbatim.
+_Avoid_: remark, annotation.

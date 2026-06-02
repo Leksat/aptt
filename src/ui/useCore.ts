@@ -44,7 +44,6 @@ export interface Core {
   readonly notes: {
     readonly text: string;
     readonly setText: (value: string) => void;
-    readonly onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   };
   readonly config: {
     readonly snapshot: ConfigSnapshot;
@@ -90,8 +89,6 @@ export const useCore = (): Core => {
   const setNotesText = (value: string) => {
     void runtime.runPromise(surfaced("Save failed", services.notes.setText(value)));
   };
-  const onNotesChange = (event: ChangeEvent<HTMLTextAreaElement>) =>
-    setNotesText(event.currentTarget.value);
 
   const setActivePluginId = (id: string) => {
     void runtime.runPromise(services.config.setActivePluginId(id));
@@ -117,7 +114,7 @@ export const useCore = (): Core => {
 
   return {
     entries: { text, setText, onChange },
-    notes: { text: notesText, setText: setNotesText, onChange: onNotesChange },
+    notes: { text: notesText, setText: setNotesText },
     config: { snapshot: configSnapshot, setActivePluginId, setSetting, setThemeMode },
     submit: {
       state: submitState,

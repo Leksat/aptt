@@ -1,4 +1,5 @@
 import type { FindTargetId } from "./billable";
+import { commentStart } from "./notes";
 
 export const selectedDescriptionFromTimeLog = (text: string, caret: number): string | null => {
   const lines = text.split("\n");
@@ -18,7 +19,8 @@ export const selectedDescriptionFromNotes = (
   const lines = text.split("\n");
   const line = lines[lineIndexAt(text, caret)];
   if (line === undefined) return null;
-  const beforeComment = line.split("#", 1)[0] ?? "";
+  const at = commentStart(line);
+  const beforeComment = at === null ? line : line.slice(0, at);
   const trimmed = beforeComment.trim();
   if (trimmed === "") return null;
   const firstToken = trimmed.split(/\s+/, 1)[0] ?? "";

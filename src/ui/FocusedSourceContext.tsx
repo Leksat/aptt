@@ -25,6 +25,3 @@ export const useFocusedSource = (): FocusedSourceContextValue => {
   if (value === null) throw new Error("useFocusedSource: missing FocusedSourceProvider");
   return value;
 };
-
-export const caretOf = (el: HTMLTextAreaElement): number =>
-  el.selectionDirection === "backward" ? el.selectionStart : el.selectionEnd;
