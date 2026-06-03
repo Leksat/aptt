@@ -4,8 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>aptt</title>
+    <style>
+      body.loading {
+        margin: 0;
+        background: #1e1e1e;
+        color-scheme: dark;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      body.loading #root {
+        display: none;
+      }
+      body.loading::before {
+        content: "";
+        width: 128px;
+        height: 128px;
+        background: url("/icon.png") center / contain no-repeat;
+      }
+    </style>
   </head>
-  <body>
+  <body class="loading">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

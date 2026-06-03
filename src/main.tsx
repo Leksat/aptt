@@ -89,6 +89,9 @@ bootCore().then(
         <App />
       </React.StrictMode>,
     );
+    requestAnimationFrame(() => {
+      document.body.classList.remove("loading");
+    });
   },
   (cause: unknown) => {
     void runtime.runPromise(surfaceError("bootCore failed", cause));
