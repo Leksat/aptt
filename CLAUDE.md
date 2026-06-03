@@ -16,46 +16,44 @@ Run `pnpm check` (tsc + biome --write) and `pnpm test` (vitest) after every chan
 
 ## Architecture
 
-Aim for deep modules. The goal is testability and AI-navigability — change, bugs, and knowledge should concentrate in one place.
+Aim for deep modules. Goal: testability and AI-navigability — change, bugs, and knowledge concentrate in one place.
 
-### Vocabulary (use these exact terms — don't drift to "component," "service," "API," or "boundary")
+### Vocabulary (use exactly — not "component," "service," "API," or "boundary")
 
-- Module — anything with an interface and an implementation. Scale-agnostic: function, class, package, slice.
-- Interface — everything a caller must know to use the module correctly: type signature plus invariants, ordering, error modes, required config, perf characteristics. Not just the type-level surface.
-- Implementation — the code inside.
-- Depth — leverage at the interface: lots of behaviour behind a small interface. Deep = high leverage. Shallow = interface nearly as complex as the implementation.
-- Seam (Feathers) — a place behaviour can be altered without editing in place. Where an interface lives. Say "seam," not "boundary."
-- Adapter — a concrete thing satisfying an interface at a seam. Describes role, not substance.
-- Leverage — what callers get from depth: capability per unit of interface they must learn.
-- Locality — what maintainers get from depth: change/bugs/knowledge concentrated, fix once = fixed everywhere.
+- Module — anything with an interface and an implementation. Scale-agnostic: function, class, package, slice. Has exactly one interface.
+- Interface — everything a caller must know: types, invariants, ordering, error modes, required config, perf. Not just the type signature.
+- Implementation — code inside. Distinct from adapter: a small adapter can have a large implementation (Postgres repo); a large adapter can have a small one (in-memory fake). Reach for "adapter" when the seam is the topic.
+- Depth — leverage at the interface: lots of behaviour behind a small interface. Deep = high leverage. Shallow = interface nearly as complex as the implementation. (Not a line-count ratio — that rewards padding.)
+- Seam (Feathers) — where an interface lives; a place behaviour can be altered without editing in place. Say "seam," not "boundary" (overloaded with DDD).
+- Adapter — a concrete thing satisfying an interface at a seam. Role, not substance.
+- Leverage — what callers get from depth.
+- Locality — what maintainers get from depth: fix once = fixed everywhere.
 
 ### Principles
 
-- Depth is a property of the interface, not the implementation. A deep module may internally be small composed parts — they just aren't in the interface. Internal seams (used by the module's own tests) are fine; don't promote them to the external interface.
-- Deletion test. Imagine deleting the module. If complexity vanishes, it was a pass-through. If complexity reappears across N callers, it was earning its keep.
-- The interface is the test surface. Callers and tests cross the same seam. Wanting to test past the interface means the module is the wrong shape.
-- One adapter = hypothetical seam. Two adapters = real seam. Don't introduce a port unless something actually varies across it (typically production + test).
-- Pure-function extraction "for testability" is a smell when real bugs hide in how the function is called — that destroys locality. Test through the interface that owns the behaviour.
-- Export only what callers outside the module use. `export` is part of the interface; default to no export, add it when a caller appears. Internal helpers stay unexported even if tests want at them — test through the interface.
+- Depth is a property of the interface, not the implementation. A deep module can be internally composed; those internal seams (used by the module's own tests) stay private — don't promote them to the external interface.
+- Deletion test. Delete the module mentally. Complexity vanishes → it was a pass-through. Complexity reappears across N callers → it was earning its keep.
+- The interface is the test surface. Wanting to test past it means the module is the wrong shape.
+- One adapter = hypothetical seam. Two = real. No port unless something actually varies across it (typically production + test).
+- Pure-function extraction "for testability" is a smell when real bugs hide in how it's called — that destroys locality. Test through the interface that owns the behaviour.
+- Export only what outside callers use. `export` is part of the interface; default off, add when a caller appears.
 
 ### Deepening dependencies
 
-When merging shallow modules into a deeper one, classify the dependencies — this drives the testing strategy:
+Classify dependencies when merging — drives the test strategy:
 
-1. In-process — pure computation, in-memory state, no I/O. Always deepenable; test through the new interface directly, no adapter.
-2. Local-substitutable — has a local stand-in (PGLite, in-memory FS). Deepenable; tests run the stand-in. Seam is internal, not exposed at the external interface.
-3. Remote but owned — your own services across a network. Define a port at the seam; inject the transport as an adapter. In-memory adapter for tests, HTTP/gRPC/queue for production.
-4. True external — third-party services you don't control. Port + injected adapter; mock in tests.
+1. In-process — pure / in-memory. Test through the new interface directly, no adapter.
+2. Local-substitutable — has a local stand-in (PGLite, in-memory FS). Stand-in runs in tests; seam stays internal.
+3. Remote but owned — your services across a network. Port at the seam; in-memory adapter for tests, HTTP/gRPC/queue for production.
+4. True external — third-party (Stripe, Twilio). Port + injected mock in tests.
 
-### Testing strategy: replace, don't layer
+### Testing: replace, don't layer
 
-- Old tests on shallow modules become waste once the deepened interface has tests — delete them.
-- Assert on observable outcomes through the interface, not internal state.
-- A test that must change when the implementation changes is testing past the interface.
+Old tests on shallow modules become waste once the deepened interface has tests — delete them. Assert on observable outcomes through the interface. A test that must change when the implementation changes is testing past the interface.
 
-### Designing an interface — design it twice
+### Design it twice
 
-First idea is unlikely to be best (Ousterhout). When the interface matters, sketch at least two radically different shapes and contrast them by depth (leverage at the interface), locality (where change concentrates), and seam placement. Then pick — opinionated, not a menu.
+First idea is unlikely to be best (Ousterhout). When the interface matters, sketch at least two radically different shapes — e.g. one minimising entry points, one optimising the common caller — and contrast by depth, locality, and seam placement. Pick opinionated, not a menu.
 
 ## Test snapshots
 
