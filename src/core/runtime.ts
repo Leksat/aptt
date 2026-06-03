@@ -4,10 +4,9 @@ import { Layer, ManagedRuntime } from "effect";
 import { ClipboardCaptureService } from "./services/ClipboardCaptureService";
 import { ClipboardTriggerService } from "./services/ClipboardTriggerService";
 import { ConfigService } from "./services/ConfigService";
-import { EntriesService } from "./services/EntriesService";
 import { FileService } from "./services/FileService";
 import { HotkeyService } from "./services/HotkeyService";
-import { NotesService } from "./services/NotesService";
+import { NotesTextLive, TimeLogTextLive } from "./services/persistedText";
 import { SubmitService } from "./services/SubmitService";
 import { TrayService } from "./services/TrayService";
 import { WindowService } from "./services/WindowService";
@@ -20,8 +19,8 @@ export const MainLive = Layer.mergeAll(
   ClipboardTriggerService.Default,
   ClipboardCaptureService.Default,
   ConfigService.Default,
-  EntriesService.Default,
-  NotesService.Default,
+  TimeLogTextLive,
+  NotesTextLive,
   SubmitService.Default,
   FetchHttpClient.layer.pipe(Layer.provide(Layer.succeed(FetchHttpClient.Fetch, tauriFetch))),
 );

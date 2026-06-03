@@ -8,7 +8,7 @@ import { Effect, Either } from "effect";
 import { appendNewStart, formatTimeLog, parseTimeLog, withActiveDescription } from "../timeLog";
 import { ClipboardTriggerService } from "./ClipboardTriggerService";
 import { ConfigService } from "./ConfigService";
-import { EntriesService } from "./EntriesService";
+import { TimeLogText, TimeLogTextLive } from "./persistedText";
 import { WindowService } from "./WindowService";
 
 export const FOCUS_TEXTAREA_EVENT = "aptt:focus-textarea";
@@ -19,13 +19,13 @@ export class ClipboardCaptureService extends Effect.Service<ClipboardCaptureServ
     dependencies: [
       ClipboardTriggerService.Default,
       ConfigService.Default,
-      EntriesService.Default,
+      TimeLogTextLive,
       WindowService.Default,
     ],
     effect: Effect.gen(function* () {
       const trigger = yield* ClipboardTriggerService;
       const config = yield* ConfigService;
-      const entries = yield* EntriesService;
+      const entries = yield* TimeLogText;
       const window = yield* WindowService;
 
       const notify = (body: string) =>

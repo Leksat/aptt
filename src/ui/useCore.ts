@@ -3,8 +3,7 @@ import { type ChangeEvent, useCallback, useSyncExternalStore } from "react";
 import type { ThemeMode } from "../core/config";
 import { runtime } from "../core/runtime";
 import { ConfigService, type ConfigSnapshot } from "../core/services/ConfigService";
-import { EntriesService } from "../core/services/EntriesService";
-import { NotesService } from "../core/services/NotesService";
+import { NotesText, TimeLogText } from "../core/services/persistedText";
 import { SubmitService } from "../core/services/SubmitService";
 import type { SubmitterImpl } from "../core/services/Submitter";
 import type { SubmitResult, SubmitState } from "../core/submit";
@@ -12,8 +11,8 @@ import { surfaced, surfaceError } from "../core/surfaceError";
 import type { TimeLog } from "../core/timeLog";
 
 const resolveServices = Effect.gen(function* () {
-  const entries = yield* EntriesService;
-  const notes = yield* NotesService;
+  const entries = yield* TimeLogText;
+  const notes = yield* NotesText;
   const config = yield* ConfigService;
   const submit = yield* SubmitService;
   return { entries, notes, config, submit };
