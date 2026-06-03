@@ -6,12 +6,60 @@ import {
   closedBillableMinutes,
   formatDurationShort,
   lineDurations,
+  parseBillable,
   totalBillableMinutes,
 } from "./billable";
 import { parseTimeLog } from "./timeLog";
 
 const acceptABC = (token: string): string | null => (/^ABC-\d+$/.test(token) ? token : null);
 const acceptNone = (): string | null => null;
+
+describe("parseBillable", () => {
+  it("returns null for an empty description", () => {
+    expect(parseBillable("", acceptABC)).toBeNull();
+  });
+
+  it("returns null for whitespace-only descriptions", () => {
+    expect(parseBillable("   \t  ", acceptABC)).toBeNull();
+  });
+
+  it("returns null when the first token is not a target ID", () => {
+    expect(parseBillable("nothing here", acceptABC)).toBeNull();
+  });
+
+  it("returns null when the target ID appears past the first token", () => {
+    expect(parseBillable("foo ABC-123 bar", acceptABC)).toBeNull();
+  });
+
+  it("returns null when the submitter rejects everything", () => {
+    expect(parseBillable("ABC-1 hello", acceptNone)).toBeNull();
+  });
+
+  it("returns the target ID with an empty tail when the description is just the target ID", () => {
+    expect(parseBillable("ABC-123", acceptABC)).toEqual({ targetId: "ABC-123", tail: "" });
+  });
+
+  it("returns the target ID and the trimmed tail when both are present", () => {
+    expect(parseBillable("ABC-123 fix the thing", acceptABC)).toEqual({
+      targetId: "ABC-123",
+      tail: "fix the thing",
+    });
+  });
+
+  it("trims leading and trailing whitespace from the input and the tail", () => {
+    expect(parseBillable("   ABC-7   the tail   ", acceptABC)).toEqual({
+      targetId: "ABC-7",
+      tail: "the tail",
+    });
+  });
+
+  it("treats tabs as token separators", () => {
+    expect(parseBillable("ABC-9\twith tab", acceptABC)).toEqual({
+      targetId: "ABC-9",
+      tail: "with tab",
+    });
+  });
+});
 
 describe("totalBillableMinutes", () => {
   it("returns 0 for an empty log", () => {

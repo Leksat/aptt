@@ -1,4 +1,4 @@
-import type { FindTargetId } from "./billable";
+import { type FindTargetId, parseBillable } from "./billable";
 import { commentStart } from "./notes";
 
 export const selectedDescriptionFromTimeLog = (text: string, caret: number): string | null => {
@@ -22,9 +22,7 @@ export const selectedDescriptionFromNotes = (
   const at = commentStart(line);
   const beforeComment = at === null ? line : line.slice(0, at);
   const trimmed = beforeComment.trim();
-  if (trimmed === "") return null;
-  const firstToken = trimmed.split(/\s+/, 1)[0] ?? "";
-  return findTargetId(firstToken) === null ? null : trimmed;
+  return parseBillable(trimmed, findTargetId) === null ? null : trimmed;
 };
 
 const lineIndexAt = (text: string, caret: number): number =>

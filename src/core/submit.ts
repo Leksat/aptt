@@ -1,6 +1,6 @@
 import type { HttpClient } from "@effect/platform";
 import { Effect, Either } from "effect";
-import type { FindTargetId } from "./billable";
+import { type FindTargetId, parseBillable } from "./billable";
 import type { SubmitError } from "./errors";
 import type { BillableEntry } from "./services/Submitter";
 import type { ClosedTimeEntry, TimeLog } from "./timeLog";
@@ -80,12 +80,12 @@ const billableEntryOf = (
   entry: ClosedTimeEntry,
   findTargetId: FindTargetId,
 ): BillableEntry | null => {
-  const trimmed = entry.description.trim();
-  const firstSpace = trimmed.search(/\s/);
-  const firstToken = firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace);
-  if (firstToken === "") return null;
-  const targetId = findTargetId(firstToken);
-  if (targetId === null) return null;
-  const description = firstSpace === -1 ? "" : trimmed.slice(firstSpace).trim();
-  return { targetId, start: entry.start, end: entry.end, description };
+  const parsed = parseBillable(entry.description, findTargetId);
+  if (parsed === null) return null;
+  return {
+    targetId: parsed.targetId,
+    start: entry.start,
+    end: entry.end,
+    description: parsed.tail,
+  };
 };

@@ -1,5 +1,6 @@
 import { Effect, Either } from "effect";
 import { useEffect, useRef, useState } from "react";
+import { parseBillable } from "../../core/billable";
 import { runtime } from "../../core/runtime";
 import type { SubmitterImpl, TargetInfo } from "../../core/services/Submitter";
 import type { TimeLog } from "../../core/timeLog";
@@ -33,7 +34,9 @@ interface Args {
 export const useExtendedInfo = ({ log, focused, now, submitter }: Args): ExtendedInfo | null => {
   const description = focused === null ? "" : focused.entry.description;
   const targetId =
-    focused === null ? null : firstTokenTargetId(description, submitter.findTargetId);
+    focused === null
+      ? null
+      : (parseBillable(description, submitter.findTargetId)?.targetId ?? null);
   const submitterRef = useRef(submitter);
   submitterRef.current = submitter;
 
@@ -74,17 +77,12 @@ export const useExtendedInfo = ({ log, focused, now, submitter }: Args): Extende
     sameTarget:
       targetId === null
         ? { count: 0, minutes: 0 }
-        : aggregate(log, now, (d) => firstTokenTargetId(d, submitter.findTargetId) === targetId),
+        : aggregate(
+            log,
+            now,
+            (d) => parseBillable(d, submitter.findTargetId)?.targetId === targetId,
+          ),
   };
-};
-
-const firstTokenTargetId = (
-  description: string,
-  findTargetId: (text: string) => string | null,
-): string | null => {
-  const firstToken = description.trim().split(/\s+/, 1)[0] ?? "";
-  if (firstToken === "") return null;
-  return findTargetId(firstToken);
 };
 
 const aggregate = (

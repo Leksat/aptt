@@ -2,19 +2,29 @@ import type { TimeLog } from "./timeLog";
 
 export type FindTargetId = (text: string) => string | null;
 
+export interface Billable {
+  readonly targetId: string;
+  readonly tail: string;
+}
+
+export const parseBillable = (description: string, findTargetId: FindTargetId): Billable | null => {
+  const trimmed = description.trim();
+  if (trimmed === "") return null;
+  const firstSpace = trimmed.search(/\s/);
+  const firstToken = firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace);
+  const targetId = findTargetId(firstToken);
+  if (targetId === null) return null;
+  const tail = firstSpace === -1 ? "" : trimmed.slice(firstSpace).trim();
+  return { targetId, tail };
+};
+
 export const activeBillableTargetId = (log: TimeLog, findTargetId: FindTargetId): string | null => {
   if (log.active === null) return null;
-  return billableTargetId(log.active.description, findTargetId);
+  return parseBillable(log.active.description, findTargetId)?.targetId ?? null;
 };
 
 const isBillable = (description: string, findTargetId: FindTargetId): boolean =>
-  billableTargetId(description, findTargetId) !== null;
-
-const billableTargetId = (description: string, findTargetId: FindTargetId): string | null => {
-  const firstToken = description.trim().split(/\s+/, 1)[0] ?? "";
-  if (firstToken === "") return null;
-  return findTargetId(firstToken);
-};
+  parseBillable(description, findTargetId) !== null;
 
 export const closedBillableMinutes = (log: TimeLog, findTargetId: FindTargetId): number => {
   let minutes = 0;
