@@ -1,6 +1,5 @@
 - Overrall: @README.md
 - Vocabulary: @CONTEXT.md
-- Not yet implemented: @PLAN.md
 - Local env: @.envrc, @devbox.json
 - Package: package.json
 
