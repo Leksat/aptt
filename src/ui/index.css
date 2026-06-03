@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 @theme {
-  --text-base: 14px;
+  --text-base: 13px;
   --text-base--line-height: 20px;
 }
 
