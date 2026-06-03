@@ -50,17 +50,17 @@ export class ClipboardCaptureService extends Effect.Service<ClipboardCaptureServ
         const submitter = config.snapshot().submitter;
         const id = text === "" ? null : submitter.findTargetId(text);
         if (id === null) {
-          yield* notify("⚠️ Cannot start time entry: clipboard has no target ID");
+          yield* notify("Cannot start time entry: clipboard has no target ID");
           return false;
         }
         const parsed = parseTimeLog(entries.snapshot());
         if (Either.isLeft(parsed)) {
-          yield* notify("⚠️ Cannot start time entry: time log has errors");
+          yield* notify("Cannot start time entry: time log has errors");
           return false;
         }
         const next = withActiveDescription(appendNewStart(parsed.right, new Date()), `${id} `);
         yield* entries.setText(formatTimeLog(next));
-        yield* notify(`✅ Started time entry: ${id}`);
+        yield* notify(`Started time entry: ${id}`);
         return true;
       });
 
