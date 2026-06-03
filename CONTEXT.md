@@ -55,3 +55,19 @@ _Avoid_: scratchpad, memo, todo list, sidebar.
 **Comment**:
 The portion of a notes line from the first `#` to the end of the line, inclusive of the `#`. Stripped before a notes line is offered as a candidate description. No equivalent in the time log — there, descriptions are verbatim.
 _Avoid_: remark, annotation.
+
+**Extended info**:
+The per-time-entry context shown alongside a time entry: target info from the external system (when available), plus aggregations across the time log for the same description and same target ID. Read-only; never submitted.
+_Avoid_: details, summary, panel.
+
+**Extended-info tooltip**:
+The only surface for extended info, anchored to the duration after a time entry start.
+_Avoid_: details panel, info popup, info card, popover.
+
+**Target info**:
+The external system's snapshot of a target ID — title, URL, estimate, and time already logged externally by this worker. Supplied by the active submitter; absent when the submitter has no remote concept (e.g. void) or the target ID is not real in the external system.
+_Avoid_: ticket info, Jira card, issue details.
+
+**Logged externally**:
+Total time already submitted to the external system against a target ID, across all workers. For JiraTempo, the value of Jira's `aggregatetimespent`.
+_Avoid_: Jira time, external time, billed time, my logged time.

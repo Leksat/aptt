@@ -27,6 +27,7 @@ export const voidPlugin: SubmitterPlugin = {
             );
           }
         }),
+      fetchTargetInfo: () => Effect.succeed(null),
     };
   },
 };

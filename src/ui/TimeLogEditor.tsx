@@ -1,4 +1,9 @@
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import {
+  defaultKeymap,
+  deleteCharBackwardStrict,
+  history,
+  historyKeymap,
+} from "@codemirror/commands";
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { Either } from "effect";
@@ -6,7 +11,11 @@ import { forwardRef, useImperativeHandle, useLayoutEffect, useRef } from "react"
 import type { FindTargetId } from "../core/billable";
 import { parseTimeLog } from "../core/timeLog";
 import { timeLogDecorationsPlugin } from "./timeLogEditor/decorations";
-import { setTimeLogState, timeLogStateField } from "./timeLogEditor/stateField";
+import {
+  type DurationClickHandler,
+  setTimeLogState,
+  timeLogStateField,
+} from "./timeLogEditor/stateField";
 
 export interface TimeLogEditorRef {
   focus(): void;
@@ -21,6 +30,7 @@ interface Props {
   readonly onChange: (text: string) => void;
   readonly onCaretChange: (caret: number) => void;
   readonly onBlur: () => void;
+  readonly onDurationClick: DurationClickHandler;
 }
 
 const editorTheme = EditorView.theme({
@@ -69,7 +79,11 @@ export const TimeLogEditor = forwardRef<TimeLogEditorRef, Props>(
         doc: initialProps.text,
         extensions: [
           history(),
-          keymap.of([...defaultKeymap, ...historyKeymap]),
+          keymap.of([
+            { key: "Backspace", run: deleteCharBackwardStrict, shift: deleteCharBackwardStrict },
+            ...defaultKeymap,
+            ...historyKeymap,
+          ]),
           lineNumbers(),
           EditorView.contentAttributes.of({ spellcheck: "false" }),
           timeLogStateField,
@@ -124,9 +138,10 @@ export const TimeLogEditor = forwardRef<TimeLogEditorRef, Props>(
           parseError,
           now: props.now,
           findTargetId: props.findTargetId,
+          onDurationClick: props.onDurationClick,
         }),
       });
-    }, [props.text, props.now, props.findTargetId]);
+    }, [props.text, props.now, props.findTargetId, props.onDurationClick]);
 
     useLayoutEffect(() => {
       const view = viewRef.current;

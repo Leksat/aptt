@@ -1,7 +1,7 @@
 import { HttpClient, HttpClientResponse } from "@effect/platform";
 import { Effect, Either, Layer } from "effect";
 import { describe, expect, it } from "vitest";
-import { SubmitError } from "../../errors";
+import { SubmitError, TargetInfoError } from "../../errors";
 import type { BillableEntry } from "../Submitter";
 import { jiraTempoPlugin } from "./jiraTempo";
 
@@ -207,5 +207,131 @@ describe("jiraTempoPlugin.submit", () => {
     const tempo = captured[1];
     if (tempo === undefined) throw new Error("missing tempo request");
     expect(JSON.parse(tempo.body).description).toBe("fix login");
+  });
+});
+
+const runFetchTargetInfo = (
+  settings: Readonly<Record<string, string>>,
+  targetId: string,
+  layer: Layer.Layer<HttpClient.HttpClient>,
+) =>
+  Effect.runPromise(
+    Effect.either(jiraTempoPlugin.make(settings).fetchTargetInfo(targetId)).pipe(
+      Effect.provide(layer),
+    ),
+  );
+
+const jiraIssueResponse = (over: {
+  summary?: string;
+  timeoriginalestimate?: number | null;
+  aggregatetimespent?: number | null;
+}): string =>
+  JSON.stringify({
+    fields: {
+      summary: over.summary ?? "Title goes here",
+      timeoriginalestimate:
+        over.timeoriginalestimate === undefined ? 18000 : over.timeoriginalestimate,
+      aggregatetimespent: over.aggregatetimespent === undefined ? 1800 : over.aggregatetimespent,
+    },
+  });
+
+describe("jiraTempoPlugin.fetchTargetInfo", () => {
+  it("returns title, url, estimate, and logged (all workers) from one Jira request", async () => {
+    const { layer, captured } = stubClient(() => ({
+      status: 200,
+      body: jiraIssueResponse({
+        summary: "Fix login",
+        timeoriginalestimate: 18000,
+        aggregatetimespent: 1800,
+      }),
+    }));
+
+    const result = await runFetchTargetInfo(completeSettings, "ABC-123", layer);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right).toEqual({
+        title: "Fix login",
+        url: "https://acme.atlassian.net/browse/ABC-123",
+        estimateMinutes: 300,
+        loggedMinutes: 30,
+      });
+    }
+
+    expect(captured).toHaveLength(1);
+    const jira = captured[0];
+    if (jira === undefined) throw new Error("missing jira request");
+    expect(jira.url).toBe(
+      "https://acme.atlassian.net/rest/api/3/issue/ABC-123?fields=summary,timeoriginalestimate,aggregatetimespent",
+    );
+    expect(jira.headers.get("authorization")).toBe(`Basic ${btoa("vasya@acme.com:jira-secret")}`);
+  });
+
+  it("returns null estimate when Jira reports it as null", async () => {
+    const { layer } = stubClient(() => ({
+      status: 200,
+      body: jiraIssueResponse({
+        timeoriginalestimate: null,
+        aggregatetimespent: 0,
+      }),
+    }));
+
+    const result = await runFetchTargetInfo(completeSettings, "ABC-123", layer);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right?.estimateMinutes).toBeNull();
+      expect(result.right?.loggedMinutes).toBe(0);
+    }
+  });
+
+  it("treats null aggregatetimespent as 0 logged minutes", async () => {
+    const { layer } = stubClient(() => ({
+      status: 200,
+      body: jiraIssueResponse({ aggregatetimespent: null }),
+    }));
+
+    const result = await runFetchTargetInfo(completeSettings, "ABC-123", layer);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right?.loggedMinutes).toBe(0);
+    }
+  });
+
+  it("fails with a TargetInfoError on Jira 404", async () => {
+    const { layer } = stubClient(() => ({ status: 404, body: "Issue Does Not Exist" }));
+    const result = await runFetchTargetInfo(completeSettings, "ABC-999", layer);
+
+    expect(Either.isLeft(result)).toBe(true);
+    if (Either.isLeft(result)) {
+      expect(result.left).toBeInstanceOf(TargetInfoError);
+      expect(String(result.left.cause)).toBe("Not found in Jira: ABC-999");
+    }
+  });
+
+  it("fails with a TargetInfoError when Jira auth is rejected", async () => {
+    const { layer } = stubClient(() => ({ status: 401, body: "Unauthorized" }));
+    const result = await runFetchTargetInfo(completeSettings, "ABC-123", layer);
+    expect(Either.isLeft(result)).toBe(true);
+    if (Either.isLeft(result)) {
+      expect(result.left).toBeInstanceOf(TargetInfoError);
+      expect(String(result.left.cause)).toBe("Jira fetch failed (401): Unauthorized");
+    }
+  });
+
+  it("fails with a TargetInfoError when a required setting is missing", async () => {
+    const { layer, captured } = stubClient(() => ({ status: 200, body: "{}" }));
+    const result = await runFetchTargetInfo(
+      { ...completeSettings, tempoToken: "" },
+      "ABC-123",
+      layer,
+    );
+    expect(Either.isLeft(result)).toBe(true);
+    if (Either.isLeft(result)) {
+      expect(result.left).toBeInstanceOf(TargetInfoError);
+      expect(String(result.left.cause)).toBe("Missing setting: Tempo API token");
+    }
+    expect(captured).toEqual([]);
   });
 });

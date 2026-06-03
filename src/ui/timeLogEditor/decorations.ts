@@ -48,7 +48,7 @@ const buildDecorations = (view: EditorView): DecorationSet => {
     const line = doc.line(duration.line);
     ranges.push(
       Decoration.widget({
-        widget: new DurationWidget(duration.minutes),
+        widget: new DurationWidget(duration.minutes, duration.line, state.onDurationClick),
         side: 1,
       }).range(line.to),
     );

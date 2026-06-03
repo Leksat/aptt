@@ -1,6 +1,6 @@
 import type { HttpClient } from "@effect/platform";
 import type { Effect } from "effect";
-import type { SubmitError } from "../errors";
+import type { SubmitError, TargetInfoError } from "../errors";
 
 export interface BillableEntry {
   readonly targetId: string;
@@ -9,12 +9,22 @@ export interface BillableEntry {
   readonly description: string;
 }
 
+export interface TargetInfo {
+  readonly title: string;
+  readonly url: string;
+  readonly estimateMinutes: number | null;
+  readonly loggedMinutes: number;
+}
+
 export interface SubmitterImpl {
   readonly id: string;
   readonly findTargetId: (text: string) => string | null;
   readonly submit: (
     entry: BillableEntry,
   ) => Effect.Effect<void, SubmitError, HttpClient.HttpClient>;
+  readonly fetchTargetInfo: (
+    targetId: string,
+  ) => Effect.Effect<TargetInfo | null, TargetInfoError, HttpClient.HttpClient>;
 }
 
 export interface SettingField {

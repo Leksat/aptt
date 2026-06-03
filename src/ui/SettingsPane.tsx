@@ -1,6 +1,7 @@
 import { type ChangeEvent, Fragment, type ReactNode, useId } from "react";
 import { type ThemeMode, ThemeModeSchema } from "../core/config";
 import { pluginById, plugins } from "../core/services/submitters/registry";
+import { Link } from "./Link";
 import { useCore } from "./useCore";
 
 const LINK_RE = /\[([^\]]+)\]\(([^)]+)\)/g;
@@ -23,9 +24,9 @@ const renderDescription = (description: string): ReactNode => {
       parts.push(<Fragment key={`t-${cursor}`}>{description.slice(cursor, start)}</Fragment>);
     }
     parts.push(
-      <a key={`a-${start}`} href={match[2]} target="_blank" rel="noreferrer" className="underline">
+      <Link key={`a-${start}`} href={match[2] ?? ""}>
         {match[1]}
-      </a>,
+      </Link>,
     );
     cursor = start + match[0].length;
   }
@@ -71,7 +72,7 @@ export const SettingsPane = () => {
       </label>
 
       {active.settings.length > 0 && (
-        <div className="flex flex-col gap-2 pl-4">
+        <div className="flex flex-col gap-4 pl-4">
           {active.settings.map((field) => (
             <label key={field.key} className="flex flex-col gap-1">
               <span>{field.label}</span>

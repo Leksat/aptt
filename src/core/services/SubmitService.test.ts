@@ -23,6 +23,7 @@ const fakeSubmitter = (
         const verdict = decide(entry, count);
         return verdict === "ok" ? Effect.void : Effect.fail(new SubmitError({ cause: verdict }));
       }),
+    fetchTargetInfo: () => Effect.succeed(null),
   };
 };
 

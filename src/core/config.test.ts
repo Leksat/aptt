@@ -11,11 +11,12 @@ import {
 } from "./config";
 
 describe("defaultConfig", () => {
-  it("uses the default plugin, empty settings map, and system theme", () => {
+  it("uses the default plugin, empty settings map, system theme, and external-only logged", () => {
     expect(defaultConfig).toEqual({
       activePluginId: "jiratempo",
       pluginSettings: {},
       themeMode: "system",
+      includeLocalInLogged: false,
     });
   });
 });
@@ -80,6 +81,23 @@ describe("parseConfig", () => {
       pluginSettings: { jiratempo: { siteName: "X" } },
     });
     expect(Either.isRight(result) && result.right.themeMode).toBe("system");
+  });
+
+  it("defaults includeLocalInLogged to false when absent", () => {
+    const result = parseConfig({
+      activePluginId: "jiratempo",
+      pluginSettings: {},
+    });
+    expect(Either.isRight(result) && result.right.includeLocalInLogged).toBe(false);
+  });
+
+  it("decodes a stored includeLocalInLogged", () => {
+    const result = parseConfig({
+      activePluginId: "jiratempo",
+      pluginSettings: {},
+      includeLocalInLogged: true,
+    });
+    expect(Either.isRight(result) && result.right.includeLocalInLogged).toBe(true);
   });
 
   it("decodes a stored themeMode", () => {

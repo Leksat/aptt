@@ -33,6 +33,10 @@
     {
       "identifier": "opener:allow-open-path",
       "allow": [{ "path": "$APPDATA/history" }, { "path": "$APPDATA/history/" }]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://*" }]
     }
   ]
 }

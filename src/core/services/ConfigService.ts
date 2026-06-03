@@ -6,6 +6,7 @@ import {
   settingsFor,
   type ThemeMode,
   withActivePluginId,
+  withIncludeLocalInLogged,
   withSetting,
   withThemeMode,
 } from "../config";
@@ -63,6 +64,8 @@ export class ConfigService extends Effect.Service<ConfigService>()("ConfigServic
       setSetting: (pluginId: string, key: string, value: string) =>
         apply(withSetting(state.config, pluginId, key, value)),
       setThemeMode: (mode: ThemeMode) => apply(withThemeMode(state.config, mode)),
+      setIncludeLocalInLogged: (value: boolean) =>
+        apply(withIncludeLocalInLogged(state.config, value)),
     } as const;
   }),
 }) {}

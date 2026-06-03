@@ -1,6 +1,6 @@
 import { confirm, message } from "@tauri-apps/plugin-dialog";
 import { Either } from "effect";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import {
   activeBillableTargetId,
@@ -19,6 +19,10 @@ import {
   parseTimeLog,
   withActiveDescription,
 } from "../core/timeLog";
+import { EntryDetails } from "./entryPane/EntryDetails";
+import { EntryTooltip } from "./entryPane/EntryTooltip";
+import { entryAtStartLine } from "./entryPane/focusedEntry";
+import { useExtendedInfo } from "./entryPane/useExtendedInfo";
 import { FocusedSourceProvider, useFocusedSource } from "./FocusedSourceContext";
 import { RightPane } from "./RightPane";
 import { StatusLine } from "./StatusLine";
@@ -39,10 +43,12 @@ export default function App() {
 const AppInner = () => {
   const core = useCore();
   const submitter = core.config.snapshot.submitter;
+  const includeLocalInLogged = core.config.snapshot.config.includeLocalInLogged;
   useThemeApplication(core.config.snapshot.config.themeMode);
   const editorRef = useRef<TimeLogEditorRef>(null);
   const focused = useFocusedSource();
   const now = useMinuteTick();
+  const [tooltip, setTooltip] = useState<{ line: number; anchor: DOMRect } | null>(null);
 
   useEffect(() => {
     const onFocus = () => editorRef.current?.focusEnd();
@@ -51,6 +57,21 @@ const AppInner = () => {
   }, []);
 
   const parsed = parseTimeLog(core.entries.text);
+  const parsedLog = Either.isRight(parsed) ? parsed.right : null;
+  const focusedEntry =
+    tooltip !== null && parsedLog !== null ? entryAtStartLine(parsedLog, tooltip.line) : null;
+  const extendedInfo = useExtendedInfo({
+    log: parsedLog ?? { closed: [], active: null },
+    focused: focusedEntry,
+    now,
+    submitter,
+  });
+
+  const handleDurationClick = useCallback((line: number, anchor: DOMRect) => {
+    setTooltip((prev) => (prev !== null && prev.line === line ? null : { line, anchor }));
+  }, []);
+  const dismissTooltip = useCallback(() => setTooltip(null), []);
+
   const logIsValid = Either.isRight(parsed);
   const closedCount = Either.isRight(parsed) ? parsed.right.closed.length : 0;
   const closedBillable = Either.isRight(parsed)
@@ -119,6 +140,7 @@ const AppInner = () => {
           onChange={core.entries.setText}
           onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}
           onBlur={() => focused.set(null)}
+          onDurationClick={handleDurationClick}
         />
         <RightPane />
       </div>
@@ -157,6 +179,15 @@ const AppInner = () => {
         </button>
       </div>
       <StatusLine />
+      {tooltip !== null && extendedInfo !== null && (
+        <EntryTooltip anchor={tooltip.anchor} onDismiss={dismissTooltip}>
+          <EntryDetails
+            info={extendedInfo}
+            includeLocalInLogged={includeLocalInLogged}
+            onToggleIncludeLocalInLogged={core.config.setIncludeLocalInLogged}
+          />
+        </EntryTooltip>
+      )}
     </main>
   );
 };

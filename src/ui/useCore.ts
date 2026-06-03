@@ -50,6 +50,7 @@ export interface Core {
     readonly setActivePluginId: (id: string) => void;
     readonly setSetting: (pluginId: string, key: string, value: string) => void;
     readonly setThemeMode: (mode: ThemeMode) => void;
+    readonly setIncludeLocalInLogged: (value: boolean) => void;
   };
   readonly submit: {
     readonly state: SubmitState;
@@ -99,6 +100,9 @@ export const useCore = (): Core => {
   const setThemeMode = (mode: ThemeMode) => {
     void runtime.runPromise(services.config.setThemeMode(mode));
   };
+  const setIncludeLocalInLogged = (value: boolean) => {
+    void runtime.runPromise(services.config.setIncludeLocalInLogged(value));
+  };
 
   const submit = async (log: TimeLog, submitter: SubmitterImpl): Promise<SubmitResult> => {
     const result = await runtime.runPromise(services.submit.submit(log, submitter));
@@ -115,7 +119,13 @@ export const useCore = (): Core => {
   return {
     entries: { text, setText, onChange },
     notes: { text: notesText, setText: setNotesText },
-    config: { snapshot: configSnapshot, setActivePluginId, setSetting, setThemeMode },
+    config: {
+      snapshot: configSnapshot,
+      setActivePluginId,
+      setSetting,
+      setThemeMode,
+      setIncludeLocalInLogged,
+    },
     submit: {
       state: submitState,
       isInFlight: submitState.tag === "submitting",

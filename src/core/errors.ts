@@ -41,3 +41,7 @@ export class HotkeyUnregisterError extends Data.TaggedError("HotkeyUnregisterErr
 export class SubmitError extends Data.TaggedError("SubmitError")<{
   readonly cause: unknown;
 }> {}
+
+export class TargetInfoError extends Data.TaggedError("TargetInfoError")<{
+  readonly cause: string;
+}> {}
