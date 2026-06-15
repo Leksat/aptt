@@ -10,7 +10,7 @@ export const NotesPane = () => {
       text={notes.text}
       onChange={notes.setText}
       onCaretChange={(caret) => focused.set({ source: "notes", caret })}
-      onBlur={() => focused.set(null)}
+      onBlur={() => focused.set((s) => (s?.source === "notes" ? null : s))}
     />
   );
 };

@@ -139,7 +139,7 @@ const AppInner = () => {
           readOnly={core.submit.isInFlight}
           onChange={core.entries.setText}
           onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}
-          onBlur={() => focused.set(null)}
+          onBlur={() => focused.set((s) => (s?.source === "timeLog" ? null : s))}
           onDurationClick={handleDurationClick}
         />
         <RightPane />

@@ -1,4 +1,12 @@
-import { createContext, type ReactNode, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 export type FocusedSource = "timeLog" | "notes";
 
@@ -9,7 +17,7 @@ export interface FocusedSourceState {
 
 interface FocusedSourceContextValue {
   readonly state: FocusedSourceState | null;
-  readonly set: (state: FocusedSourceState | null) => void;
+  readonly set: Dispatch<SetStateAction<FocusedSourceState | null>>;
 }
 
 const FocusedSourceContext = createContext<FocusedSourceContextValue | null>(null);
