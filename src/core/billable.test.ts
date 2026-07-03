@@ -234,15 +234,15 @@ describe("formatDurationShort", () => {
     expect(formatDurationShort(59)).toBe("59m");
   });
 
-  it("formats one hour or more with both units always present", () => {
-    expect(formatDurationShort(60)).toBe("1h0m");
+  it("formats one hour or more, dropping the minutes when they are zero", () => {
+    expect(formatDurationShort(60)).toBe("1h");
     expect(formatDurationShort(90)).toBe("1h30m");
     expect(formatDurationShort(125)).toBe("2h5m");
   });
 
   it("formats negative minutes with a leading dash and the same units", () => {
     expect(formatDurationShort(-30)).toBe("-30m");
-    expect(formatDurationShort(-60)).toBe("-1h0m");
+    expect(formatDurationShort(-60)).toBe("-1h");
     expect(formatDurationShort(-90)).toBe("-1h30m");
   });
 });

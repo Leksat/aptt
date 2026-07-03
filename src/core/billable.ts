@@ -60,6 +60,7 @@ export const formatDurationShort = (minutes: number): string => {
   if (abs < 60) return `${sign}${abs}m`;
   const hours = Math.floor(abs / 60);
   const remaining = abs % 60;
+  if (remaining === 0) return `${sign}${hours}h`;
   return `${sign}${hours}h${remaining}m`;
 };
 
