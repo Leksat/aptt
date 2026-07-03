@@ -45,3 +45,7 @@ export class SubmitError extends Data.TaggedError("SubmitError")<{
 export class TargetInfoError extends Data.TaggedError("TargetInfoError")<{
   readonly cause: string;
 }> {}
+
+export class WeekTotalsError extends Data.TaggedError("WeekTotalsError")<{
+  readonly cause: string;
+}> {}

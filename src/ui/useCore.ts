@@ -6,16 +6,19 @@ import { ConfigService, type ConfigSnapshot } from "../core/services/ConfigServi
 import { NotesText, TimeLogText } from "../core/services/persistedText";
 import { SubmitService } from "../core/services/SubmitService";
 import type { SubmitterImpl } from "../core/services/Submitter";
+import { WeekTotalsService, type WeekTotalsState } from "../core/services/WeekTotalsService";
 import type { SubmitResult, SubmitState } from "../core/submit";
 import { surfaced, surfaceError } from "../core/surfaceError";
 import type { TimeLog } from "../core/timeLog";
+import { currentWeekRange } from "../core/week";
 
 const resolveServices = Effect.gen(function* () {
   const entries = yield* TimeLogText;
   const notes = yield* NotesText;
   const config = yield* ConfigService;
   const submit = yield* SubmitService;
-  return { entries, notes, config, submit };
+  const weekTotals = yield* WeekTotalsService;
+  return { entries, notes, config, submit, weekTotals };
 });
 
 type Services = Effect.Effect.Success<typeof resolveServices>;
@@ -25,9 +28,22 @@ let cachedServices: Services | null = null;
 export const bootCore = (): Promise<void> =>
   runtime.runPromise(
     Effect.gen(function* () {
-      cachedServices = yield* resolveServices;
+      const services = yield* resolveServices;
+      cachedServices = services;
+      yield* Effect.forkDaemon(
+        services.weekTotals.refresh(
+          services.config.snapshot().submitter,
+          currentWeekRange(new Date()),
+        ),
+      );
     }),
   );
+
+const refreshWeekTotals = (services: Services): void => {
+  void runtime.runPromise(
+    services.weekTotals.refresh(services.config.snapshot().submitter, currentWeekRange(new Date())),
+  );
+};
 
 const requireServices = (): Services => {
   if (cachedServices === null) throw new Error("Core services not booted");
@@ -56,6 +72,9 @@ export interface Core {
     readonly isInFlight: boolean;
     readonly submit: (log: TimeLog, submitter: SubmitterImpl) => Promise<SubmitResult>;
   };
+  readonly weekTotals: {
+    readonly state: WeekTotalsState;
+  };
   readonly history: {
     readonly open: () => void;
   };
@@ -79,6 +98,10 @@ export const useCore = (): Core => {
   const submitState = useSyncExternalStore(
     useCallback((listener: () => void) => services.submit.subscribe(listener), [services]),
     useCallback(() => services.submit.snapshot(), [services]),
+  );
+  const weekTotalsState = useSyncExternalStore(
+    useCallback((listener: () => void) => services.weekTotals.subscribe(listener), [services]),
+    useCallback(() => services.weekTotals.snapshot(), [services]),
   );
 
   const setText = (value: string) => {
@@ -107,6 +130,8 @@ export const useCore = (): Core => {
     const result = await runtime.runPromise(services.submit.submit(log, submitter));
     if (result.tag === "error") {
       void runtime.runPromise(surfaceError("Submit failed", result.error.cause));
+    } else {
+      refreshWeekTotals(services);
     }
     return result;
   };
@@ -130,6 +155,7 @@ export const useCore = (): Core => {
       isInFlight: submitState.tag === "submitting",
       submit,
     },
+    weekTotals: { state: weekTotalsState },
     history: { open: openHistory },
   };
 };

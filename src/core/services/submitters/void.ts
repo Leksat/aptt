@@ -28,6 +28,7 @@ export const voidPlugin: SubmitterPlugin = {
           }
         }),
       fetchTargetInfo: () => Effect.succeed(null),
+      fetchWeekTotals: () => Effect.succeed(null),
     };
   },
 };

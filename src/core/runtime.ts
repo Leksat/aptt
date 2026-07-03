@@ -9,6 +9,7 @@ import { HotkeyService } from "./services/HotkeyService";
 import { NotesTextLive, TimeLogTextLive } from "./services/persistedText";
 import { SubmitService } from "./services/SubmitService";
 import { TrayService } from "./services/TrayService";
+import { WeekTotalsService } from "./services/WeekTotalsService";
 import { WindowService } from "./services/WindowService";
 
 export const MainLive = Layer.mergeAll(
@@ -22,6 +23,7 @@ export const MainLive = Layer.mergeAll(
   TimeLogTextLive,
   NotesTextLive,
   SubmitService.Default,
+  WeekTotalsService.Default,
   FetchHttpClient.layer.pipe(Layer.provide(Layer.succeed(FetchHttpClient.Fetch, tauriFetch))),
 );
 

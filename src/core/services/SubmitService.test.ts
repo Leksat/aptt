@@ -24,6 +24,7 @@ const fakeSubmitter = (
         return verdict === "ok" ? Effect.void : Effect.fail(new SubmitError({ cause: verdict }));
       }),
     fetchTargetInfo: () => Effect.succeed(null),
+    fetchWeekTotals: () => Effect.succeed(null),
   };
 };
 

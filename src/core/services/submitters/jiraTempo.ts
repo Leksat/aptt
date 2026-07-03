@@ -1,7 +1,13 @@
 import { HttpClient, HttpClientRequest } from "@effect/platform";
 import { Effect, Either, Schema } from "effect";
-import { SubmitError, TargetInfoError } from "../../errors";
-import type { BillableEntry, SubmitterPlugin, TargetInfo } from "../Submitter";
+import { SubmitError, TargetInfoError, WeekTotalsError } from "../../errors";
+import type {
+  BillableEntry,
+  SubmitterPlugin,
+  TargetInfo,
+  WeekRange,
+  WeekTotals,
+} from "../Submitter";
 import { getSetting } from "../Submitter";
 
 const TARGET_ID_RE = /\b[A-Z][A-Z0-9]+-\d+\b/;
@@ -86,26 +92,135 @@ export const jiraTempoPlugin: SubmitterPlugin = {
         };
         return info;
       }),
+    fetchWeekTotals: (range) =>
+      Effect.gen(function* () {
+        const resolved = resolveSettingsOrNull(settings);
+        if (resolved === null) return null;
+        const http = yield* HttpClient.HttpClient;
+        const loggedSeconds = yield* fetchTempoLoggedSeconds(http, resolved, range);
+        const requiredSeconds = yield* fetchTempoRequiredSeconds(http, resolved, range);
+        const totals: WeekTotals = {
+          loggedMinutes: Math.floor(loggedSeconds / 60),
+          requiredMinutes: Math.floor(requiredSeconds / 60),
+        };
+        return totals;
+      }),
   }),
 };
+
+const TempoWorklogsPageSchema = Schema.Struct({
+  results: Schema.Array(Schema.Struct({ timeSpentSeconds: Schema.Number })),
+  metadata: Schema.Struct({ next: Schema.optional(Schema.String) }),
+});
+
+const fetchTempoLoggedSeconds = (
+  http: HttpClient.HttpClient,
+  s: ResolvedSettings,
+  range: WeekRange,
+): Effect.Effect<number, WeekTotalsError> =>
+  Effect.gen(function* () {
+    let url: string | null =
+      `https://api.tempo.io/4/worklogs/user/${s.workerId}` +
+      `?from=${localDate(range.from)}&to=${localDate(range.to)}&limit=1000`;
+    let total = 0;
+    while (url !== null) {
+      const page: Schema.Schema.Type<typeof TempoWorklogsPageSchema> = yield* fetchTempo(
+        http,
+        s,
+        url,
+        TempoWorklogsPageSchema,
+        "Tempo worklogs",
+      );
+      for (const w of page.results) total += w.timeSpentSeconds;
+      url = page.metadata.next ?? null;
+    }
+    return total;
+  });
+
+const TempoScheduleSchema = Schema.Struct({
+  results: Schema.Array(Schema.Struct({ requiredSeconds: Schema.Number })),
+});
+
+const fetchTempoRequiredSeconds = (
+  http: HttpClient.HttpClient,
+  s: ResolvedSettings,
+  range: WeekRange,
+): Effect.Effect<number, WeekTotalsError> =>
+  Effect.gen(function* () {
+    const url =
+      `https://api.tempo.io/4/user-schedule/${s.workerId}` +
+      `?from=${localDate(range.from)}&to=${localDate(range.to)}`;
+    const schedule = yield* fetchTempo(http, s, url, TempoScheduleSchema, "Tempo schedule");
+    let total = 0;
+    for (const day of schedule.results) total += day.requiredSeconds;
+    return total;
+  });
+
+const fetchTempo = <A, I>(
+  http: HttpClient.HttpClient,
+  s: ResolvedSettings,
+  url: string,
+  schema: Schema.Schema<A, I>,
+  label: string,
+): Effect.Effect<A, WeekTotalsError> =>
+  Effect.gen(function* () {
+    const request = HttpClientRequest.get(url).pipe(
+      HttpClientRequest.bearerToken(s.tempoToken),
+      HttpClientRequest.acceptJson,
+    );
+    const response = yield* http
+      .execute(request)
+      .pipe(
+        Effect.mapError((cause) => new WeekTotalsError({ cause: `${label}: ${stringify(cause)}` })),
+      );
+    if (response.status < 200 || response.status >= 300) {
+      const body = yield* response.text.pipe(Effect.orElseSucceed(() => ""));
+      return yield* Effect.fail(
+        new WeekTotalsError({
+          cause: `${label} failed (${response.status}): ${body.slice(0, 200)}`,
+        }),
+      );
+    }
+    const json: unknown = yield* response.json.pipe(
+      Effect.mapError((cause) => new WeekTotalsError({ cause: `${label}: ${stringify(cause)}` })),
+    );
+    const decoded = Schema.decodeUnknownEither(schema)(json);
+    if (Either.isLeft(decoded)) {
+      return yield* Effect.fail(
+        new WeekTotalsError({ cause: `${label} response shape: ${String(decoded.left)}` }),
+      );
+    }
+    return decoded.right;
+  });
+
+const missingSettingLabel = (settings: Readonly<Record<string, string>>): string | null => {
+  for (const f of REQUIRED_FIELDS) {
+    if (getSetting(settings, f.key).trim() === "") return f.label;
+  }
+  return null;
+};
+
+const buildResolvedSettings = (settings: Readonly<Record<string, string>>): ResolvedSettings => ({
+  siteName: normalizeSiteName(getSetting(settings, "siteName")),
+  email: getSetting(settings, "email").trim(),
+  workerId: getSetting(settings, "workerId").trim(),
+  jiraToken: getSetting(settings, "jiraToken"),
+  tempoToken: getSetting(settings, "tempoToken"),
+});
 
 const resolveSettings = <E>(
   settings: Readonly<Record<string, string>>,
   toError: (cause: string) => E,
 ): Effect.Effect<ResolvedSettings, E> => {
-  for (const f of REQUIRED_FIELDS) {
-    if (getSetting(settings, f.key).trim() === "") {
-      return Effect.fail(toError(`Missing setting: ${f.label}`));
-    }
-  }
-  return Effect.succeed({
-    siteName: normalizeSiteName(getSetting(settings, "siteName")),
-    email: getSetting(settings, "email").trim(),
-    workerId: getSetting(settings, "workerId").trim(),
-    jiraToken: getSetting(settings, "jiraToken"),
-    tempoToken: getSetting(settings, "tempoToken"),
-  });
+  const missing = missingSettingLabel(settings);
+  if (missing !== null) return Effect.fail(toError(`Missing setting: ${missing}`));
+  return Effect.succeed(buildResolvedSettings(settings));
 };
+
+const resolveSettingsOrNull = (
+  settings: Readonly<Record<string, string>>,
+): ResolvedSettings | null =>
+  missingSettingLabel(settings) === null ? buildResolvedSettings(settings) : null;
 
 const lookupIssueId = (
   http: HttpClient.HttpClient,

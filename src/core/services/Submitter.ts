@@ -1,6 +1,6 @@
 import type { HttpClient } from "@effect/platform";
 import type { Effect } from "effect";
-import type { SubmitError, TargetInfoError } from "../errors";
+import type { SubmitError, TargetInfoError, WeekTotalsError } from "../errors";
 
 export interface BillableEntry {
   readonly targetId: string;
@@ -16,6 +16,16 @@ export interface TargetInfo {
   readonly loggedMinutes: number;
 }
 
+export interface WeekRange {
+  readonly from: Date;
+  readonly to: Date;
+}
+
+export interface WeekTotals {
+  readonly loggedMinutes: number;
+  readonly requiredMinutes: number;
+}
+
 export interface SubmitterImpl {
   readonly id: string;
   readonly findTargetId: (text: string) => string | null;
@@ -25,6 +35,9 @@ export interface SubmitterImpl {
   readonly fetchTargetInfo: (
     targetId: string,
   ) => Effect.Effect<TargetInfo | null, TargetInfoError, HttpClient.HttpClient>;
+  readonly fetchWeekTotals: (
+    range: WeekRange,
+  ) => Effect.Effect<WeekTotals | null, WeekTotalsError, HttpClient.HttpClient>;
 }
 
 export interface SettingField {

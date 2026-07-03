@@ -71,3 +71,19 @@ _Avoid_: ticket info, Jira card, issue details.
 **Logged externally**:
 Total time already submitted to the external system against a target ID, across all workers. For JiraTempo, the value of Jira's `aggregatetimespent`.
 _Avoid_: Jira time, external time, billed time, my logged time.
+
+**Status line**:
+The single-line readout beneath the time log. Its left side shows the current app state — submit progress, submit result, the first parse error, or the total billable across the time log — and its right side shows week progress. A parse error takes over the whole line.
+_Avoid_: status bar, footer, toolbar.
+
+**Weekly logged**:
+Total time this worker has already submitted to the external system in the current week, across all target IDs. Distinct from logged externally, which is per-target-ID across all workers. For JiraTempo, the sum of the worker's Tempo worklogs for the week.
+_Avoid_: week total, my logged time, logged externally.
+
+**Required hours**:
+The external system's expected working time for this worker's current week — the denominator of week progress. For JiraTempo, the sum of `requiredSeconds` from Tempo's user schedule (weekends and holidays count as zero).
+_Avoid_: target hours, quota, capacity, workload.
+
+**Week progress**:
+The right side of the status line, shown as `Week: billable + logged = sum / required`: the current total billable in the time log, plus weekly logged, summing to the week's running total, over required hours. Collapses to `Week: logged / required` when there is no billable in the time log. Absent when the active submitter has no weekly concept.
+_Avoid_: weekly summary, capacity bar.

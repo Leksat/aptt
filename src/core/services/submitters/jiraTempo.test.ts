@@ -1,8 +1,8 @@
 import { HttpClient, HttpClientResponse } from "@effect/platform";
 import { Effect, Either, Layer } from "effect";
 import { describe, expect, it } from "vitest";
-import { SubmitError, TargetInfoError } from "../../errors";
-import type { BillableEntry } from "../Submitter";
+import { SubmitError, TargetInfoError, WeekTotalsError } from "../../errors";
+import type { BillableEntry, WeekRange } from "../Submitter";
 import { jiraTempoPlugin } from "./jiraTempo";
 
 interface CapturedRequest {
@@ -331,6 +331,110 @@ describe("jiraTempoPlugin.fetchTargetInfo", () => {
     if (Either.isLeft(result)) {
       expect(result.left).toBeInstanceOf(TargetInfoError);
       expect(String(result.left.cause)).toBe("Missing setting: Tempo API token");
+    }
+    expect(captured).toEqual([]);
+  });
+});
+
+const sampleRange: WeekRange = {
+  from: new Date("2026-06-29T00:00:00"),
+  to: new Date("2026-07-05T00:00:00"),
+};
+
+const runFetchWeekTotals = (
+  settings: Readonly<Record<string, string>>,
+  range: WeekRange,
+  layer: Layer.Layer<HttpClient.HttpClient>,
+) =>
+  Effect.runPromise(
+    Effect.either(jiraTempoPlugin.make(settings).fetchWeekTotals(range)).pipe(
+      Effect.provide(layer),
+    ),
+  );
+
+const worklogsPage = (seconds: number[], next?: string): string =>
+  JSON.stringify({
+    results: seconds.map((s) => ({ timeSpentSeconds: s })),
+    metadata: next === undefined ? {} : { next },
+  });
+
+const schedulePage = (seconds: number[]): string =>
+  JSON.stringify({ results: seconds.map((s) => ({ requiredSeconds: s })) });
+
+describe("jiraTempoPlugin.fetchWeekTotals", () => {
+  it("sums Tempo worklogs and the user schedule into minutes", async () => {
+    const { layer, captured } = stubClient((req) =>
+      req.url.includes("/user-schedule/")
+        ? { status: 200, body: schedulePage([23040, 23040]) }
+        : { status: 200, body: worklogsPage([3600, 1800]) },
+    );
+
+    const result = await runFetchWeekTotals(completeSettings, sampleRange, layer);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right).toEqual({ loggedMinutes: 90, requiredMinutes: 768 });
+    }
+
+    const worklogs = captured.find((c) => c.url.includes("/worklogs/"));
+    if (worklogs === undefined) throw new Error("missing worklogs request");
+    expect(worklogs.url).toBe(
+      "https://api.tempo.io/4/worklogs/user/user-123?from=2026-06-29&to=2026-07-05&limit=1000",
+    );
+    expect(worklogs.headers.get("authorization")).toBe("Bearer tempo-secret");
+
+    const schedule = captured.find((c) => c.url.includes("/user-schedule/"));
+    if (schedule === undefined) throw new Error("missing schedule request");
+    expect(schedule.url).toBe(
+      "https://api.tempo.io/4/user-schedule/user-123?from=2026-06-29&to=2026-07-05",
+    );
+  });
+
+  it("follows worklog pagination via metadata.next", async () => {
+    let worklogCall = 0;
+    const { layer } = stubClient((req) => {
+      if (req.url.includes("/user-schedule/")) return { status: 200, body: schedulePage([]) };
+      worklogCall += 1;
+      return worklogCall === 1
+        ? {
+            status: 200,
+            body: worklogsPage(
+              [3600],
+              "https://api.tempo.io/4/worklogs/user/user-123?offset=1000&limit=1000",
+            ),
+          }
+        : { status: 200, body: worklogsPage([1800]) };
+    });
+
+    const result = await runFetchWeekTotals(completeSettings, sampleRange, layer);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right).toEqual({ loggedMinutes: 90, requiredMinutes: 0 });
+    }
+    expect(worklogCall).toBe(2);
+  });
+
+  it("fails with a WeekTotalsError when Tempo rejects the worklogs request", async () => {
+    const { layer } = stubClient(() => ({ status: 401, body: "Unauthorized" }));
+    const result = await runFetchWeekTotals(completeSettings, sampleRange, layer);
+    expect(Either.isLeft(result)).toBe(true);
+    if (Either.isLeft(result)) {
+      expect(result.left).toBeInstanceOf(WeekTotalsError);
+      expect(String(result.left.cause)).toBe("Tempo worklogs failed (401): Unauthorized");
+    }
+  });
+
+  it("returns null (hidden) when Tempo is not configured", async () => {
+    const { layer, captured } = stubClient(() => ({ status: 200, body: "{}" }));
+    const result = await runFetchWeekTotals(
+      { ...completeSettings, tempoToken: "" },
+      sampleRange,
+      layer,
+    );
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right).toBeNull();
     }
     expect(captured).toEqual([]);
   });
