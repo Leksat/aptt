@@ -61,7 +61,7 @@ The per-time-entry context shown alongside a time entry: target info from the ex
 _Avoid_: details, summary, panel.
 
 **Extended-info tooltip**:
-The only surface for extended info, anchored to the duration after a time entry start.
+The only surface for extended info, opened by clicking a time entry's description line number in the gutter and anchored to that number.
 _Avoid_: details panel, info popup, info card, popover.
 
 **Target info**:

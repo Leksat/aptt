@@ -67,8 +67,10 @@ const AppInner = () => {
     submitter,
   });
 
-  const handleDurationClick = useCallback((line: number, anchor: DOMRect) => {
-    setTooltip((prev) => (prev !== null && prev.line === line ? null : { line, anchor }));
+  const handleLineNumberClick = useCallback((startLine: number, anchor: DOMRect) => {
+    setTooltip((prev) =>
+      prev !== null && prev.line === startLine ? null : { line: startLine, anchor },
+    );
   }, []);
   const dismissTooltip = useCallback(() => setTooltip(null), []);
 
@@ -140,7 +142,7 @@ const AppInner = () => {
           onChange={core.entries.setText}
           onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}
           onBlur={() => focused.set((s) => (s?.source === "timeLog" ? null : s))}
-          onDurationClick={handleDurationClick}
+          onLineNumberClick={handleLineNumberClick}
         />
         <RightPane />
       </div>

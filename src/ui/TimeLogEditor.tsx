@@ -1,12 +1,13 @@
 import { Compartment, EditorState } from "@codemirror/state";
-import { EditorView, lineNumbers } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
 import { Either } from "effect";
 import { forwardRef, useImperativeHandle, useLayoutEffect, useRef } from "react";
 import type { FindTargetId } from "../core/billable";
 import { parseTimeLog } from "../core/timeLog";
 import { timeLogDecorationsPlugin } from "./timeLogEditor/decorations";
+import { lineNumberTooltip } from "./timeLogEditor/lineNumberTooltip";
 import {
-  type DurationClickHandler,
+  type LineNumberClickHandler,
   setTimeLogState,
   timeLogStateField,
 } from "./timeLogEditor/stateField";
@@ -25,7 +26,7 @@ interface Props {
   readonly onChange: (text: string) => void;
   readonly onCaretChange: (caret: number) => void;
   readonly onBlur: () => void;
-  readonly onDurationClick: DurationClickHandler;
+  readonly onLineNumberClick: LineNumberClickHandler;
 }
 
 const editorTheme = EditorView.theme({
@@ -36,8 +37,13 @@ const editorTheme = EditorView.theme({
     paddingRight: "8px",
   },
   ".cm-lineNumbers .cm-gutterElement": { textAlign: "right" },
+  ".cm-lineNumbers .cm-gutterElement.cm-aptt-tooltip-line": { cursor: "pointer" },
   ".cm-activeLineGutter": { background: "transparent" },
-  ".cm-aptt-duration": { color: "var(--color-muted)" },
+  ".cm-aptt-duration": {
+    color: "var(--color-muted)",
+    userSelect: "none",
+    WebkitUserSelect: "none",
+  },
   ".cm-aptt-blocker": { color: "var(--color-attention)", fontWeight: "bold" },
   ".cm-aptt-error-line": {
     backgroundColor: "color-mix(in srgb, var(--color-attention) 18%, transparent)",
@@ -51,7 +57,7 @@ export const TimeLogEditor = forwardRef<TimeLogEditorRef, Props>(
     const { hostRef, viewRef } = useCodeMirror({
       text: props.text,
       extensions: [
-        lineNumbers(),
+        lineNumberTooltip,
         timeLogStateField,
         timeLogDecorationsPlugin,
         readOnlyCompartment.current.of(EditorState.readOnly.of(props.readOnly)),
@@ -74,10 +80,10 @@ export const TimeLogEditor = forwardRef<TimeLogEditorRef, Props>(
           parseError,
           now: props.now,
           findTargetId: props.findTargetId,
-          onDurationClick: props.onDurationClick,
+          onLineNumberClick: props.onLineNumberClick,
         }),
       });
-    }, [props.text, props.now, props.findTargetId, props.onDurationClick, viewRef]);
+    }, [props.text, props.now, props.findTargetId, props.onLineNumberClick, viewRef]);
 
     useLayoutEffect(() => {
       const view = viewRef.current;

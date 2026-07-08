@@ -72,7 +72,7 @@ export const EntryTooltip = ({ anchor, onDismiss, children }: Props) => {
       const target = e.target;
       if (!(target instanceof Node)) return;
       if (boxRef.current?.contains(target) === true) return;
-      if (target instanceof Element && target.closest(".cm-aptt-duration") !== null) return;
+      if (target instanceof Element && target.closest(".cm-aptt-tooltip-line") !== null) return;
       onDismiss();
     };
     window.addEventListener("mousedown", onMouseDown);

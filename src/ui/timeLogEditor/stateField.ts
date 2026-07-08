@@ -2,14 +2,14 @@ import { StateEffect, StateField } from "@codemirror/state";
 import type { FindTargetId } from "../../core/billable";
 import type { TimeLog, TimeLogParseError } from "../../core/timeLog";
 
-export type DurationClickHandler = (line: number, anchor: DOMRect) => void;
+export type LineNumberClickHandler = (startLine: number, anchor: DOMRect) => void;
 
 export interface TimeLogState {
   readonly log: TimeLog;
   readonly parseError: TimeLogParseError | null;
   readonly now: Date;
   readonly findTargetId: FindTargetId;
-  readonly onDurationClick: DurationClickHandler | null;
+  readonly onLineNumberClick: LineNumberClickHandler | null;
 }
 
 export const setTimeLogState = StateEffect.define<TimeLogState>();
@@ -19,7 +19,7 @@ const initial: TimeLogState = {
   parseError: null,
   now: new Date(0),
   findTargetId: () => null,
-  onDurationClick: null,
+  onLineNumberClick: null,
 };
 
 export const timeLogStateField = StateField.define<TimeLogState>({
