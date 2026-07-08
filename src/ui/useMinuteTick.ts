@@ -1,3 +1,4 @@
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useState } from "react";
 
 export const useMinuteTick = (): Date => {
@@ -12,7 +13,27 @@ export const useMinuteTick = (): Date => {
       }, msUntilNextMinute);
     };
     scheduleNextMinute();
-    return () => window.clearTimeout(timeoutId);
+
+    const resync = () => {
+      window.clearTimeout(timeoutId);
+      setNow(new Date());
+      scheduleNextMinute();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") resync();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    const unlistenPromise = getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+      if (focused) resync();
+    });
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      document.removeEventListener("visibilitychange", onVisible);
+      void unlistenPromise.then((unlisten) => {
+        unlisten();
+      });
+    };
   }, []);
   return now;
 };
