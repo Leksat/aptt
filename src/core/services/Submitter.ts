@@ -23,7 +23,6 @@ export interface WeekRange {
 
 export interface WeekTotals {
   readonly loggedMinutes: number;
-  readonly requiredMinutes: number;
 }
 
 export interface SubmitterImpl {

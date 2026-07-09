@@ -98,10 +98,8 @@ export const jiraTempoPlugin: SubmitterPlugin = {
         if (resolved === null) return null;
         const http = yield* HttpClient.HttpClient;
         const loggedSeconds = yield* fetchTempoLoggedSeconds(http, resolved, range);
-        const requiredSeconds = yield* fetchTempoRequiredSeconds(http, resolved, range);
         const totals: WeekTotals = {
           loggedMinutes: Math.floor(loggedSeconds / 60),
-          requiredMinutes: Math.floor(requiredSeconds / 60),
         };
         return totals;
       }),
@@ -134,25 +132,6 @@ const fetchTempoLoggedSeconds = (
       for (const w of page.results) total += w.timeSpentSeconds;
       url = page.metadata.next ?? null;
     }
-    return total;
-  });
-
-const TempoScheduleSchema = Schema.Struct({
-  results: Schema.Array(Schema.Struct({ requiredSeconds: Schema.Number })),
-});
-
-const fetchTempoRequiredSeconds = (
-  http: HttpClient.HttpClient,
-  s: ResolvedSettings,
-  range: WeekRange,
-): Effect.Effect<number, WeekTotalsError> =>
-  Effect.gen(function* () {
-    const url =
-      `https://api.tempo.io/4/user-schedule/${s.workerId}` +
-      `?from=${localDate(range.from)}&to=${localDate(range.to)}`;
-    const schedule = yield* fetchTempo(http, s, url, TempoScheduleSchema, "Tempo schedule");
-    let total = 0;
-    for (const day of schedule.results) total += day.requiredSeconds;
     return total;
   });
 

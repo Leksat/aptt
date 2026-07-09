@@ -358,22 +358,18 @@ const worklogsPage = (seconds: number[], next?: string): string =>
     metadata: next === undefined ? {} : { next },
   });
 
-const schedulePage = (seconds: number[]): string =>
-  JSON.stringify({ results: seconds.map((s) => ({ requiredSeconds: s })) });
-
 describe("jiraTempoPlugin.fetchWeekTotals", () => {
-  it("sums Tempo worklogs and the user schedule into minutes", async () => {
-    const { layer, captured } = stubClient((req) =>
-      req.url.includes("/user-schedule/")
-        ? { status: 200, body: schedulePage([23040, 23040]) }
-        : { status: 200, body: worklogsPage([3600, 1800]) },
-    );
+  it("sums Tempo worklogs into minutes", async () => {
+    const { layer, captured } = stubClient(() => ({
+      status: 200,
+      body: worklogsPage([3600, 1800]),
+    }));
 
     const result = await runFetchWeekTotals(completeSettings, sampleRange, layer);
 
     expect(Either.isRight(result)).toBe(true);
     if (Either.isRight(result)) {
-      expect(result.right).toEqual({ loggedMinutes: 90, requiredMinutes: 768 });
+      expect(result.right).toEqual({ loggedMinutes: 90 });
     }
 
     const worklogs = captured.find((c) => c.url.includes("/worklogs/"));
@@ -382,18 +378,11 @@ describe("jiraTempoPlugin.fetchWeekTotals", () => {
       "https://api.tempo.io/4/worklogs/user/user-123?from=2026-06-29&to=2026-07-05&limit=1000",
     );
     expect(worklogs.headers.get("authorization")).toBe("Bearer tempo-secret");
-
-    const schedule = captured.find((c) => c.url.includes("/user-schedule/"));
-    if (schedule === undefined) throw new Error("missing schedule request");
-    expect(schedule.url).toBe(
-      "https://api.tempo.io/4/user-schedule/user-123?from=2026-06-29&to=2026-07-05",
-    );
   });
 
   it("follows worklog pagination via metadata.next", async () => {
     let worklogCall = 0;
-    const { layer } = stubClient((req) => {
-      if (req.url.includes("/user-schedule/")) return { status: 200, body: schedulePage([]) };
+    const { layer } = stubClient(() => {
       worklogCall += 1;
       return worklogCall === 1
         ? {
@@ -410,7 +399,7 @@ describe("jiraTempoPlugin.fetchWeekTotals", () => {
 
     expect(Either.isRight(result)).toBe(true);
     if (Either.isRight(result)) {
-      expect(result.right).toEqual({ loggedMinutes: 90, requiredMinutes: 0 });
+      expect(result.right).toEqual({ loggedMinutes: 90 });
     }
     expect(worklogCall).toBe(2);
   });

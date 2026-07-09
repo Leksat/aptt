@@ -4,16 +4,15 @@ import { parseTimeLog } from "../core/timeLog";
 import { useCore } from "./useCore";
 import { useMinuteTick } from "./useMinuteTick";
 
-export type WeekProgress =
+export type WeekTotal =
   | { readonly tag: "cannotFetch" }
   | {
       readonly tag: "loaded";
       readonly billableMinutes: number;
       readonly loggedMinutes: number;
-      readonly requiredMinutes: number;
     };
 
-export const useWeekProgress = (): WeekProgress | null => {
+export const useWeekTotal = (): WeekTotal | null => {
   const now = useMinuteTick();
   const { entries, config, weekTotals } = useCore();
 
@@ -29,6 +28,5 @@ export const useWeekProgress = (): WeekProgress | null => {
     tag: "loaded",
     billableMinutes: billable,
     loggedMinutes: state.loggedMinutes,
-    requiredMinutes: state.requiredMinutes,
   };
 };

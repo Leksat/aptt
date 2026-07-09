@@ -1,11 +1,11 @@
 import { formatDurationShort } from "../core/billable";
 import type { Status } from "../core/status";
 import { useStatus } from "./useStatus";
-import { useWeekProgress, type WeekProgress } from "./useWeekProgress";
+import { useWeekTotal, type WeekTotal } from "./useWeekTotal";
 
 export const StatusLine = () => {
   const status = useStatus();
-  const week = useWeekProgress();
+  const week = useWeekTotal();
   return (
     <div className="flex min-h-5 items-baseline justify-between gap-4">
       <span className={leftClass(status)}>{lineText(status)}</span>
@@ -30,15 +30,14 @@ const lineText = (status: Status): string => {
   }
 };
 
-const weekText = (week: WeekProgress): string => {
+const weekText = (week: WeekTotal): string => {
   if (week.tag === "cannotFetch") return "Week: cannot fetch";
-  const required = formatDurationShort(week.requiredMinutes);
   if (week.billableMinutes === 0) {
-    return `Week: ${formatDurationShort(week.loggedMinutes)} / ${required}`;
+    return `Week: ${formatDurationShort(week.loggedMinutes)}`;
   }
   const sum = week.billableMinutes + week.loggedMinutes;
   return (
     `Week: ${formatDurationShort(week.billableMinutes)} + ${formatDurationShort(week.loggedMinutes)}` +
-    ` = ${formatDurationShort(sum)} / ${required}`
+    ` = ${formatDurationShort(sum)}`
   );
 };

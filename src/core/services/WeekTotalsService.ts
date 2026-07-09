@@ -6,7 +6,7 @@ export type WeekTotalsState =
   | { readonly tag: "pending" }
   | { readonly tag: "unavailable" }
   | { readonly tag: "error" }
-  | { readonly tag: "loaded"; readonly loggedMinutes: number; readonly requiredMinutes: number };
+  | { readonly tag: "loaded"; readonly loggedMinutes: number };
 
 export class WeekTotalsService extends Effect.Service<WeekTotalsService>()("WeekTotalsService", {
   effect: Effect.gen(function* () {
@@ -42,7 +42,6 @@ export class WeekTotalsService extends Effect.Service<WeekTotalsService>()("Week
               : {
                   tag: "loaded",
                   loggedMinutes: totals.loggedMinutes,
-                  requiredMinutes: totals.requiredMinutes,
                 },
           );
         }),
