@@ -1,6 +1,6 @@
 import type { Range } from "@codemirror/state";
 import { Decoration, type DecorationSet, type EditorView, ViewPlugin } from "@codemirror/view";
-import { commentStart } from "../../core/notes";
+import { commentStart, findLinks } from "../../core/notes";
 
 export const notesDecorationsPlugin = ViewPlugin.define(
   (view) => ({
@@ -15,6 +15,7 @@ export const notesDecorationsPlugin = ViewPlugin.define(
 );
 
 const commentMarkDecoration = Decoration.mark({ class: "cm-aptt-comment" });
+const linkMarkDecoration = Decoration.mark({ class: "cm-aptt-url" });
 
 const buildDecorations = (view: EditorView): DecorationSet => {
   const doc = view.state.doc;
@@ -24,6 +25,9 @@ const buildDecorations = (view: EditorView): DecorationSet => {
     const at = commentStart(line.text);
     if (at === null) continue;
     ranges.push(commentMarkDecoration.range(line.from + at, line.to));
+  }
+  for (const link of findLinks(doc.toString())) {
+    ranges.push(linkMarkDecoration.range(link.from, link.to));
   }
   return Decoration.set(ranges, true);
 };
