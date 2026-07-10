@@ -22,7 +22,7 @@ const editorTheme = EditorView.theme({
 export const NotesEditor = (props: Props) => {
   const { hostRef } = useCodeMirror({
     text: props.text,
-    extensions: [notesDecorationsPlugin, linkInteraction, editorTheme],
+    extensions: [notesDecorationsPlugin, linkInteraction, editorTheme, EditorView.lineWrapping],
     onChange: props.onChange,
     onCaretChange: props.onCaretChange,
     onBlur: props.onBlur,
