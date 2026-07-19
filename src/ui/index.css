@@ -41,6 +41,8 @@ body,
   background: var(--color-bg);
   color: var(--color-text);
   font-family: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
 }
 
 button,
