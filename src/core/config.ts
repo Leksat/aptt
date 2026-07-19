@@ -11,7 +11,6 @@ export const ConfigSchema = Schema.Struct({
     value: Schema.Record({ key: Schema.String, value: Schema.String }),
   }),
   themeMode: Schema.optionalWith(ThemeModeSchema, { default: () => "system" as const }),
-  includeLocalInLogged: Schema.optionalWith(Schema.Boolean, { default: () => false as const }),
 });
 
 export type Config = typeof ConfigSchema.Type;
@@ -20,7 +19,6 @@ export const defaultConfig: Config = {
   activePluginId: defaultPlugin.id,
   pluginSettings: {},
   themeMode: "system",
-  includeLocalInLogged: false,
 };
 
 export const parseConfig = Schema.decodeUnknownEither(ConfigSchema);
@@ -37,11 +35,6 @@ export const withActivePluginId = (config: Config, pluginId: string): Config => 
 export const withThemeMode = (config: Config, themeMode: ThemeMode): Config => ({
   ...config,
   themeMode,
-});
-
-export const withIncludeLocalInLogged = (config: Config, value: boolean): Config => ({
-  ...config,
-  includeLocalInLogged: value,
 });
 
 export const withSetting = (

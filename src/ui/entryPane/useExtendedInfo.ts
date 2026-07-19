@@ -15,6 +15,7 @@ export type TargetInfoState =
 export interface ExtendedInfoAggregate {
   readonly count: number;
   readonly minutes: number;
+  readonly focusedMinutes: number;
 }
 
 export interface ExtendedInfo {
@@ -70,16 +71,22 @@ export const useExtendedInfo = ({ log, focused, now, submitter }: Args): Extende
 
   if (focused === null) return null;
 
+  const focusedMinutes =
+    focused.kind === "closed"
+      ? diffMinutes(focused.entry.start, focused.entry.end)
+      : diffMinutes(focused.entry.start, floorToMinute(now));
+
   return {
     targetId,
     targetInfo: targetInfoState,
-    sameDescription: aggregate(log, now, (d) => d.trim() === description.trim()),
+    sameDescription: aggregate(log, now, focusedMinutes, (d) => d.trim() === description.trim()),
     sameTarget:
       targetId === null
-        ? { count: 0, minutes: 0 }
+        ? { count: 0, minutes: 0, focusedMinutes: 0 }
         : aggregate(
             log,
             now,
+            focusedMinutes,
             (d) => parseBillable(d, submitter.findTargetId)?.targetId === targetId,
           ),
   };
@@ -88,6 +95,7 @@ export const useExtendedInfo = ({ log, focused, now, submitter }: Args): Extende
 const aggregate = (
   log: TimeLog,
   now: Date,
+  focusedMinutes: number,
   matches: (description: string) => boolean,
 ): ExtendedInfoAggregate => {
   let count = 0;
@@ -101,7 +109,7 @@ const aggregate = (
     count += 1;
     minutes += diffMinutes(log.active.start, floorToMinute(now));
   }
-  return { count, minutes };
+  return { count, minutes, focusedMinutes };
 };
 
 const diffMinutes = (start: Date, end: Date): number =>

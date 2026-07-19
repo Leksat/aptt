@@ -1,18 +1,12 @@
 import { formatDurationShort } from "../../core/billable";
 import { Link } from "../Link";
-import type { ExtendedInfo, TargetInfoState } from "./useExtendedInfo";
+import type { ExtendedInfo, ExtendedInfoAggregate, TargetInfoState } from "./useExtendedInfo";
 
 interface Props {
   readonly info: ExtendedInfo;
-  readonly includeLocalInLogged: boolean;
-  readonly onToggleIncludeLocalInLogged: (value: boolean) => void;
 }
 
-export const EntryDetails = ({
-  info,
-  includeLocalInLogged,
-  onToggleIncludeLocalInLogged,
-}: Props) => {
+export const EntryDetails = ({ info }: Props) => {
   const showJiraCard =
     info.targetId !== null && info.targetInfo !== null && info.targetInfo.kind !== "absent";
   const showSameDescription = info.sameDescription.count >= 2;
@@ -28,22 +22,17 @@ export const EntryDetails = ({
         <JiraCard
           targetId={info.targetId}
           state={info.targetInfo}
-          sameTargetMinutes={info.sameTarget.minutes}
-          includeLocalInLogged={includeLocalInLogged}
-          onToggleIncludeLocalInLogged={onToggleIncludeLocalInLogged}
+          localMinutes={info.sameTarget.minutes}
         />
       )}
       {showSameDescription && (
         <Card>
-          <Row left="Same description" right={formatDurationShort(info.sameDescription.minutes)} />
+          <Row left="Same description" right={splitFormula(info.sameDescription)} />
         </Card>
       )}
       {showSameTarget && info.targetId !== null && (
         <Card>
-          <Row
-            left={`Same target (${info.targetId})`}
-            right={formatDurationShort(info.sameTarget.minutes)}
-          />
+          <Row left={`Same target (${info.targetId})`} right={splitFormula(info.sameTarget)} />
         </Card>
       )}
     </div>
@@ -53,18 +42,10 @@ export const EntryDetails = ({
 interface JiraCardProps {
   readonly targetId: string;
   readonly state: TargetInfoState;
-  readonly sameTargetMinutes: number;
-  readonly includeLocalInLogged: boolean;
-  readonly onToggleIncludeLocalInLogged: (value: boolean) => void;
+  readonly localMinutes: number;
 }
 
-const JiraCard = ({
-  targetId,
-  state,
-  sameTargetMinutes,
-  includeLocalInLogged,
-  onToggleIncludeLocalInLogged,
-}: JiraCardProps) => {
+const JiraCard = ({ targetId, state, localMinutes }: JiraCardProps) => {
   return (
     <Card>
       <div className="flex flex-col gap-2">
@@ -73,18 +54,8 @@ const JiraCard = ({
           (state.info.estimateMinutes !== null || state.info.loggedMinutes > 0) && (
             <EstimateRows
               estimateMinutes={state.info.estimateMinutes}
-              loggedMinutes={state.info.loggedMinutes}
-              sameTargetMinutes={sameTargetMinutes}
-              includeLocalInLogged={includeLocalInLogged}
-            />
-          )}
-        {state.kind === "ok" &&
-          (state.info.estimateMinutes !== null || state.info.loggedMinutes > 0) && (
-            <Toggle
-              value={includeLocalInLogged}
-              onChange={onToggleIncludeLocalInLogged}
-              leftLabel="Jira only"
-              rightLabel="Jira + local"
+              remoteMinutes={state.info.loggedMinutes}
+              localMinutes={localMinutes}
             />
           )}
       </div>
@@ -109,28 +80,35 @@ const TitleRow = ({ targetId, state }: { targetId: string; state: TargetInfoStat
 
 interface EstimateRowsProps {
   readonly estimateMinutes: number | null;
-  readonly loggedMinutes: number;
-  readonly sameTargetMinutes: number;
-  readonly includeLocalInLogged: boolean;
+  readonly remoteMinutes: number;
+  readonly localMinutes: number;
 }
 
-const EstimateRows = ({
-  estimateMinutes,
-  loggedMinutes,
-  sameTargetMinutes,
-  includeLocalInLogged,
-}: EstimateRowsProps) => {
-  const logged = loggedMinutes + (includeLocalInLogged ? sameTargetMinutes : 0);
+const EstimateRows = ({ estimateMinutes, remoteMinutes, localMinutes }: EstimateRowsProps) => {
+  const logged = localMinutes + remoteMinutes;
   return (
     <div className="flex flex-col">
       {estimateMinutes !== null && (
         <Row left="Estimated" right={formatDurationShort(estimateMinutes)} />
       )}
-      <Row left="Logged" right={formatDurationShort(logged)} />
+      <Row left="Logged" right={sumFormula(localMinutes, remoteMinutes)} />
       {estimateMinutes !== null && (
         <Row left="Remaining" right={formatDurationShort(estimateMinutes - logged)} />
       )}
     </div>
+  );
+};
+
+const splitFormula = (agg: ExtendedInfoAggregate): string =>
+  sumFormula(agg.focusedMinutes, agg.minutes - agg.focusedMinutes);
+
+const sumFormula = (current: number, other: number): string => {
+  if (current === 0 || other === 0) {
+    return formatDurationShort(current + other);
+  }
+  return (
+    `${formatDurationShort(current)} + ${formatDurationShort(other)}` +
+    ` = ${formatDurationShort(current + other)}`
   );
 };
 
@@ -146,43 +124,6 @@ const SkeletonLine = ({ width }: { width: string }) => (
     className="inline-block h-4 animate-pulse rounded bg-[var(--color-border)]"
     style={{ width }}
   />
-);
-
-interface ToggleProps {
-  readonly value: boolean;
-  readonly onChange: (value: boolean) => void;
-  readonly leftLabel: string;
-  readonly rightLabel: string;
-}
-
-const Toggle = ({ value, onChange, leftLabel, rightLabel }: ToggleProps) => (
-  <div className="flex items-center justify-end gap-2 text-xs">
-    <button
-      type="button"
-      onClick={() => onChange(false)}
-      className={value ? "text-[var(--color-muted)]" : ""}
-    >
-      {leftLabel}
-    </button>
-    <button
-      type="button"
-      onClick={() => onChange(!value)}
-      aria-pressed={value}
-      className="relative inline-flex h-4 w-8 items-center rounded-full border border-[var(--color-border)]"
-    >
-      <span
-        className="inline-block h-3 w-3 rounded-full bg-[var(--color-text)] transition-transform"
-        style={{ transform: value ? "translateX(16px)" : "translateX(2px)" }}
-      />
-    </button>
-    <button
-      type="button"
-      onClick={() => onChange(true)}
-      className={value ? "" : "text-[var(--color-muted)]"}
-    >
-      {rightLabel}
-    </button>
-  </div>
 );
 
 const Card = ({ children }: { children: React.ReactNode }) => (

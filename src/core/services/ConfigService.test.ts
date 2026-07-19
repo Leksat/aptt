@@ -72,7 +72,6 @@ describe("ConfigService", () => {
       activePluginId: "jiratempo",
       pluginSettings: { jiratempo: { siteName: "acme" } },
       themeMode: "system",
-      includeLocalInLogged: false,
     });
   });
 
@@ -87,19 +86,6 @@ describe("ConfigService", () => {
     );
     expect(modes).toEqual(["dark"]);
     expect(JSON.parse(fs.state.config).themeMode).toBe("dark");
-  });
-
-  it("setIncludeLocalInLogged writes to disk and notifies", async () => {
-    const fs = makeFakeFileService();
-    const values: boolean[] = [];
-    await runWithFs(fs, (svc) =>
-      Effect.gen(function* () {
-        svc.subscribe(() => values.push(svc.snapshot().config.includeLocalInLogged));
-        yield* svc.setIncludeLocalInLogged(true);
-      }),
-    );
-    expect(values).toEqual([true]);
-    expect(JSON.parse(fs.state.config).includeLocalInLogged).toBe(true);
   });
 
   it("setActivePluginId writes to disk and notifies", async () => {

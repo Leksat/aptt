@@ -43,7 +43,6 @@ export default function App() {
 const AppInner = () => {
   const core = useCore();
   const submitter = core.config.snapshot.submitter;
-  const includeLocalInLogged = core.config.snapshot.config.includeLocalInLogged;
   useThemeApplication(core.config.snapshot.config.themeMode);
   const editorRef = useRef<TimeLogEditorRef>(null);
   const focused = useFocusedSource();
@@ -183,11 +182,7 @@ const AppInner = () => {
       <StatusLine />
       {tooltip !== null && extendedInfo !== null && (
         <EntryTooltip anchor={tooltip.anchor} onDismiss={dismissTooltip}>
-          <EntryDetails
-            info={extendedInfo}
-            includeLocalInLogged={includeLocalInLogged}
-            onToggleIncludeLocalInLogged={core.config.setIncludeLocalInLogged}
-          />
+          <EntryDetails info={extendedInfo} />
         </EntryTooltip>
       )}
     </main>

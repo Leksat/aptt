@@ -57,7 +57,7 @@ The portion of a notes line from the first `#` to the end of the line, inclusive
 _Avoid_: remark, annotation.
 
 **Extended info**:
-The per-time-entry context shown alongside a time entry: target info from the external system (when available), plus aggregations across the time log for the same description and same target ID. Read-only; never submitted.
+The per-time-entry context shown alongside a time entry: target info from the external system (when available), plus aggregations across the time log for the same description and same target ID. Read-only; never submitted. Additive quantities are shown as a formula in the house standard `current + other = total`, where the current operand is always the one printed nearby (see local, this). A formula collapses to a single value when either operand is zero.
 _Avoid_: details, summary, panel.
 
 **Extended-info tooltip**:
@@ -69,8 +69,16 @@ The external system's snapshot of a target ID — title, URL, estimate, and time
 _Avoid_: ticket info, Jira card, issue details.
 
 **Logged externally**:
-Total time already submitted to the external system against a target ID, across all workers. For JiraTempo, the value of Jira's `aggregatetimespent`.
+Total time already submitted to the external system against a target ID, across all workers. For JiraTempo, the value of Jira's `aggregatetimespent`. Surfaced in extended info as remote.
 _Avoid_: Jira time, external time, billed time, my logged time.
+
+**Remote**:
+The extended-info name for logged externally — the already-submitted operand in the `Logged: local + remote = total` formula on a target's card.
+_Avoid_: external, Jira value.
+
+**Local**:
+Time in the current time log against a target ID that has not been submitted yet: the same-target aggregation. The current operand in `Logged: local + remote = total`, and the quantity the `this + rest = total` cards break down (this being the focused time entry's own share, rest the other matching entries).
+_Avoid_: unsubmitted, in-log, pending.
 
 **Status line**:
 The single-line readout beneath the time log. Its left side shows the current app state — submit progress, submit result, the first parse error, or the total billable across the time log — and its right side shows the week total. A parse error takes over the whole line.
