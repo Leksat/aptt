@@ -1,6 +1,6 @@
 import { type ChangeEvent, Fragment, type ReactNode, useId } from "react";
 import { type ThemeMode, ThemeModeSchema } from "../core/config";
-import { pluginById, plugins } from "../core/services/submitters/registry";
+import { pluginById, plugins } from "../core/services/backends/registry";
 import { Link } from "./Link";
 import { useCore } from "./useCore";
 
@@ -37,7 +37,7 @@ const renderDescription = (description: string): ReactNode => {
 };
 
 export const SettingsPane = () => {
-  const submitterLabelId = useId();
+  const backendLabelId = useId();
   const themeLabelId = useId();
   const { config } = useCore();
   const active = pluginById(config.snapshot.config.activePluginId);
@@ -55,13 +55,13 @@ export const SettingsPane = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <label className="flex items-center gap-2" id={submitterLabelId}>
-        <span className="font-medium">Submitter:</span>
+      <label className="flex items-center gap-2" id={backendLabelId}>
+        <span className="font-medium">Backend:</span>
         <select
           value={active.id}
           onChange={onSelectPlugin}
           className="flex-1 rounded border border-[var(--color-border)] px-2 py-1"
-          aria-labelledby={submitterLabelId}
+          aria-labelledby={backendLabelId}
         >
           {plugins.map((p) => (
             <option key={p.id} value={p.id}>

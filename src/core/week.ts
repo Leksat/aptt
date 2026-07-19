@@ -1,4 +1,4 @@
-import type { WeekRange } from "./services/Submitter";
+import type { WeekRange } from "./services/Backend";
 
 export const currentWeekRange = (now: Date): WeekRange => {
   const daysSinceMonday = (now.getDay() + 6) % 7;

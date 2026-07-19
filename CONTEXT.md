@@ -17,19 +17,23 @@ A line of the form `YYYY-MM-DD HH:MM`. Marks a wall-clock moment. Anchors the be
 _Avoid_: marker, boundary, header, timestamp.
 
 **Time entry description**:
-The body of a time entry — everything between its start and the next start. Its first token is tested as a ticket ID; if the active submitter accepts it, the entry is billable. Otherwise the description is just there to carve time out of the log (e.g. `nothing`, empty).
+The body of a time entry — everything between its start and the next start. Its first token is tested as a ticket ID; if the active backend accepts it, the entry is billable. Otherwise the description is just there to carve time out of the log (e.g. `nothing`, empty).
 _Avoid_: body, content, text, note.
 
 **Ticket ID**:
-The identifier of the external thing time is being logged against (e.g. `ABC-123` for a Jira issue). The active submitter decides what counts as a valid ticket ID — the Jira submitter accepts issue keys, a Toggl submitter would accept project identifiers, etc. Lives as the first token of a time entry description.
+The identifier of the external thing time is being logged against (e.g. `ABC-123` for a Jira issue). The active backend decides what counts as a valid ticket ID — the Jira backend accepts issue keys, a Toggl backend would accept project identifiers, etc. Lives as the first token of a time entry description.
 _Avoid_: issue key, reference, subject.
+
+**Backend**:
+The pluggable integration with one external time-tracking system (JiraTempo, Toggl, void). It owns every point where aptt touches that system: it decides what counts as a valid ticket ID, submits closed billable entries, supplies ticket info, and reports weekly logged. The active backend is the one currently selected in settings; exactly one is active at a time. Submitting is only its write path — reading ticket info and totals is just as much its job.
+_Avoid_: integration, provider, plugin, adapter.
 
 **Active time entry**:
 The trailing time entry of a non-empty log. Its end is "now" and it is never submitted. Its description is the line after its start, or empty if the log ends on the start itself. The empty log has no active time entry.
 _Avoid_: current entry, in-progress entry, open entry.
 
 **Billable**:
-A time entry whose description begins with a valid ticket ID for the active submitter. Only closed billable entries are submitted; non-billable closed entries are removed without being sent. The active entry can also be billable; its running duration counts toward live totals even though it is never submitted.
+A time entry whose description begins with a valid ticket ID for the active backend. Only closed billable entries are submitted; non-billable closed entries are removed without being sent. The active entry can also be billable; its running duration counts toward live totals even though it is never submitted.
 _Avoid_: loggable, sendable.
 
 **Duration**:
@@ -65,7 +69,7 @@ The only surface for extended info, opened by clicking a time entry's descriptio
 _Avoid_: details panel, info popup, info card, popover.
 
 **Ticket info**:
-The external system's snapshot of a ticket ID — title, URL, estimate, and time already logged externally by this worker. Supplied by the active submitter; absent when the submitter has no remote concept (e.g. void) or the ticket ID is not real in the external system.
+The external system's snapshot of a ticket ID — title, URL, estimate, and time already logged externally by this worker. Supplied by the active backend; absent when the backend has no remote concept (e.g. void) or the ticket ID is not real in the external system.
 _Avoid_: Jira card, issue details.
 
 **Logged externally**:
@@ -89,5 +93,5 @@ Total time this worker has already submitted to the external system in the curre
 _Avoid_: week total, my logged time, logged externally.
 
 **Week total**:
-The right side of the status line, shown as `Week: billable + logged = sum`: the current total billable in the time log, plus weekly logged, summing to the week's running total. Collapses to `Week: logged` when there is no billable in the time log. Absent when the active submitter has no weekly concept.
+The right side of the status line, shown as `Week: billable + logged = sum`: the current total billable in the time log, plus weekly logged, summing to the week's running total. Collapses to `Week: logged` when there is no billable in the time log. Absent when the active backend has no weekly concept.
 _Avoid_: weekly summary, week progress, capacity bar.

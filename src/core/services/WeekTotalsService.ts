@@ -1,6 +1,6 @@
 import type { HttpClient } from "@effect/platform";
 import { Effect, Either } from "effect";
-import type { SubmitterImpl, WeekRange } from "./Submitter";
+import type { Backend, WeekRange } from "./Backend";
 
 export type WeekTotalsState =
   | { readonly tag: "pending" }
@@ -26,11 +26,11 @@ export class WeekTotalsService extends Effect.Service<WeekTotalsService>()("Week
         };
       },
       refresh: (
-        submitter: SubmitterImpl,
+        backend: Backend,
         range: WeekRange,
       ): Effect.Effect<void, never, HttpClient.HttpClient> =>
         Effect.gen(function* () {
-          const result = yield* Effect.either(submitter.fetchWeekTotals(range));
+          const result = yield* Effect.either(backend.fetchWeekTotals(range));
           if (Either.isLeft(result)) {
             setState({ tag: "error" });
             return;

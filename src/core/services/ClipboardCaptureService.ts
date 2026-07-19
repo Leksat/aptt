@@ -47,8 +47,8 @@ export class ClipboardCaptureService extends Effect.Service<ClipboardCaptureServ
           catch: (cause) => cause,
         }).pipe(Effect.orElseSucceed(() => ""));
         const text = (raw ?? "").trim();
-        const submitter = config.snapshot().submitter;
-        const id = text === "" ? null : submitter.findTicketId(text);
+        const backend = config.snapshot().backend;
+        const id = text === "" ? null : backend.findTicketId(text);
         if (id === null) {
           yield* notify("Cannot start time entry: clipboard has no ticket ID");
           return false;

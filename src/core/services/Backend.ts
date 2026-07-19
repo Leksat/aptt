@@ -25,7 +25,7 @@ export interface WeekTotals {
   readonly loggedMinutes: number;
 }
 
-export interface SubmitterImpl {
+export interface Backend {
   readonly id: string;
   readonly findTicketId: (text: string) => string | null;
   readonly submit: (
@@ -46,12 +46,12 @@ export interface SettingField {
   readonly description?: string;
 }
 
-export interface SubmitterPlugin {
+export interface BackendPlugin {
   readonly id: string;
   readonly displayName: string;
   readonly dev: boolean;
   readonly settings: ReadonlyArray<SettingField>;
-  readonly make: (settings: Readonly<Record<string, string>>) => SubmitterImpl;
+  readonly make: (settings: Readonly<Record<string, string>>) => Backend;
 }
 
 export const getSetting = (settings: Readonly<Record<string, string>>, key: string): string =>

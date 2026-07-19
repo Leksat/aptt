@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { defaultPlugin } from "./services/submitters/registry";
+import { defaultPlugin } from "./services/backends/registry";
 
 export const ThemeModeSchema = Schema.Literal("system", "light", "dark");
 export type ThemeMode = typeof ThemeModeSchema.Type;

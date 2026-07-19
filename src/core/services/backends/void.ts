@@ -1,10 +1,10 @@
 import { Duration, Effect } from "effect";
 import { SubmitError } from "../../errors";
-import type { SubmitterPlugin } from "../Submitter";
+import type { BackendPlugin } from "../Backend";
 
 const JIRA_ISSUE_KEY_RE = /\b[A-Z][A-Z0-9]+-\d+\b/;
 
-export const voidPlugin: SubmitterPlugin = {
+export const voidPlugin: BackendPlugin = {
   id: "void",
   displayName: "Void",
   dev: true,
@@ -22,7 +22,7 @@ export const voidPlugin: SubmitterPlugin = {
             count = 0;
             return yield* Effect.fail(
               new SubmitError({
-                cause: "Void submitter rejects every 3rd entry (for testing)",
+                cause: "Void backend rejects every 3rd entry (for testing)",
               }),
             );
           }

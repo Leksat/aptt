@@ -22,7 +22,7 @@ describe("ConfigService", () => {
     const fs = makeFakeFileService();
     const snap = await runWithFs(fs, (svc) => Effect.sync(() => svc.snapshot()));
     expect(snap.config).toEqual(defaultConfig);
-    expect(snap.submitter.id).toBe("jiratempo");
+    expect(snap.backend.id).toBe("jiratempo");
   });
 
   it("loads a valid config from disk", async () => {
@@ -34,8 +34,8 @@ describe("ConfigService", () => {
     });
     const snap = await runWithFs(fs, (svc) => Effect.sync(() => svc.snapshot()));
     expect(snap.config.activePluginId).toBe("jiratempo");
-    expect(snap.submitter.id).toBe("jiratempo");
-    expect(snap.submitter.findTicketId("ABC-1")).toBe("ABC-1");
+    expect(snap.backend.id).toBe("jiratempo");
+    expect(snap.backend.findTicketId("ABC-1")).toBe("ABC-1");
   });
 
   it("normalises an unknown active plugin id to the default plugin", async () => {
@@ -47,7 +47,7 @@ describe("ConfigService", () => {
     });
     const snap = await runWithFs(fs, (svc) => Effect.sync(() => svc.snapshot()));
     expect(snap.config.activePluginId).toBe("jiratempo");
-    expect(snap.submitter.id).toBe("jiratempo");
+    expect(snap.backend.id).toBe("jiratempo");
   });
 
   it("falls back to defaults when the config on disk is malformed", async () => {

@@ -31,7 +31,7 @@ describe("parseBillable", () => {
     expect(parseBillable("foo ABC-123 bar", acceptABC)).toBeNull();
   });
 
-  it("returns null when the submitter rejects everything", () => {
+  it("returns null when the backend rejects everything", () => {
     expect(parseBillable("ABC-1 hello", acceptNone)).toBeNull();
   });
 

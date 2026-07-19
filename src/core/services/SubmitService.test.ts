@@ -4,15 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SubmitError } from "../errors";
 import type { SubmitState } from "../submit";
 import type { TimeLog } from "../timeLog";
+import type { Backend, BillableEntry } from "./Backend";
 import { type FakeFileService, makeFakeFileService } from "./fakeFileService";
 import { SubmitService } from "./SubmitService";
-import type { BillableEntry, SubmitterImpl } from "./Submitter";
 
 const acceptABC = (token: string) => (/^ABC-\d+$/.test(token) ? token : null);
 
-const fakeSubmitter = (
-  decide: (entry: BillableEntry, attempt: number) => "ok" | string,
-): SubmitterImpl => {
+const fakeBackend = (decide: (entry: BillableEntry, attempt: number) => "ok" | string): Backend => {
   let count = 0;
   return {
     id: "fake",
@@ -94,7 +92,7 @@ describe("SubmitService", () => {
         svc.subscribe(() => transitions.push(formatTransition(svc.snapshot())));
         yield* svc.submit(
           sampleLog,
-          fakeSubmitter(() => "ok"),
+          fakeBackend(() => "ok"),
         );
         expect(svc.snapshot()).toEqual({ tag: "success", total: 2 });
         vi.advanceTimersByTime(3000);
@@ -115,7 +113,7 @@ describe("SubmitService", () => {
       Effect.gen(function* () {
         const result = yield* svc.submit(
           sampleLog,
-          fakeSubmitter((_, n) => (n === 2 ? "boom" : "ok")),
+          fakeBackend((_, n) => (n === 2 ? "boom" : "ok")),
         );
         expect(result.tag).toBe("error");
         expect(svc.snapshot()).toEqual({ tag: "idle" });
@@ -128,7 +126,7 @@ describe("SubmitService", () => {
       Effect.gen(function* () {
         yield* svc.submit(
           sampleLog,
-          fakeSubmitter(() => "ok"),
+          fakeBackend(() => "ok"),
         );
         const filenames = Object.keys(fs.state.history);
         expect(filenames).toHaveLength(1);
@@ -154,7 +152,7 @@ describe("SubmitService", () => {
       Effect.gen(function* () {
         yield* svc.submit(
           nothingLog,
-          fakeSubmitter(() => "ok"),
+          fakeBackend(() => "ok"),
         );
         const filenames = Object.keys(fs.state.history);
         expect(filenames).toHaveLength(1);
@@ -178,7 +176,7 @@ describe("SubmitService", () => {
       Effect.gen(function* () {
         yield* svc.submit(
           failedFirstLog,
-          fakeSubmitter(() => "boom"),
+          fakeBackend(() => "boom"),
         );
         expect(Object.keys(fs.state.history)).toHaveLength(0);
       }),
@@ -199,7 +197,7 @@ describe("SubmitService", () => {
       Effect.gen(function* () {
         yield* svc.submit(
           sampleLog,
-          fakeSubmitter(() => "ok"),
+          fakeBackend(() => "ok"),
         );
         expect(svc.snapshot().tag).toBe("success");
 
@@ -208,7 +206,7 @@ describe("SubmitService", () => {
 
         yield* svc.submit(
           sampleLog,
-          fakeSubmitter(() => "ok"),
+          fakeBackend(() => "ok"),
         );
         expect(svc.snapshot().tag).toBe("success");
 

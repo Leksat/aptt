@@ -1,14 +1,8 @@
 import { HttpClient, HttpClientRequest } from "@effect/platform";
 import { Effect, Either, Schema } from "effect";
 import { SubmitError, TicketInfoError, WeekTotalsError } from "../../errors";
-import type {
-  BillableEntry,
-  SubmitterPlugin,
-  TicketInfo,
-  WeekRange,
-  WeekTotals,
-} from "../Submitter";
-import { getSetting } from "../Submitter";
+import type { BackendPlugin, BillableEntry, TicketInfo, WeekRange, WeekTotals } from "../Backend";
+import { getSetting } from "../Backend";
 
 const TICKET_ID_RE = /\b[A-Z][A-Z0-9]+-\d+\b/;
 
@@ -28,7 +22,7 @@ interface ResolvedSettings {
   readonly tempoToken: string;
 }
 
-export const jiraTempoPlugin: SubmitterPlugin = {
+export const jiraTempoPlugin: BackendPlugin = {
   id: "jiratempo",
   displayName: "JiraTempo",
   dev: false,

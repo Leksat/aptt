@@ -2,7 +2,7 @@ import { HttpClient, HttpClientResponse } from "@effect/platform";
 import { Effect, Either, Layer } from "effect";
 import { describe, expect, it } from "vitest";
 import { SubmitError, TicketInfoError, WeekTotalsError } from "../../errors";
-import type { BillableEntry, WeekRange } from "../Submitter";
+import type { BillableEntry, WeekRange } from "../Backend";
 import { jiraTempoPlugin } from "./jiraTempo";
 
 interface CapturedRequest {

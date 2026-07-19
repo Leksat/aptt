@@ -2,10 +2,10 @@ import { Effect } from "effect";
 import { type ChangeEvent, useCallback, useSyncExternalStore } from "react";
 import type { ThemeMode } from "../core/config";
 import { runtime } from "../core/runtime";
+import type { Backend } from "../core/services/Backend";
 import { ConfigService, type ConfigSnapshot } from "../core/services/ConfigService";
 import { NotesText, TimeLogText } from "../core/services/persistedText";
 import { SubmitService } from "../core/services/SubmitService";
-import type { SubmitterImpl } from "../core/services/Submitter";
 import { WeekTotalsService, type WeekTotalsState } from "../core/services/WeekTotalsService";
 import type { SubmitResult, SubmitState } from "../core/submit";
 import { surfaced, surfaceError } from "../core/surfaceError";
@@ -32,7 +32,7 @@ export const bootCore = (): Promise<void> =>
       cachedServices = services;
       yield* Effect.forkDaemon(
         services.weekTotals.refresh(
-          services.config.snapshot().submitter,
+          services.config.snapshot().backend,
           currentWeekRange(new Date()),
         ),
       );
@@ -41,7 +41,7 @@ export const bootCore = (): Promise<void> =>
 
 const refreshWeekTotals = (services: Services): void => {
   void runtime.runPromise(
-    services.weekTotals.refresh(services.config.snapshot().submitter, currentWeekRange(new Date())),
+    services.weekTotals.refresh(services.config.snapshot().backend, currentWeekRange(new Date())),
   );
 };
 
@@ -69,7 +69,7 @@ export interface Core {
   readonly submit: {
     readonly state: SubmitState;
     readonly isInFlight: boolean;
-    readonly submit: (log: TimeLog, submitter: SubmitterImpl) => Promise<SubmitResult>;
+    readonly submit: (log: TimeLog, backend: Backend) => Promise<SubmitResult>;
   };
   readonly weekTotals: {
     readonly state: WeekTotalsState;
@@ -122,8 +122,8 @@ export const useCore = (): Core => {
     void runtime.runPromise(services.config.setThemeMode(mode));
   };
 
-  const submit = async (log: TimeLog, submitter: SubmitterImpl): Promise<SubmitResult> => {
-    const result = await runtime.runPromise(services.submit.submit(log, submitter));
+  const submit = async (log: TimeLog, backend: Backend): Promise<SubmitResult> => {
+    const result = await runtime.runPromise(services.submit.submit(log, backend));
     if (result.tag === "error") {
       void runtime.runPromise(surfaceError("Submit failed", result.error.cause));
     } else {

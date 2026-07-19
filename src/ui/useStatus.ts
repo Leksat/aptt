@@ -5,5 +5,5 @@ import { useMinuteTick } from "./useMinuteTick";
 export const useStatus = (): Status => {
   const now = useMinuteTick();
   const { entries, config, submit } = useCore();
-  return statusOf(entries.text, config.snapshot.submitter.findTicketId, submit.state, now);
+  return statusOf(entries.text, config.snapshot.backend.findTicketId, submit.state, now);
 };

@@ -2,7 +2,7 @@ import type { HttpClient } from "@effect/platform";
 import { Effect, Either } from "effect";
 import { type FindTicketId, parseBillable } from "./billable";
 import type { SubmitError } from "./errors";
-import type { BillableEntry } from "./services/Submitter";
+import type { BillableEntry } from "./services/Backend";
 import type { ClosedTimeEntry, TimeLog } from "./timeLog";
 
 export type SubmitState =

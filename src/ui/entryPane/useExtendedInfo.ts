@@ -2,7 +2,7 @@ import { Effect, Either } from "effect";
 import { useEffect, useRef, useState } from "react";
 import { parseBillable } from "../../core/billable";
 import { runtime } from "../../core/runtime";
-import type { SubmitterImpl, TicketInfo } from "../../core/services/Submitter";
+import type { Backend, TicketInfo } from "../../core/services/Backend";
 import type { TimeLog } from "../../core/timeLog";
 import type { FocusedEntry } from "./focusedEntry";
 
@@ -29,17 +29,15 @@ interface Args {
   readonly log: TimeLog;
   readonly focused: FocusedEntry | null;
   readonly now: Date;
-  readonly submitter: SubmitterImpl;
+  readonly backend: Backend;
 }
 
-export const useExtendedInfo = ({ log, focused, now, submitter }: Args): ExtendedInfo | null => {
+export const useExtendedInfo = ({ log, focused, now, backend }: Args): ExtendedInfo | null => {
   const description = focused === null ? "" : focused.entry.description;
   const ticketId =
-    focused === null
-      ? null
-      : (parseBillable(description, submitter.findTicketId)?.ticketId ?? null);
-  const submitterRef = useRef(submitter);
-  submitterRef.current = submitter;
+    focused === null ? null : (parseBillable(description, backend.findTicketId)?.ticketId ?? null);
+  const backendRef = useRef(backend);
+  backendRef.current = backend;
 
   const [ticketInfoState, setTicketInfoState] = useState<TicketInfoState | null>(null);
 
@@ -51,7 +49,7 @@ export const useExtendedInfo = ({ log, focused, now, submitter }: Args): Extende
     let cancelled = false;
     setTicketInfoState({ kind: "loading" });
     void runtime
-      .runPromise(Effect.either(submitterRef.current.fetchTicketInfo(ticketId)))
+      .runPromise(Effect.either(backendRef.current.fetchTicketInfo(ticketId)))
       .then((result) => {
         if (cancelled) return;
         if (Either.isLeft(result)) {
@@ -87,7 +85,7 @@ export const useExtendedInfo = ({ log, focused, now, submitter }: Args): Extende
             log,
             now,
             focusedMinutes,
-            (d) => parseBillable(d, submitter.findTicketId)?.ticketId === ticketId,
+            (d) => parseBillable(d, backend.findTicketId)?.ticketId === ticketId,
           ),
   };
 };

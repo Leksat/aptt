@@ -4,7 +4,7 @@ import { Effect, Either } from "effect";
 import { describe, expect, it } from "vitest";
 import type { FindTicketId } from "./billable";
 import { SubmitError } from "./errors";
-import type { BillableEntry } from "./services/Submitter";
+import type { BillableEntry } from "./services/Backend";
 import { type SubmitFn, type SubmitResult, submitTimeLog } from "./submit";
 import { formatTimeLog, parseTimeLog } from "./timeLog";
 

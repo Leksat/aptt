@@ -42,7 +42,7 @@ export default function App() {
 
 const AppInner = () => {
   const core = useCore();
-  const submitter = core.config.snapshot.submitter;
+  const backend = core.config.snapshot.backend;
   useThemeApplication(core.config.snapshot.config.themeMode);
   const editorRef = useRef<TimeLogEditorRef>(null);
   const focused = useFocusedSource();
@@ -63,7 +63,7 @@ const AppInner = () => {
     log: parsedLog ?? { closed: [], active: null },
     focused: focusedEntry,
     now,
-    submitter,
+    backend,
   });
 
   const handleLineNumberClick = useCallback((startLine: number, anchor: DOMRect) => {
@@ -76,10 +76,10 @@ const AppInner = () => {
   const logIsValid = Either.isRight(parsed);
   const closedCount = Either.isRight(parsed) ? parsed.right.closed.length : 0;
   const closedBillable = Either.isRight(parsed)
-    ? closedBillableMinutes(parsed.right, submitter.findTicketId)
+    ? closedBillableMinutes(parsed.right, backend.findTicketId)
     : 0;
   const trayTitle = Either.isRight(parsed)
-    ? activeBillableTicketId(parsed.right, submitter.findTicketId)
+    ? activeBillableTicketId(parsed.right, backend.findTicketId)
     : null;
   useTrayTitle(trayTitle);
   const submitDisabled = !logIsValid || closedCount === 0 || core.submit.isInFlight;
@@ -88,7 +88,7 @@ const AppInner = () => {
     focused.state,
     core.entries.text,
     core.notes.text,
-    submitter.findTicketId,
+    backend.findTicketId,
   );
   const newFromSelectedDisabled =
     !logIsValid || core.submit.isInFlight || derivedDescription === null;
@@ -112,7 +112,7 @@ const AppInner = () => {
 
   const handleSubmit = async () => {
     if (Either.isLeft(parsed)) return;
-    const blocker = findBlocker(parsed.right, core.entries.text, submitter.findTicketId);
+    const blocker = findBlocker(parsed.right, core.entries.text, backend.findTicketId);
     if (blocker !== null) {
       await message(
         `Submission is blocked because line ${blocker.line} contains the exclamation mark.`,
@@ -125,7 +125,7 @@ const AppInner = () => {
     }
     const ok = await confirm("Are you sure?", { title: "aptt", kind: "warning" });
     if (!ok) return;
-    const result = await core.submit.submit(parsed.right, submitter);
+    const result = await core.submit.submit(parsed.right, backend);
     core.entries.setText(formatTimeLog(result.log));
   };
 
@@ -136,7 +136,7 @@ const AppInner = () => {
           ref={editorRef}
           text={core.entries.text}
           now={now}
-          findTicketId={submitter.findTicketId}
+          findTicketId={backend.findTicketId}
           readOnly={core.submit.isInFlight}
           onChange={core.entries.setText}
           onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}

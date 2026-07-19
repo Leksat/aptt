@@ -10,13 +10,13 @@ import {
   withThemeMode,
 } from "../config";
 import { surfaced } from "../surfaceError";
+import type { Backend } from "./Backend";
+import { buildBackend, defaultPlugin, pluginById } from "./backends/registry";
 import { FileService } from "./FileService";
-import type { SubmitterImpl } from "./Submitter";
-import { buildSubmitter, defaultPlugin, pluginById } from "./submitters/registry";
 
 export interface ConfigSnapshot {
   readonly config: Config;
-  readonly submitter: SubmitterImpl;
+  readonly backend: Backend;
 }
 
 export class ConfigService extends Effect.Service<ConfigService>()("ConfigService", {
@@ -26,7 +26,7 @@ export class ConfigService extends Effect.Service<ConfigService>()("ConfigServic
 
     const snapshotOf = (config: Config): ConfigSnapshot => ({
       config,
-      submitter: buildSubmitter(config.activePluginId, settingsFor(config, config.activePluginId)),
+      backend: buildBackend(config.activePluginId, settingsFor(config, config.activePluginId)),
     });
 
     const loaded = yield* loadInitial(fs.readConfig);

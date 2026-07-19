@@ -3,8 +3,8 @@ import { Effect } from "effect";
 import { carveHistory, historyFilename } from "../history";
 import { type SubmitResult, type SubmitState, submitTimeLog } from "../submit";
 import type { TimeLog } from "../timeLog";
+import type { Backend } from "./Backend";
 import { FileService } from "./FileService";
-import type { SubmitterImpl } from "./Submitter";
 
 const SUCCESS_LINGER_MS = 3000;
 
@@ -39,15 +39,15 @@ export class SubmitService extends Effect.Service<SubmitService>()("SubmitServic
       },
       submit: (
         log: TimeLog,
-        submitter: SubmitterImpl,
+        backend: Backend,
       ): Effect.Effect<SubmitResult, never, HttpClient.HttpClient> =>
         Effect.gen(function* () {
           cancelLinger();
           setState({ tag: "submitting", current: 0, total: 0 });
           const result: SubmitResult = yield* submitTimeLog(
             log,
-            submitter.findTicketId,
-            submitter.submit,
+            backend.findTicketId,
+            backend.submit,
             (current, total) => setState({ tag: "submitting", current, total }),
           );
           const historyText = carveHistory(log, result);
