@@ -100,6 +100,27 @@ describe("jiraTempoPlugin.findTicketId", () => {
   });
 });
 
+describe("jiraTempoPlugin.ticketUrl", () => {
+  it("builds the browse URL from the configured site name", () => {
+    expect(jiraTempoPlugin.make(completeSettings).ticketUrl("ABC-123")).toBe(
+      "https://acme.atlassian.net/browse/ABC-123",
+    );
+  });
+
+  it("normalizes the site name the same way the API paths do", () => {
+    for (const siteName of ["acme", "acme.atlassian.net", "https://acme.atlassian.net"]) {
+      expect(jiraTempoPlugin.make({ siteName }).ticketUrl("ABC-123")).toBe(
+        "https://acme.atlassian.net/browse/ABC-123",
+      );
+    }
+  });
+
+  it("returns null when the site name is not configured", () => {
+    expect(jiraTempoPlugin.make({}).ticketUrl("ABC-123")).toBeNull();
+    expect(jiraTempoPlugin.make({ siteName: "   " }).ticketUrl("ABC-123")).toBeNull();
+  });
+});
+
 describe("jiraTempoPlugin.submit", () => {
   it("looks up the issue then posts a worklog", async () => {
     const { layer, captured } = stubClient((req) => {
@@ -236,7 +257,7 @@ const jiraIssueResponse = (over: {
   });
 
 describe("jiraTempoPlugin.fetchTicketInfo", () => {
-  it("returns title, url, estimate, and logged (all workers) from one Jira request", async () => {
+  it("returns title, estimate, and logged (all workers) from one Jira request", async () => {
     const { layer, captured } = stubClient(() => ({
       status: 200,
       body: jiraIssueResponse({
@@ -252,7 +273,6 @@ describe("jiraTempoPlugin.fetchTicketInfo", () => {
     if (Either.isRight(result)) {
       expect(result.right).toEqual({
         title: "Fix login",
-        url: "https://acme.atlassian.net/browse/ABC-123",
         estimateMinutes: 300,
         loggedMinutes: 30,
       });

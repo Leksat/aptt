@@ -19,23 +19,27 @@ export interface ExtendedInfoAggregate {
 }
 
 export interface ExtendedInfo {
+  readonly kind: "entry" | "ticket";
   readonly ticketId: string | null;
   readonly ticketInfo: TicketInfoState | null;
-  readonly sameDescription: ExtendedInfoAggregate;
-  readonly sameTicket: ExtendedInfoAggregate;
+  readonly localMinutes: number;
+  readonly sameDescription: ExtendedInfoAggregate | null;
+  readonly sameTicket: ExtendedInfoAggregate | null;
 }
+
+export type ExtendedInfoTarget =
+  | { readonly kind: "entry"; readonly focused: FocusedEntry }
+  | { readonly kind: "ticket"; readonly ticketId: string };
 
 interface Args {
   readonly log: TimeLog;
-  readonly focused: FocusedEntry | null;
+  readonly target: ExtendedInfoTarget | null;
   readonly now: Date;
   readonly backend: Backend;
 }
 
-export const useExtendedInfo = ({ log, focused, now, backend }: Args): ExtendedInfo | null => {
-  const description = focused === null ? "" : focused.entry.description;
-  const ticketId =
-    focused === null ? null : (parseBillable(description, backend.findTicketId)?.ticketId ?? null);
+export const useExtendedInfo = ({ log, target, now, backend }: Args): ExtendedInfo | null => {
+  const ticketId = targetTicketId(target, backend);
   const backendRef = useRef(backend);
   backendRef.current = backend;
 
@@ -67,28 +71,47 @@ export const useExtendedInfo = ({ log, focused, now, backend }: Args): ExtendedI
     };
   }, [ticketId]);
 
-  if (focused === null) return null;
+  if (target === null) return null;
 
-  const focusedMinutes =
-    focused.kind === "closed"
-      ? diffMinutes(focused.entry.start, focused.entry.end)
-      : diffMinutes(focused.entry.start, floorToMinute(now));
+  const focusedMinutes = target.kind === "entry" ? entryMinutes(target.focused, now) : 0;
+  const localAggregate =
+    ticketId === null
+      ? null
+      : aggregate(
+          log,
+          now,
+          focusedMinutes,
+          (d) => parseBillable(d, backend.findTicketId)?.ticketId === ticketId,
+        );
 
   return {
+    kind: target.kind,
     ticketId,
     ticketInfo: ticketInfoState,
-    sameDescription: aggregate(log, now, focusedMinutes, (d) => d.trim() === description.trim()),
-    sameTicket:
-      ticketId === null
-        ? { count: 0, minutes: 0, focusedMinutes: 0 }
-        : aggregate(
+    localMinutes: localAggregate?.minutes ?? 0,
+    sameDescription:
+      target.kind === "entry"
+        ? aggregate(
             log,
             now,
             focusedMinutes,
-            (d) => parseBillable(d, backend.findTicketId)?.ticketId === ticketId,
-          ),
+            (d) => d.trim() === target.focused.entry.description.trim(),
+          )
+        : null,
+    sameTicket: localAggregate,
   };
 };
+
+const targetTicketId = (target: ExtendedInfoTarget | null, backend: Backend): string | null => {
+  if (target === null) return null;
+  if (target.kind === "ticket") return target.ticketId;
+  return parseBillable(target.focused.entry.description, backend.findTicketId)?.ticketId ?? null;
+};
+
+const entryMinutes = (focused: FocusedEntry, now: Date): number =>
+  focused.kind === "closed"
+    ? diffMinutes(focused.entry.start, focused.entry.end)
+    : diffMinutes(focused.entry.start, floorToMinute(now));
 
 const aggregate = (
   log: TimeLog,

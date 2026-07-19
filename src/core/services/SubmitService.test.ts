@@ -15,6 +15,7 @@ const fakeBackend = (decide: (entry: BillableEntry, attempt: number) => "ok" | s
   return {
     id: "fake",
     findTicketId: acceptABC,
+    ticketUrl: () => null,
     submit: (entry) =>
       Effect.suspend(() => {
         count += 1;

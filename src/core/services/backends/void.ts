@@ -14,6 +14,7 @@ export const voidPlugin: BackendPlugin = {
     return {
       id: "void",
       findTicketId: (text) => text.match(JIRA_ISSUE_KEY_RE)?.[0] ?? null,
+      ticketUrl: () => null,
       submit: () =>
         Effect.gen(function* () {
           count += 1;

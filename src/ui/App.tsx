@@ -1,6 +1,6 @@
 import { confirm, message } from "@tauri-apps/plugin-dialog";
 import { Either } from "effect";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
 import {
   activeBillableTicketId,
@@ -17,12 +17,14 @@ import {
   appendNewStart,
   formatTimeLog,
   parseTimeLog,
+  type TimeLog,
   withActiveDescription,
 } from "../core/timeLog";
 import { EntryDetails } from "./entryPane/EntryDetails";
 import { EntryTooltip } from "./entryPane/EntryTooltip";
 import { entryAtStartLine } from "./entryPane/focusedEntry";
-import { useExtendedInfo } from "./entryPane/useExtendedInfo";
+import { TicketPopupProvider, useTicketPopup } from "./entryPane/ticketPopup";
+import { type ExtendedInfoTarget, useExtendedInfo } from "./entryPane/useExtendedInfo";
 import { FocusedSourceProvider, useFocusedSource } from "./FocusedSourceContext";
 import { RightPane } from "./RightPane";
 import { StatusLine } from "./StatusLine";
@@ -47,7 +49,7 @@ const AppInner = () => {
   const editorRef = useRef<TimeLogEditorRef>(null);
   const focused = useFocusedSource();
   const now = useMinuteTick();
-  const [tooltip, setTooltip] = useState<{ line: number; anchor: DOMRect } | null>(null);
+  const popup = useTicketPopup();
 
   useEffect(() => {
     const onFocus = () => editorRef.current?.focusEnd();
@@ -57,21 +59,13 @@ const AppInner = () => {
 
   const parsed = parseTimeLog(core.entries.text);
   const parsedLog = Either.isRight(parsed) ? parsed.right : null;
-  const focusedEntry =
-    tooltip !== null && parsedLog !== null ? entryAtStartLine(parsedLog, tooltip.line) : null;
+  const extendedTarget = resolveTarget(popup.target, parsedLog);
   const extendedInfo = useExtendedInfo({
     log: parsedLog ?? { closed: [], active: null },
-    focused: focusedEntry,
+    target: extendedTarget,
     now,
     backend,
   });
-
-  const handleLineNumberClick = useCallback((startLine: number, anchor: DOMRect) => {
-    setTooltip((prev) =>
-      prev !== null && prev.line === startLine ? null : { line: startLine, anchor },
-    );
-  }, []);
-  const dismissTooltip = useCallback(() => setTooltip(null), []);
 
   const logIsValid = Either.isRight(parsed);
   const closedCount = Either.isRight(parsed) ? parsed.right.closed.length : 0;
@@ -130,63 +124,81 @@ const AppInner = () => {
   };
 
   return (
-    <main className="flex h-screen flex-col gap-3 p-3">
-      <div className="flex min-h-0 flex-1 gap-3">
-        <TimeLogEditor
-          ref={editorRef}
-          text={core.entries.text}
-          now={now}
-          findTicketId={backend.findTicketId}
-          readOnly={core.submit.isInFlight}
-          onChange={core.entries.setText}
-          onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}
-          onBlur={() => focused.set((s) => (s?.source === "timeLog" ? null : s))}
-          onLineNumberClick={handleLineNumberClick}
-        />
-        <RightPane />
-      </div>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={handleNew}
-          disabled={!logIsValid || core.submit.isInFlight}
-          className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
-        >
-          New
-        </button>
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={handleNewFromSelected}
-          disabled={newFromSelectedDisabled}
-          className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
-        >
-          New from cursor
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={submitDisabled}
-          className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
-        >
-          {submitDisabled ? "Submit" : `Submit ${formatDurationShort(closedBillable)}`}
-        </button>
-        <button
-          type="button"
-          onClick={core.history.open}
-          className="rounded border border-[var(--color-border)] px-3 py-1"
-        >
-          History
-        </button>
-      </div>
-      <StatusLine />
-      {tooltip !== null && extendedInfo !== null && (
-        <EntryTooltip anchor={tooltip.anchor} onDismiss={dismissTooltip}>
-          <EntryDetails info={extendedInfo} />
-        </EntryTooltip>
-      )}
-    </main>
+    <TicketPopupProvider value={popup.actions}>
+      <main className="flex h-screen flex-col gap-3 p-3">
+        <div className="flex min-h-0 flex-1 gap-3">
+          <TimeLogEditor
+            ref={editorRef}
+            text={core.entries.text}
+            now={now}
+            findTicketId={backend.findTicketId}
+            ticketUrl={backend.ticketUrl}
+            readOnly={core.submit.isInFlight}
+            onChange={core.entries.setText}
+            onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}
+            onBlur={() => focused.set((s) => (s?.source === "timeLog" ? null : s))}
+          />
+          <RightPane />
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleNew}
+            disabled={!logIsValid || core.submit.isInFlight}
+            className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
+          >
+            New
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleNewFromSelected}
+            disabled={newFromSelectedDisabled}
+            className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
+          >
+            New from cursor
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitDisabled}
+            className="rounded border border-[var(--color-border)] px-3 py-1 disabled:opacity-50"
+          >
+            {submitDisabled ? "Submit" : `Submit ${formatDurationShort(closedBillable)}`}
+          </button>
+          <button
+            type="button"
+            onClick={core.history.open}
+            className="rounded border border-[var(--color-border)] px-3 py-1"
+          >
+            History
+          </button>
+        </div>
+        <StatusLine />
+        {popup.anchor !== null && extendedInfo !== null && (
+          <EntryTooltip
+            anchor={popup.anchor}
+            onDismiss={popup.dismiss}
+            onMouseEnter={popup.onPopupMouseEnter}
+            onMouseLeave={popup.onPopupMouseLeave}
+          >
+            <EntryDetails info={extendedInfo} />
+          </EntryTooltip>
+        )}
+      </main>
+    </TicketPopupProvider>
   );
+};
+
+const resolveTarget = (
+  target: ReturnType<typeof useTicketPopup>["target"],
+  log: TimeLog | null,
+): ExtendedInfoTarget | null => {
+  if (target === null) return null;
+  if (target.kind === "ticket") return { kind: "ticket", ticketId: target.ticketId };
+  if (log === null) return null;
+  const focused = entryAtStartLine(log, target.startLine);
+  return focused === null ? null : { kind: "entry", focused };
 };
 
 const deriveDescription = (

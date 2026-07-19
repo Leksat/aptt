@@ -2,6 +2,7 @@ import type { Range } from "@codemirror/state";
 import { Decoration, type DecorationSet, type EditorView, ViewPlugin } from "@codemirror/view";
 import { lineDurations } from "../../core/billable";
 import { findAllBlockers } from "../../core/blocker";
+import { firstTicketRef } from "../../core/ticketRef";
 import { DurationWidget } from "./durationWidget";
 import { timeLogStateField } from "./stateField";
 
@@ -21,12 +22,23 @@ export const timeLogDecorationsPlugin = ViewPlugin.define(
 
 const errorLineDecoration = Decoration.line({ class: "cm-aptt-error-line" });
 const blockerMarkDecoration = Decoration.mark({ class: "cm-aptt-blocker" });
+const ticketMarkDecoration = Decoration.mark({ class: "cm-aptt-ticket" });
+const ticketLinkMarkDecoration = Decoration.mark({ class: "cm-aptt-ticket-link" });
 
 const buildDecorations = (view: EditorView): DecorationSet => {
   const state = view.state.field(timeLogStateField);
   const doc = view.state.doc;
   const text = doc.toString();
   const ranges: Range<Decoration>[] = [];
+
+  for (let lineNumber = 2; lineNumber <= doc.lines; lineNumber += 2) {
+    const line = doc.line(lineNumber);
+    const ref = firstTicketRef(line.text, state.findTicketId);
+    if (ref === null) continue;
+    const decoration =
+      state.ticketUrl(ref.ticketId) === null ? ticketMarkDecoration : ticketLinkMarkDecoration;
+    ranges.push(decoration.range(line.from + ref.from, line.from + ref.to));
+  }
 
   if (
     state.parseError !== null &&

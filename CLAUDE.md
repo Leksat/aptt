@@ -1,7 +1,7 @@
 - Overrall: @README.md
 - Vocabulary: @CONTEXT.md
 - Local env: @.envrc, @devbox.json
-- Package: package.json
+- Package: @package.json
 
 ## After changes
 

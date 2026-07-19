@@ -1,5 +1,4 @@
 import { formatDurationShort } from "../../core/billable";
-import { Link } from "../Link";
 import type { ExtendedInfo, ExtendedInfoAggregate, TicketInfoState } from "./useExtendedInfo";
 
 interface Props {
@@ -9,28 +8,43 @@ interface Props {
 export const EntryDetails = ({ info }: Props) => {
   const showJiraCard =
     info.ticketId !== null && info.ticketInfo !== null && info.ticketInfo.kind !== "absent";
-  const showSameDescription = info.sameDescription.count >= 2;
-  const showSameTicket = info.ticketId !== null && info.sameTicket.count >= 2;
+  const showSameDescription = info.sameDescription !== null && info.sameDescription.count >= 2;
+  const showSameTicket =
+    info.ticketId !== null &&
+    info.sameTicket !== null &&
+    info.sameTicket.count >= (info.kind === "entry" ? 2 : 1);
 
   if (!showJiraCard && !showSameDescription && !showSameTicket) {
-    return <div className="text-[var(--color-muted)]">No info for this entry</div>;
+    return <div className="text-[var(--color-muted)]">No info for this ticket</div>;
   }
+
+  const showStats =
+    info.ticketInfo !== null &&
+    info.ticketInfo.kind === "ok" &&
+    (info.ticketInfo.info.estimateMinutes !== null || info.ticketInfo.info.loggedMinutes > 0);
 
   return (
     <div className="flex flex-col gap-3">
-      {showJiraCard && info.ticketId !== null && info.ticketInfo !== null && (
-        <JiraCard
-          ticketId={info.ticketId}
-          state={info.ticketInfo}
-          localMinutes={info.sameTicket.minutes}
-        />
+      {showJiraCard && info.ticketInfo !== null && (
+        <Card>
+          <TitleRow state={info.ticketInfo} />
+        </Card>
       )}
-      {showSameDescription && (
+      {showStats && info.ticketInfo !== null && info.ticketInfo.kind === "ok" && (
+        <Card>
+          <EstimateRows
+            estimateMinutes={info.ticketInfo.info.estimateMinutes}
+            remoteMinutes={info.ticketInfo.info.loggedMinutes}
+            localMinutes={info.localMinutes}
+          />
+        </Card>
+      )}
+      {showSameDescription && info.sameDescription !== null && (
         <Card>
           <Row left="Same description" right={splitFormula(info.sameDescription)} />
         </Card>
       )}
-      {showSameTicket && info.ticketId !== null && (
+      {showSameTicket && info.ticketId !== null && info.sameTicket !== null && (
         <Card>
           <Row left={`Same ticket (${info.ticketId})`} right={splitFormula(info.sameTicket)} />
         </Card>
@@ -39,31 +53,7 @@ export const EntryDetails = ({ info }: Props) => {
   );
 };
 
-interface JiraCardProps {
-  readonly ticketId: string;
-  readonly state: TicketInfoState;
-  readonly localMinutes: number;
-}
-
-const JiraCard = ({ ticketId, state, localMinutes }: JiraCardProps) => {
-  return (
-    <Card>
-      <div className="flex flex-col gap-2">
-        <TitleRow ticketId={ticketId} state={state} />
-        {state.kind === "ok" &&
-          (state.info.estimateMinutes !== null || state.info.loggedMinutes > 0) && (
-            <EstimateRows
-              estimateMinutes={state.info.estimateMinutes}
-              remoteMinutes={state.info.loggedMinutes}
-              localMinutes={localMinutes}
-            />
-          )}
-      </div>
-    </Card>
-  );
-};
-
-const TitleRow = ({ ticketId, state }: { ticketId: string; state: TicketInfoState }) => {
+const TitleRow = ({ state }: { state: TicketInfoState }) => {
   if (state.kind === "loading") {
     return <SkeletonLine width="60%" />;
   }
@@ -71,11 +61,7 @@ const TitleRow = ({ ticketId, state }: { ticketId: string; state: TicketInfoStat
     return <span className="text-[var(--color-attention)]">{state.message}</span>;
   }
   if (state.kind === "absent") return null;
-  return (
-    <Link href={state.info.url}>
-      [{ticketId}] {state.info.title}
-    </Link>
-  );
+  return <span className="font-medium">{state.info.title}</span>;
 };
 
 interface EstimateRowsProps {

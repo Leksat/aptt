@@ -61,16 +61,20 @@ The portion of a notes line from the first `#` to the end of the line, inclusive
 _Avoid_: remark, annotation.
 
 **Extended info**:
-The per-time-entry context shown alongside a time entry: ticket info from the external system (when available), plus aggregations across the time log for the same description and same ticket ID. Read-only; never submitted. Additive quantities are shown as a formula in the house standard `current + other = total`, where the current operand is always the one printed nearby (see local, this). A formula collapses to a single value when either operand is zero.
+The context shown for a ticket ID, read-only and never submitted. Anchored either to a time entry — ticket info from the external system (when available) plus aggregations across the time log for the same description and same ticket ID — or, from notes where there is no time entry, to a bare ticket ID: ticket info plus the same-ticket local total only, without the same-description card or the `this + rest` split. Additive quantities are shown as a formula in the house standard `current + other = total`, where the current operand is always the one printed nearby (see local, this). A formula collapses to a single value when either operand is zero.
 _Avoid_: details, summary, panel.
 
 **Extended-info tooltip**:
-The only surface for extended info, opened by clicking a time entry's description line number in the gutter and anchored to that number.
+The only surface for extended info, opened by cmd-hovering a ticket ID in either editor and anchored to that ticket-ID span. Persists while cmd is held (re-anchoring when another ticket ID is cmd-hovered); on cmd-release it closes unless the mouse is over it, in which case it survives and closes on mouse-out. Window blur force-closes it.
 _Avoid_: details panel, info popup, info card, popover.
 
 **Ticket info**:
-The external system's snapshot of a ticket ID — title, URL, estimate, and time already logged externally by this worker. Supplied by the active backend; absent when the backend has no remote concept (e.g. void) or the ticket ID is not real in the external system.
+The external system's snapshot of a ticket ID — title, estimate, and time already logged externally by this worker. Supplied by the active backend; absent when the backend has no remote concept (e.g. void) or the ticket ID is not real in the external system.
 _Avoid_: Jira card, issue details.
+
+**Ticket URL**:
+The external address of a ticket ID (e.g. its Jira browse link), derived by the active backend from the ticket ID alone — no fetch, unlike ticket info. Absent when the backend has no remote concept (e.g. void) or is not configured. When present, the ticket ID becomes a cmd-clickable link (in both the time log and notes) that opens it.
+_Avoid_: issue link, browse link, ticket address.
 
 **Logged externally**:
 Total time already submitted to the external system against a ticket ID, across all workers. For JiraTempo, the value of Jira's `aggregatetimespent`. Surfaced in extended info as remote.

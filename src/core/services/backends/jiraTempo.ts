@@ -6,6 +6,9 @@ import { getSetting } from "../Backend";
 
 const TICKET_ID_RE = /\b[A-Z][A-Z0-9]+-\d+\b/;
 
+const browseUrl = (siteName: string, ticketId: string): string =>
+  `https://${siteName}.atlassian.net/browse/${ticketId}`;
+
 const REQUIRED_FIELDS = [
   { key: "siteName", label: "Jira site name" },
   { key: "email", label: "Jira email" },
@@ -63,6 +66,10 @@ export const jiraTempoPlugin: BackendPlugin = {
   make: (settings) => ({
     id: "jiratempo",
     findTicketId: (text) => text.match(TICKET_ID_RE)?.[0] ?? null,
+    ticketUrl: (ticketId) => {
+      const siteName = normalizeSiteName(getSetting(settings, "siteName"));
+      return siteName === "" ? null : browseUrl(siteName, ticketId);
+    },
     submit: (entry) =>
       Effect.gen(function* () {
         const resolved = yield* resolveSettings(settings, (cause) => new SubmitError({ cause }));
@@ -80,7 +87,6 @@ export const jiraTempoPlugin: BackendPlugin = {
         const issue = yield* fetchJiraIssueDetails(http, resolved, ticketId);
         const info: TicketInfo = {
           title: issue.summary,
-          url: `https://${resolved.siteName}.atlassian.net/browse/${ticketId}`,
           estimateMinutes: secondsToMinutes(issue.estimateSeconds),
           loggedMinutes: secondsToMinutes(issue.loggedSeconds) ?? 0,
         };

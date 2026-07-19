@@ -11,7 +11,6 @@ export interface BillableEntry {
 
 export interface TicketInfo {
   readonly title: string;
-  readonly url: string;
   readonly estimateMinutes: number | null;
   readonly loggedMinutes: number;
 }
@@ -28,6 +27,7 @@ export interface WeekTotals {
 export interface Backend {
   readonly id: string;
   readonly findTicketId: (text: string) => string | null;
+  readonly ticketUrl: (ticketId: string) => string | null;
   readonly submit: (
     entry: BillableEntry,
   ) => Effect.Effect<void, SubmitError, HttpClient.HttpClient>;
