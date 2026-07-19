@@ -1,22 +1,24 @@
-import { useState } from "react";
 import { HistoryPane } from "./HistoryPane";
 import { NotesPane } from "./NotesPane";
 import { SettingsPane } from "./SettingsPane";
 
-const TABS = ["Notes", "History", "Settings"] as const;
-type Tab = (typeof TABS)[number];
+export const RIGHT_TABS = ["Notes", "History", "Settings"] as const;
+export type RightTab = (typeof RIGHT_TABS)[number];
 
-export const RightPane = () => {
-  const [active, setActive] = useState<Tab>("Notes");
+interface Props {
+  readonly active: RightTab;
+  readonly onSelect: (tab: RightTab) => void;
+}
 
+export const RightPane = ({ active, onSelect }: Props) => {
   return (
     <aside className="flex flex-1 flex-col">
       <div className="flex border-[var(--color-border)] border-b">
-        {TABS.map((tab) => (
+        {RIGHT_TABS.map((tab) => (
           <button
             key={tab}
             type="button"
-            onClick={() => setActive(tab)}
+            onClick={() => onSelect(tab)}
             className={tabClass(tab === active)}
           >
             {tab}

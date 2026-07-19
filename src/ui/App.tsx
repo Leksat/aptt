@@ -1,6 +1,6 @@
 import { confirm, message } from "@tauri-apps/plugin-dialog";
 import { Either } from "effect";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import {
   activeBillableTicketId,
@@ -26,7 +26,7 @@ import { entryAtStartLine } from "./entryPane/focusedEntry";
 import { TicketPopupProvider, useTicketPopup } from "./entryPane/ticketPopup";
 import { type ExtendedInfoTarget, useExtendedInfo } from "./entryPane/useExtendedInfo";
 import { FocusedSourceProvider, useFocusedSource } from "./FocusedSourceContext";
-import { RightPane } from "./RightPane";
+import { RightPane, type RightTab } from "./RightPane";
 import { StatusLine } from "./StatusLine";
 import { TimeLogEditor, type TimeLogEditorRef } from "./TimeLogEditor";
 import { useCore } from "./useCore";
@@ -50,6 +50,7 @@ const AppInner = () => {
   const focused = useFocusedSource();
   const now = useMinuteTick();
   const popup = useTicketPopup();
+  const [rightTab, setRightTab] = useState<RightTab>("Notes");
 
   useEffect(() => {
     const onFocus = () => editorRef.current?.focusEnd();
@@ -138,7 +139,7 @@ const AppInner = () => {
             onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}
             onBlur={() => focused.set((s) => (s?.source === "timeLog" ? null : s))}
           />
-          <RightPane />
+          <RightPane active={rightTab} onSelect={setRightTab} />
         </div>
         <div className="flex gap-2">
           <button
@@ -166,6 +167,15 @@ const AppInner = () => {
           >
             {submitDisabled ? "Submit" : `Submit ${formatDurationShort(closedBillable)}`}
           </button>
+          {rightTab === "History" && (
+            <button
+              type="button"
+              onClick={core.history.open}
+              className="ml-auto rounded border border-[var(--color-border)] px-3 py-1"
+            >
+              Open history folder
+            </button>
+          )}
         </div>
         <StatusLine />
         {popup.anchor !== null && extendedInfo !== null && (
