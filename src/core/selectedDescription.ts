@@ -1,4 +1,4 @@
-import { type FindTargetId, parseBillable } from "./billable";
+import { type FindTicketId, parseBillable } from "./billable";
 import { commentStart } from "./notes";
 
 export const selectedDescriptionFromTimeLog = (text: string, caret: number): string | null => {
@@ -14,7 +14,7 @@ export const selectedDescriptionFromTimeLog = (text: string, caret: number): str
 export const selectedDescriptionFromNotes = (
   text: string,
   caret: number,
-  findTargetId: FindTargetId,
+  findTicketId: FindTicketId,
 ): string | null => {
   const lines = text.split("\n");
   const line = lines[lineIndexAt(text, caret)];
@@ -22,7 +22,7 @@ export const selectedDescriptionFromNotes = (
   const at = commentStart(line);
   const beforeComment = at === null ? line : line.slice(0, at);
   const trimmed = beforeComment.trim();
-  return parseBillable(trimmed, findTargetId) === null ? null : trimmed;
+  return parseBillable(trimmed, findTicketId) === null ? null : trimmed;
 };
 
 const lineIndexAt = (text: string, caret: number): number =>

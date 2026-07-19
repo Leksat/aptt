@@ -1,5 +1,5 @@
 import { Either } from "effect";
-import { type FindTargetId, totalBillableMinutes } from "./billable";
+import { type FindTicketId, totalBillableMinutes } from "./billable";
 import type { SubmitState } from "./submit";
 import { parseTimeLog } from "./timeLog";
 
@@ -11,7 +11,7 @@ export type Status =
 
 export const statusOf = (
   text: string,
-  findTargetId: FindTargetId,
+  findTicketId: FindTicketId,
   submitState: SubmitState,
   now: Date,
 ): Status => {
@@ -25,5 +25,5 @@ export const statusOf = (
   if (Either.isLeft(parsed)) {
     return { tag: "parseError", line: parsed.left.line, message: parsed.left.message };
   }
-  return { tag: "billable", minutes: totalBillableMinutes(parsed.right, findTargetId, now) };
+  return { tag: "billable", minutes: totalBillableMinutes(parsed.right, findTicketId, now) };
 };

@@ -42,7 +42,7 @@ export class SubmitError extends Data.TaggedError("SubmitError")<{
   readonly cause: unknown;
 }> {}
 
-export class TargetInfoError extends Data.TaggedError("TargetInfoError")<{
+export class TicketInfoError extends Data.TaggedError("TicketInfoError")<{
   readonly cause: string;
 }> {}
 

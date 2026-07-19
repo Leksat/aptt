@@ -23,7 +23,7 @@ export const useWeekTotal = (): WeekTotal | null => {
   if (state.tag === "pending" || state.tag === "unavailable") return null;
   if (state.tag === "error") return { tag: "cannotFetch" };
 
-  const billable = totalBillableMinutes(parsed.right, config.snapshot.submitter.findTargetId, now);
+  const billable = totalBillableMinutes(parsed.right, config.snapshot.submitter.findTicketId, now);
   return {
     tag: "loaded",
     billableMinutes: billable,

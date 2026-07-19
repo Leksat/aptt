@@ -3,7 +3,7 @@ import { Either } from "effect";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import {
-  activeBillableTargetId,
+  activeBillableTicketId,
   closedBillableMinutes,
   formatDurationShort,
 } from "../core/billable";
@@ -76,10 +76,10 @@ const AppInner = () => {
   const logIsValid = Either.isRight(parsed);
   const closedCount = Either.isRight(parsed) ? parsed.right.closed.length : 0;
   const closedBillable = Either.isRight(parsed)
-    ? closedBillableMinutes(parsed.right, submitter.findTargetId)
+    ? closedBillableMinutes(parsed.right, submitter.findTicketId)
     : 0;
   const trayTitle = Either.isRight(parsed)
-    ? activeBillableTargetId(parsed.right, submitter.findTargetId)
+    ? activeBillableTicketId(parsed.right, submitter.findTicketId)
     : null;
   useTrayTitle(trayTitle);
   const submitDisabled = !logIsValid || closedCount === 0 || core.submit.isInFlight;
@@ -88,7 +88,7 @@ const AppInner = () => {
     focused.state,
     core.entries.text,
     core.notes.text,
-    submitter.findTargetId,
+    submitter.findTicketId,
   );
   const newFromSelectedDisabled =
     !logIsValid || core.submit.isInFlight || derivedDescription === null;
@@ -112,7 +112,7 @@ const AppInner = () => {
 
   const handleSubmit = async () => {
     if (Either.isLeft(parsed)) return;
-    const blocker = findBlocker(parsed.right, core.entries.text, submitter.findTargetId);
+    const blocker = findBlocker(parsed.right, core.entries.text, submitter.findTicketId);
     if (blocker !== null) {
       await message(
         `Submission is blocked because line ${blocker.line} contains the exclamation mark.`,
@@ -136,7 +136,7 @@ const AppInner = () => {
           ref={editorRef}
           text={core.entries.text}
           now={now}
-          findTargetId={submitter.findTargetId}
+          findTicketId={submitter.findTicketId}
           readOnly={core.submit.isInFlight}
           onChange={core.entries.setText}
           onCaretChange={(caret) => focused.set({ source: "timeLog", caret })}
@@ -193,9 +193,9 @@ const deriveDescription = (
   state: ReturnType<typeof useFocusedSource>["state"],
   timeLogText: string,
   notesText: string,
-  findTargetId: (text: string) => string | null,
+  findTicketId: (text: string) => string | null,
 ): string | null => {
   if (state === null) return null;
   if (state.source === "timeLog") return selectedDescriptionFromTimeLog(timeLogText, state.caret);
-  return selectedDescriptionFromNotes(notesText, state.caret, findTargetId);
+  return selectedDescriptionFromNotes(notesText, state.caret, findTicketId);
 };

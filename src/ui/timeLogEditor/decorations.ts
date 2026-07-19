@@ -37,7 +37,7 @@ const buildDecorations = (view: EditorView): DecorationSet => {
     ranges.push(errorLineDecoration.range(line.from));
   }
 
-  for (const blocker of findAllBlockers(state.log, text, state.findTargetId)) {
+  for (const blocker of findAllBlockers(state.log, text, state.findTicketId)) {
     if (blocker.to <= doc.length) {
       ranges.push(blockerMarkDecoration.range(blocker.from, blocker.to));
     }

@@ -1,16 +1,16 @@
 import { HttpClient, HttpClientRequest } from "@effect/platform";
 import { Effect, Either, Schema } from "effect";
-import { SubmitError, TargetInfoError, WeekTotalsError } from "../../errors";
+import { SubmitError, TicketInfoError, WeekTotalsError } from "../../errors";
 import type {
   BillableEntry,
   SubmitterPlugin,
-  TargetInfo,
+  TicketInfo,
   WeekRange,
   WeekTotals,
 } from "../Submitter";
 import { getSetting } from "../Submitter";
 
-const TARGET_ID_RE = /\b[A-Z][A-Z0-9]+-\d+\b/;
+const TICKET_ID_RE = /\b[A-Z][A-Z0-9]+-\d+\b/;
 
 const REQUIRED_FIELDS = [
   { key: "siteName", label: "Jira site name" },
@@ -68,25 +68,25 @@ export const jiraTempoPlugin: SubmitterPlugin = {
   ],
   make: (settings) => ({
     id: "jiratempo",
-    findTargetId: (text) => text.match(TARGET_ID_RE)?.[0] ?? null,
+    findTicketId: (text) => text.match(TICKET_ID_RE)?.[0] ?? null,
     submit: (entry) =>
       Effect.gen(function* () {
         const resolved = yield* resolveSettings(settings, (cause) => new SubmitError({ cause }));
         const http = yield* HttpClient.HttpClient;
-        const issueId = yield* lookupIssueId(http, resolved, entry.targetId);
+        const issueId = yield* lookupIssueId(http, resolved, entry.ticketId);
         yield* postWorklog(http, resolved, entry, issueId);
       }),
-    fetchTargetInfo: (targetId) =>
+    fetchTicketInfo: (ticketId) =>
       Effect.gen(function* () {
         const resolved = yield* resolveSettings(
           settings,
-          (cause) => new TargetInfoError({ cause }),
+          (cause) => new TicketInfoError({ cause }),
         );
         const http = yield* HttpClient.HttpClient;
-        const issue = yield* fetchJiraIssueDetails(http, resolved, targetId);
-        const info: TargetInfo = {
+        const issue = yield* fetchJiraIssueDetails(http, resolved, ticketId);
+        const info: TicketInfo = {
           title: issue.summary,
-          url: `https://${resolved.siteName}.atlassian.net/browse/${targetId}`,
+          url: `https://${resolved.siteName}.atlassian.net/browse/${ticketId}`,
           estimateMinutes: secondsToMinutes(issue.estimateSeconds),
           loggedMinutes: secondsToMinutes(issue.loggedSeconds) ?? 0,
         };
@@ -204,10 +204,10 @@ const resolveSettingsOrNull = (
 const lookupIssueId = (
   http: HttpClient.HttpClient,
   s: ResolvedSettings,
-  targetId: string,
+  ticketId: string,
 ): Effect.Effect<string, SubmitError> =>
   Effect.gen(function* () {
-    const url = `https://${s.siteName}.atlassian.net/rest/api/3/issue/${targetId}`;
+    const url = `https://${s.siteName}.atlassian.net/rest/api/3/issue/${ticketId}`;
     const request = HttpClientRequest.get(url).pipe(
       HttpClientRequest.basicAuth(s.email, s.jiraToken),
       HttpClientRequest.acceptJson,
@@ -221,7 +221,7 @@ const lookupIssueId = (
       const body = yield* response.text.pipe(Effect.orElseSucceed(() => ""));
       return yield* Effect.fail(
         new SubmitError({
-          cause: `Jira lookup failed for ${targetId}: GET ${url} → ${response.status} — ${body.slice(0, 300)}`,
+          cause: `Jira lookup failed for ${ticketId}: GET ${url} → ${response.status} — ${body.slice(0, 300)}`,
         }),
       );
     }
@@ -261,10 +261,10 @@ const secondsToMinutes = (s: number | null): number | null =>
 const fetchJiraIssueDetails = (
   http: HttpClient.HttpClient,
   s: ResolvedSettings,
-  targetId: string,
-): Effect.Effect<JiraIssueDetails, TargetInfoError> =>
+  ticketId: string,
+): Effect.Effect<JiraIssueDetails, TicketInfoError> =>
   Effect.gen(function* () {
-    const url = `https://${s.siteName}.atlassian.net/rest/api/3/issue/${targetId}?fields=summary,timeoriginalestimate,aggregatetimespent`;
+    const url = `https://${s.siteName}.atlassian.net/rest/api/3/issue/${ticketId}?fields=summary,timeoriginalestimate,aggregatetimespent`;
     const request = HttpClientRequest.get(url).pipe(
       HttpClientRequest.basicAuth(s.email, s.jiraToken),
       HttpClientRequest.acceptJson,
@@ -273,27 +273,27 @@ const fetchJiraIssueDetails = (
       .execute(request)
       .pipe(
         Effect.mapError(
-          (cause) => new TargetInfoError({ cause: `Jira fetch: ${stringify(cause)}` }),
+          (cause) => new TicketInfoError({ cause: `Jira fetch: ${stringify(cause)}` }),
         ),
       );
     if (response.status === 404) {
-      return yield* Effect.fail(new TargetInfoError({ cause: `Not found in Jira: ${targetId}` }));
+      return yield* Effect.fail(new TicketInfoError({ cause: `Not found in Jira: ${ticketId}` }));
     }
     if (response.status < 200 || response.status >= 300) {
       const body = yield* response.text.pipe(Effect.orElseSucceed(() => ""));
       return yield* Effect.fail(
-        new TargetInfoError({
+        new TicketInfoError({
           cause: `Jira fetch failed (${response.status}): ${body.slice(0, 200)}`,
         }),
       );
     }
     const json: unknown = yield* response.json.pipe(
-      Effect.mapError((cause) => new TargetInfoError({ cause: `Jira fetch: ${stringify(cause)}` })),
+      Effect.mapError((cause) => new TicketInfoError({ cause: `Jira fetch: ${stringify(cause)}` })),
     );
     const decoded = Schema.decodeUnknownEither(JiraIssueDetailsSchema)(json);
     if (Either.isLeft(decoded)) {
       return yield* Effect.fail(
-        new TargetInfoError({ cause: `Jira response shape: ${String(decoded.left)}` }),
+        new TicketInfoError({ cause: `Jira response shape: ${String(decoded.left)}` }),
       );
     }
     const issue = decoded.right;
@@ -337,7 +337,7 @@ const postWorklog = (
       const errBody = yield* response.text.pipe(Effect.orElseSucceed(() => ""));
       return yield* Effect.fail(
         new SubmitError({
-          cause: `Tempo worklog POST failed for ${entry.targetId}: POST ${url} → ${response.status} — ${errBody.slice(0, 300)}`,
+          cause: `Tempo worklog POST failed for ${entry.ticketId}: POST ${url} → ${response.status} — ${errBody.slice(0, 300)}`,
         }),
       );
     }

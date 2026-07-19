@@ -48,9 +48,9 @@ export class ClipboardCaptureService extends Effect.Service<ClipboardCaptureServ
         }).pipe(Effect.orElseSucceed(() => ""));
         const text = (raw ?? "").trim();
         const submitter = config.snapshot().submitter;
-        const id = text === "" ? null : submitter.findTargetId(text);
+        const id = text === "" ? null : submitter.findTicketId(text);
         if (id === null) {
-          yield* notify("Cannot start time entry: clipboard has no target ID");
+          yield* notify("Cannot start time entry: clipboard has no ticket ID");
           return false;
         }
         const parsed = parseTimeLog(entries.snapshot());

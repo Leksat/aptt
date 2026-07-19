@@ -1,35 +1,35 @@
 import type { TimeLog } from "./timeLog";
 
-export type FindTargetId = (text: string) => string | null;
+export type FindTicketId = (text: string) => string | null;
 
 export interface Billable {
-  readonly targetId: string;
+  readonly ticketId: string;
   readonly tail: string;
 }
 
-export const parseBillable = (description: string, findTargetId: FindTargetId): Billable | null => {
+export const parseBillable = (description: string, findTicketId: FindTicketId): Billable | null => {
   const trimmed = description.trim();
   if (trimmed === "") return null;
   const firstSpace = trimmed.search(/\s/);
   const firstToken = firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace);
-  const targetId = findTargetId(firstToken);
-  if (targetId === null) return null;
+  const ticketId = findTicketId(firstToken);
+  if (ticketId === null) return null;
   const tail = firstSpace === -1 ? "" : trimmed.slice(firstSpace).trim();
-  return { targetId, tail };
+  return { ticketId, tail };
 };
 
-export const activeBillableTargetId = (log: TimeLog, findTargetId: FindTargetId): string | null => {
+export const activeBillableTicketId = (log: TimeLog, findTicketId: FindTicketId): string | null => {
   if (log.active === null) return null;
-  return parseBillable(log.active.description, findTargetId)?.targetId ?? null;
+  return parseBillable(log.active.description, findTicketId)?.ticketId ?? null;
 };
 
-const isBillable = (description: string, findTargetId: FindTargetId): boolean =>
-  parseBillable(description, findTargetId) !== null;
+const isBillable = (description: string, findTicketId: FindTicketId): boolean =>
+  parseBillable(description, findTicketId) !== null;
 
-export const closedBillableMinutes = (log: TimeLog, findTargetId: FindTargetId): number => {
+export const closedBillableMinutes = (log: TimeLog, findTicketId: FindTicketId): number => {
   let minutes = 0;
   for (const entry of log.closed) {
-    if (!isBillable(entry.description, findTargetId)) continue;
+    if (!isBillable(entry.description, findTicketId)) continue;
     minutes += diffMinutes(entry.start, entry.end);
   }
   return minutes;
@@ -37,15 +37,15 @@ export const closedBillableMinutes = (log: TimeLog, findTargetId: FindTargetId):
 
 export const totalBillableMinutes = (
   log: TimeLog,
-  findTargetId: FindTargetId,
+  findTicketId: FindTicketId,
   now: Date,
 ): number => {
   let minutes = 0;
   for (const entry of log.closed) {
-    if (!isBillable(entry.description, findTargetId)) continue;
+    if (!isBillable(entry.description, findTicketId)) continue;
     minutes += diffMinutes(entry.start, entry.end);
   }
-  if (log.active !== null && isBillable(log.active.description, findTargetId)) {
+  if (log.active !== null && isBillable(log.active.description, findTicketId)) {
     const end = floorToMinute(now);
     if (end.getTime() > log.active.start.getTime()) {
       minutes += diffMinutes(log.active.start, end);

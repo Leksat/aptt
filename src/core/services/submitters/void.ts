@@ -13,7 +13,7 @@ export const voidPlugin: SubmitterPlugin = {
     let count = 0;
     return {
       id: "void",
-      findTargetId: (text) => text.match(JIRA_ISSUE_KEY_RE)?.[0] ?? null,
+      findTicketId: (text) => text.match(JIRA_ISSUE_KEY_RE)?.[0] ?? null,
       submit: () =>
         Effect.gen(function* () {
           count += 1;
@@ -27,7 +27,7 @@ export const voidPlugin: SubmitterPlugin = {
             );
           }
         }),
-      fetchTargetInfo: () => Effect.succeed(null),
+      fetchTicketInfo: () => Effect.succeed(null),
       fetchWeekTotals: () => Effect.succeed(null),
     };
   },

@@ -46,7 +46,7 @@ export class SubmitService extends Effect.Service<SubmitService>()("SubmitServic
           setState({ tag: "submitting", current: 0, total: 0 });
           const result: SubmitResult = yield* submitTimeLog(
             log,
-            submitter.findTargetId,
+            submitter.findTicketId,
             submitter.submit,
             (current, total) => setState({ tag: "submitting", current, total }),
           );

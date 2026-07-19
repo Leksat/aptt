@@ -8,7 +8,7 @@ A single time log where you type time entries in a known format. No timer. Submi
 
 - `cmd+alt+x` toggles the window.
 - Clipboard capture:
-  - copy a target (e.g. a Jira key)
+  - copy a ticket (e.g. a Jira key)
   - copy again within 500ms to start a new time entry against it
   - copy a third time within 500ms to bring the window to the front with the textarea focused
 

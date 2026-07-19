@@ -2,7 +2,7 @@ import { FetchHttpClient } from "@effect/platform";
 import dedent from "dedent";
 import { Effect, Either } from "effect";
 import { describe, expect, it } from "vitest";
-import type { FindTargetId } from "./billable";
+import type { FindTicketId } from "./billable";
 import { SubmitError } from "./errors";
 import type { BillableEntry } from "./services/Submitter";
 import { type SubmitFn, type SubmitResult, submitTimeLog } from "./submit";
@@ -11,7 +11,7 @@ import { formatTimeLog, parseTimeLog } from "./timeLog";
 const run = (effect: ReturnType<typeof submitTimeLog>): Promise<SubmitResult> =>
   Effect.runPromise(effect.pipe(Effect.provide(FetchHttpClient.layer)));
 
-const acceptABC: FindTargetId = (token) => (/^ABC-\d+$/.test(token) ? token : null);
+const acceptABC: FindTicketId = (token) => (/^ABC-\d+$/.test(token) ? token : null);
 
 const recordingSubmit = (
   decide: (attempt: number, entry: BillableEntry) => "ok" | string,
@@ -47,7 +47,7 @@ describe("submitTimeLog", () => {
         progress.push({ current, total });
       }),
     );
-    expect(calls.map((c) => c.targetId)).toEqual(["ABC-1", "ABC-2", "ABC-3"]);
+    expect(calls.map((c) => c.ticketId)).toEqual(["ABC-1", "ABC-2", "ABC-3"]);
     expect(progress).toEqual([
       { current: 1, total: 3 },
       { current: 2, total: 3 },
@@ -80,7 +80,7 @@ describe("submitTimeLog", () => {
         progress.push({ current, total });
       }),
     );
-    expect(calls.map((c) => c.targetId)).toEqual(["ABC-1", "ABC-2"]);
+    expect(calls.map((c) => c.ticketId)).toEqual(["ABC-1", "ABC-2"]);
     expect(progress).toEqual([
       { current: 1, total: 2 },
       { current: 2, total: 2 },
@@ -91,7 +91,7 @@ describe("submitTimeLog", () => {
     `);
   });
 
-  it("strips the target id from the description before sending", async () => {
+  it("strips the ticket id from the description before sending", async () => {
     const log = Either.getOrThrow(
       parseTimeLog(dedent`
         2026-01-01 10:00
@@ -107,7 +107,7 @@ describe("submitTimeLog", () => {
           "description": "wrote the spec",
           "end": 2026-01-01T11:00:00.000Z,
           "start": 2026-01-01T10:00:00.000Z,
-          "targetId": "ABC-7",
+          "ticketId": "ABC-7",
         },
       ]
     `);
@@ -132,7 +132,7 @@ describe("submitTimeLog", () => {
     );
     const { submit, calls } = recordingSubmit((attempt) => (attempt === 2 ? "boom" : "ok"));
     const result = await run(submitTimeLog(log, acceptABC, submit, () => {}));
-    expect(calls.map((c) => c.targetId)).toEqual(["ABC-1", "ABC-2"]);
+    expect(calls.map((c) => c.ticketId)).toEqual(["ABC-1", "ABC-2"]);
     expect(result.tag).toBe("error");
     expect(result.submitted).toBe(1);
     if (result.tag === "error") {

@@ -1,4 +1,4 @@
-import type { FindTargetId } from "./billable";
+import type { FindTicketId } from "./billable";
 import type { TimeLog } from "./timeLog";
 
 export interface Blocker {
@@ -10,7 +10,7 @@ export interface Blocker {
 export const findAllBlockers = (
   log: TimeLog,
   text: string,
-  findTargetId: FindTargetId,
+  findTicketId: FindTicketId,
 ): Blocker[] => {
   const lines = text.split("\n");
   const lineStarts = computeLineStarts(lines);
@@ -18,7 +18,7 @@ export const findAllBlockers = (
   const collect = (lineNumber: number): void => {
     const raw = lines[lineNumber - 1];
     if (raw === undefined) return;
-    const col = blockerColumn(raw, findTargetId);
+    const col = blockerColumn(raw, findTicketId);
     if (col === null) return;
     const from = (lineStarts[lineNumber - 1] ?? 0) + col;
     blockers.push({ line: lineNumber, from, to: from + 1 });
@@ -35,8 +35,8 @@ export const findAllBlockers = (
 export const findBlocker = (
   log: TimeLog,
   text: string,
-  findTargetId: FindTargetId,
-): Blocker | null => findAllBlockers(log, text, findTargetId)[0] ?? null;
+  findTicketId: FindTicketId,
+): Blocker | null => findAllBlockers(log, text, findTicketId)[0] ?? null;
 
 const computeLineStarts = (lines: readonly string[]): number[] => {
   const starts: number[] = [0];
@@ -47,14 +47,14 @@ const computeLineStarts = (lines: readonly string[]): number[] => {
   return starts;
 };
 
-const blockerColumn = (rawLine: string, findTargetId: FindTargetId): number | null => {
+const blockerColumn = (rawLine: string, findTicketId: FindTicketId): number | null => {
   let i = skipWhitespace(rawLine, 0);
   if (i === rawLine.length) return null;
   const firstStart = i;
   i = skipNonWhitespace(rawLine, i);
   const first = rawLine.slice(firstStart, i);
   if (first === "!") return firstStart;
-  if (findTargetId(first) === null) return null;
+  if (findTicketId(first) === null) return null;
   i = skipWhitespace(rawLine, i);
   if (i === rawLine.length) return null;
   const secondStart = i;

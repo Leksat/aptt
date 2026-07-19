@@ -1,6 +1,6 @@
 import type { HttpClient } from "@effect/platform";
 import { Effect, Either } from "effect";
-import { type FindTargetId, parseBillable } from "./billable";
+import { type FindTicketId, parseBillable } from "./billable";
 import type { SubmitError } from "./errors";
 import type { BillableEntry } from "./services/Submitter";
 import type { ClosedTimeEntry, TimeLog } from "./timeLog";
@@ -32,29 +32,29 @@ export type OnProgress = (current: number, total: number) => void;
 
 export const countBillable = (
   closed: readonly ClosedTimeEntry[],
-  findTargetId: FindTargetId,
+  findTicketId: FindTicketId,
 ): number => {
   let n = 0;
   for (const entry of closed) {
-    if (billableEntryOf(entry, findTargetId) !== null) n += 1;
+    if (billableEntryOf(entry, findTicketId) !== null) n += 1;
   }
   return n;
 };
 
 export const submitTimeLog = (
   log: TimeLog,
-  findTargetId: FindTargetId,
+  findTicketId: FindTicketId,
   submit: SubmitFn,
   onProgress: OnProgress,
 ): Effect.Effect<SubmitResult, never, HttpClient.HttpClient> =>
   Effect.gen(function* () {
-    const total = countBillable(log.closed, findTargetId);
+    const total = countBillable(log.closed, findTicketId);
     let attempted = 0;
 
     for (let i = 0; i < log.closed.length; i++) {
       const entry = log.closed[i];
       if (entry === undefined) throw new Error("unreachable: closed index in range");
-      const info = billableEntryOf(entry, findTargetId);
+      const info = billableEntryOf(entry, findTicketId);
       if (info === null) continue;
       attempted += 1;
       yield* Effect.sync(() => onProgress(attempted, total));
@@ -78,12 +78,12 @@ export const submitTimeLog = (
 
 const billableEntryOf = (
   entry: ClosedTimeEntry,
-  findTargetId: FindTargetId,
+  findTicketId: FindTicketId,
 ): BillableEntry | null => {
-  const parsed = parseBillable(entry.description, findTargetId);
+  const parsed = parseBillable(entry.description, findTicketId);
   if (parsed === null) return null;
   return {
-    targetId: parsed.targetId,
+    ticketId: parsed.ticketId,
     start: entry.start,
     end: entry.end,
     description: parsed.tail,

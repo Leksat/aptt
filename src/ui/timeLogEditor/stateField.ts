@@ -1,5 +1,5 @@
 import { StateEffect, StateField } from "@codemirror/state";
-import type { FindTargetId } from "../../core/billable";
+import type { FindTicketId } from "../../core/billable";
 import type { TimeLog, TimeLogParseError } from "../../core/timeLog";
 
 export type LineNumberClickHandler = (startLine: number, anchor: DOMRect) => void;
@@ -8,7 +8,7 @@ export interface TimeLogState {
   readonly log: TimeLog;
   readonly parseError: TimeLogParseError | null;
   readonly now: Date;
-  readonly findTargetId: FindTargetId;
+  readonly findTicketId: FindTicketId;
   readonly onLineNumberClick: LineNumberClickHandler | null;
 }
 
@@ -18,7 +18,7 @@ const initial: TimeLogState = {
   log: { closed: [], active: null },
   parseError: null,
   now: new Date(0),
-  findTargetId: () => null,
+  findTicketId: () => null,
   onLineNumberClick: null,
 };
 

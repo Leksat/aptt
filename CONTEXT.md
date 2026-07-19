@@ -17,19 +17,19 @@ A line of the form `YYYY-MM-DD HH:MM`. Marks a wall-clock moment. Anchors the be
 _Avoid_: marker, boundary, header, timestamp.
 
 **Time entry description**:
-The body of a time entry — everything between its start and the next start. Its first token is tested as a target ID; if the active submitter accepts it, the entry is billable. Otherwise the description is just there to carve time out of the log (e.g. `nothing`, empty).
+The body of a time entry — everything between its start and the next start. Its first token is tested as a ticket ID; if the active submitter accepts it, the entry is billable. Otherwise the description is just there to carve time out of the log (e.g. `nothing`, empty).
 _Avoid_: body, content, text, note.
 
-**Target ID**:
-The identifier of the external thing time is being logged against (e.g. `ABC-123` for a Jira issue). The active submitter decides what counts as a valid target ID — the Jira submitter accepts issue keys, a Toggl submitter would accept project identifiers, etc. Lives as the first token of a time entry description.
-_Avoid_: ticket ID, issue key, target, reference, subject.
+**Ticket ID**:
+The identifier of the external thing time is being logged against (e.g. `ABC-123` for a Jira issue). The active submitter decides what counts as a valid ticket ID — the Jira submitter accepts issue keys, a Toggl submitter would accept project identifiers, etc. Lives as the first token of a time entry description.
+_Avoid_: issue key, reference, subject.
 
 **Active time entry**:
 The trailing time entry of a non-empty log. Its end is "now" and it is never submitted. Its description is the line after its start, or empty if the log ends on the start itself. The empty log has no active time entry.
 _Avoid_: current entry, in-progress entry, open entry.
 
 **Billable**:
-A time entry whose description begins with a valid target ID for the active submitter. Only closed billable entries are submitted; non-billable closed entries are removed without being sent. The active entry can also be billable; its running duration counts toward live totals even though it is never submitted.
+A time entry whose description begins with a valid ticket ID for the active submitter. Only closed billable entries are submitted; non-billable closed entries are removed without being sent. The active entry can also be billable; its running duration counts toward live totals even though it is never submitted.
 _Avoid_: loggable, sendable.
 
 **Duration**:
@@ -37,7 +37,7 @@ The elapsed time of a time entry — `end - start` for a closed entry, `now - st
 _Avoid_: elapsed, length, span.
 
 **Blocker**:
-A `!` appearing as its own whitespace-delimited token at the start of a time entry's description (e.g. `! stuff`) or immediately after the target ID (e.g. `ABC-123 ! stuff`). A `!` attached to another token (e.g. `!stuff`) is not a blocker. While any time entry has a blocker, the log cannot be submitted; clicking Submit reports the first line that contains one.
+A `!` appearing as its own whitespace-delimited token at the start of a time entry's description (e.g. `! stuff`) or immediately after the ticket ID (e.g. `ABC-123 ! stuff`). A `!` attached to another token (e.g. `!stuff`) is not a blocker. While any time entry has a blocker, the log cannot be submitted; clicking Submit reports the first line that contains one.
 _Avoid_: hold, flag, bang, exclamation marker.
 
 **History file**:
@@ -49,7 +49,7 @@ _Avoid_: backup, archive, snapshot, log file.
 _Avoid_: archive, backup folder.
 
 **Notes**:
-A free-form scratch area kept alongside the time log, persisted to `notes.txt`. Independent of the time log: notes are never submitted. A line whose first token is a valid target ID can be used as a candidate description (e.g. via the selection-driven status hookup); other lines are pure scratch.
+A free-form scratch area kept alongside the time log, persisted to `notes.txt`. Independent of the time log: notes are never submitted. A line whose first token is a valid ticket ID can be used as a candidate description (e.g. via the selection-driven status hookup); other lines are pure scratch.
 _Avoid_: scratchpad, memo, todo list, sidebar.
 
 **Comment**:
@@ -57,27 +57,27 @@ The portion of a notes line from the first `#` to the end of the line, inclusive
 _Avoid_: remark, annotation.
 
 **Extended info**:
-The per-time-entry context shown alongside a time entry: target info from the external system (when available), plus aggregations across the time log for the same description and same target ID. Read-only; never submitted. Additive quantities are shown as a formula in the house standard `current + other = total`, where the current operand is always the one printed nearby (see local, this). A formula collapses to a single value when either operand is zero.
+The per-time-entry context shown alongside a time entry: ticket info from the external system (when available), plus aggregations across the time log for the same description and same ticket ID. Read-only; never submitted. Additive quantities are shown as a formula in the house standard `current + other = total`, where the current operand is always the one printed nearby (see local, this). A formula collapses to a single value when either operand is zero.
 _Avoid_: details, summary, panel.
 
 **Extended-info tooltip**:
 The only surface for extended info, opened by clicking a time entry's description line number in the gutter and anchored to that number.
 _Avoid_: details panel, info popup, info card, popover.
 
-**Target info**:
-The external system's snapshot of a target ID — title, URL, estimate, and time already logged externally by this worker. Supplied by the active submitter; absent when the submitter has no remote concept (e.g. void) or the target ID is not real in the external system.
-_Avoid_: ticket info, Jira card, issue details.
+**Ticket info**:
+The external system's snapshot of a ticket ID — title, URL, estimate, and time already logged externally by this worker. Supplied by the active submitter; absent when the submitter has no remote concept (e.g. void) or the ticket ID is not real in the external system.
+_Avoid_: Jira card, issue details.
 
 **Logged externally**:
-Total time already submitted to the external system against a target ID, across all workers. For JiraTempo, the value of Jira's `aggregatetimespent`. Surfaced in extended info as remote.
+Total time already submitted to the external system against a ticket ID, across all workers. For JiraTempo, the value of Jira's `aggregatetimespent`. Surfaced in extended info as remote.
 _Avoid_: Jira time, external time, billed time, my logged time.
 
 **Remote**:
-The extended-info name for logged externally — the already-submitted operand in the `Logged: local + remote = total` formula on a target's card.
+The extended-info name for logged externally — the already-submitted operand in the `Logged: local + remote = total` formula on a ticket's card.
 _Avoid_: external, Jira value.
 
 **Local**:
-Time in the current time log against a target ID that has not been submitted yet: the same-target aggregation. The current operand in `Logged: local + remote = total`, and the quantity the `this + rest = total` cards break down (this being the focused time entry's own share, rest the other matching entries).
+Time in the current time log against a ticket ID that has not been submitted yet: the same-ticket aggregation. The current operand in `Logged: local + remote = total`, and the quantity the `this + rest = total` cards break down (this being the focused time entry's own share, rest the other matching entries).
 _Avoid_: unsubmitted, in-log, pending.
 
 **Status line**:
@@ -85,7 +85,7 @@ The single-line readout beneath the time log. Its left side shows the current ap
 _Avoid_: status bar, footer, toolbar.
 
 **Weekly logged**:
-Total time this worker has already submitted to the external system in the current week, across all target IDs. Distinct from logged externally, which is per-target-ID across all workers. For JiraTempo, the sum of the worker's Tempo worklogs for the week.
+Total time this worker has already submitted to the external system in the current week, across all ticket IDs. Distinct from logged externally, which is per-ticket-ID across all workers. For JiraTempo, the sum of the worker's Tempo worklogs for the week.
 _Avoid_: week total, my logged time, logged externally.
 
 **Week total**:

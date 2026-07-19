@@ -37,7 +37,7 @@ describe("findBlocker", () => {
     });
   });
 
-  it("finds a blocker after the target id", () => {
+  it("finds a blocker after the ticket id", () => {
     const text = dedent`
       2026-01-01 10:00
       ABC-1 ! pending
@@ -63,7 +63,7 @@ describe("findBlocker", () => {
     });
   });
 
-  it("treats target id followed by lone `!` as a blocker", () => {
+  it("treats ticket id followed by lone `!` as a blocker", () => {
     const text = dedent`
       2026-01-01 10:00
       ABC-1 !
@@ -85,7 +85,7 @@ describe("findBlocker", () => {
     expect(findBlocker(parse(text), text, acceptABC)).toBeNull();
   });
 
-  it("does not flag `!` attached to another token after the target id", () => {
+  it("does not flag `!` attached to another token after the ticket id", () => {
     const text = dedent`
       2026-01-01 10:00
       ABC-1 !pending
@@ -94,7 +94,7 @@ describe("findBlocker", () => {
     expect(findBlocker(parse(text), text, acceptABC)).toBeNull();
   });
 
-  it("does not flag `!` in the second position when the first token is not a target id", () => {
+  it("does not flag `!` in the second position when the first token is not a ticket id", () => {
     const text = dedent`
       2026-01-01 10:00
       xyz ! stuff
@@ -146,7 +146,7 @@ describe("findBlocker", () => {
     expect(findBlocker(parse(text), text, acceptABC)).toBeNull();
   });
 
-  it("treats `!` after a non-target-id first token as harmless when no closed blockers exist", () => {
+  it("treats `!` after a non-ticket-id first token as harmless when no closed blockers exist", () => {
     const text = dedent`
       2026-01-01 10:00
       nothing

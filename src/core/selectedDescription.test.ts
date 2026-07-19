@@ -98,7 +98,7 @@ describe("selectedDescriptionFromTimeLog", () => {
 });
 
 describe("selectedDescriptionFromNotes", () => {
-  it("returns the line when caret sits on a target-ID-starting line", () => {
+  it("returns the line when caret sits on a ticket-ID-starting line", () => {
     const text = dedent`
       ABC-1 foo
       ABC-2 bar
@@ -106,7 +106,7 @@ describe("selectedDescriptionFromNotes", () => {
     expect(selectedDescriptionFromNotes(text, 3, acceptABC)).toBe("ABC-1 foo");
   });
 
-  it("returns null when first token is not a target ID", () => {
+  it("returns null when first token is not a ticket ID", () => {
     expect(selectedDescriptionFromNotes("todo: ABC-1 foo", 0, acceptABC)).toBeNull();
   });
 
@@ -118,7 +118,7 @@ describe("selectedDescriptionFromNotes", () => {
     expect(selectedDescriptionFromNotes("ABC-1 foo#bar", 0, acceptABC)).toBe("ABC-1 foo");
   });
 
-  it("allows a bare target ID after stripping the comment", () => {
+  it("allows a bare ticket ID after stripping the comment", () => {
     expect(selectedDescriptionFromNotes("ABC-1 # only a comment", 0, acceptABC)).toBe("ABC-1");
   });
 
@@ -136,7 +136,7 @@ describe("selectedDescriptionFromNotes", () => {
     expect(selectedDescriptionFromNotes(text, caret, acceptABC)).toBeNull();
   });
 
-  it("returns null when findTargetId rejects everything", () => {
+  it("returns null when findTicketId rejects everything", () => {
     expect(selectedDescriptionFromNotes("ABC-1 foo", 0, acceptNone)).toBeNull();
   });
 

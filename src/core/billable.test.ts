@@ -2,7 +2,7 @@ import dedent from "dedent";
 import { Either } from "effect";
 import { describe, expect, it } from "vitest";
 import {
-  activeBillableTargetId,
+  activeBillableTicketId,
   closedBillableMinutes,
   formatDurationShort,
   lineDurations,
@@ -23,11 +23,11 @@ describe("parseBillable", () => {
     expect(parseBillable("   \t  ", acceptABC)).toBeNull();
   });
 
-  it("returns null when the first token is not a target ID", () => {
+  it("returns null when the first token is not a ticket ID", () => {
     expect(parseBillable("nothing here", acceptABC)).toBeNull();
   });
 
-  it("returns null when the target ID appears past the first token", () => {
+  it("returns null when the ticket ID appears past the first token", () => {
     expect(parseBillable("foo ABC-123 bar", acceptABC)).toBeNull();
   });
 
@@ -35,27 +35,27 @@ describe("parseBillable", () => {
     expect(parseBillable("ABC-1 hello", acceptNone)).toBeNull();
   });
 
-  it("returns the target ID with an empty tail when the description is just the target ID", () => {
-    expect(parseBillable("ABC-123", acceptABC)).toEqual({ targetId: "ABC-123", tail: "" });
+  it("returns the ticket ID with an empty tail when the description is just the ticket ID", () => {
+    expect(parseBillable("ABC-123", acceptABC)).toEqual({ ticketId: "ABC-123", tail: "" });
   });
 
-  it("returns the target ID and the trimmed tail when both are present", () => {
+  it("returns the ticket ID and the trimmed tail when both are present", () => {
     expect(parseBillable("ABC-123 fix the thing", acceptABC)).toEqual({
-      targetId: "ABC-123",
+      ticketId: "ABC-123",
       tail: "fix the thing",
     });
   });
 
   it("trims leading and trailing whitespace from the input and the tail", () => {
     expect(parseBillable("   ABC-7   the tail   ", acceptABC)).toEqual({
-      targetId: "ABC-7",
+      ticketId: "ABC-7",
       tail: "the tail",
     });
   });
 
   it("treats tabs as token separators", () => {
     expect(parseBillable("ABC-9\twith tab", acceptABC)).toEqual({
-      targetId: "ABC-9",
+      ticketId: "ABC-9",
       tail: "with tab",
     });
   });
@@ -102,7 +102,7 @@ describe("totalBillableMinutes", () => {
     expect(totalBillableMinutes(log, acceptABC, new Date("2026-01-01T10:30"))).toBe(0);
   });
 
-  it("treats every entry as non-billable when findTargetId rejects all", () => {
+  it("treats every entry as non-billable when findTicketId rejects all", () => {
     const log = Either.getOrThrow(
       parseTimeLog(dedent`
         2026-01-01 10:00
@@ -114,7 +114,7 @@ describe("totalBillableMinutes", () => {
     expect(totalBillableMinutes(log, acceptNone, new Date("2026-01-01T12:00"))).toBe(0);
   });
 
-  it("treats an entry as non-billable when the target ID is not the first token", () => {
+  it("treats an entry as non-billable when the ticket ID is not the first token", () => {
     const log = Either.getOrThrow(
       parseTimeLog(dedent`
         2026-01-01 10:00
@@ -169,20 +169,20 @@ describe("closedBillableMinutes", () => {
   });
 });
 
-describe("activeBillableTargetId", () => {
+describe("activeBillableTicketId", () => {
   it("returns null for an empty log", () => {
     const log = Either.getOrThrow(parseTimeLog(""));
-    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+    expect(activeBillableTicketId(log, acceptABC)).toBeNull();
   });
 
-  it("returns the target ID when the active entry's first token is accepted", () => {
+  it("returns the ticket ID when the active entry's first token is accepted", () => {
     const log = Either.getOrThrow(
       parseTimeLog(dedent`
         2026-01-01 10:00
         ABC-123 working on it
       `),
     );
-    expect(activeBillableTargetId(log, acceptABC)).toBe("ABC-123");
+    expect(activeBillableTicketId(log, acceptABC)).toBe("ABC-123");
   });
 
   it("returns null when the active entry has an empty description", () => {
@@ -191,17 +191,17 @@ describe("activeBillableTargetId", () => {
         2026-01-01 10:00
       `),
     );
-    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+    expect(activeBillableTicketId(log, acceptABC)).toBeNull();
   });
 
-  it("returns null when the first token is not a target ID", () => {
+  it("returns null when the first token is not a ticket ID", () => {
     const log = Either.getOrThrow(
       parseTimeLog(dedent`
         2026-01-01 10:00
         nothing
       `),
     );
-    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+    expect(activeBillableTicketId(log, acceptABC)).toBeNull();
   });
 
   it("ignores closed entries", () => {
@@ -213,17 +213,17 @@ describe("activeBillableTargetId", () => {
         nothing
       `),
     );
-    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+    expect(activeBillableTicketId(log, acceptABC)).toBeNull();
   });
 
-  it("returns null when the target ID is not the first token", () => {
+  it("returns null when the ticket ID is not the first token", () => {
     const log = Either.getOrThrow(
       parseTimeLog(dedent`
         2026-01-01 10:00
         foo ABC-123 bar
       `),
     );
-    expect(activeBillableTargetId(log, acceptABC)).toBeNull();
+    expect(activeBillableTicketId(log, acceptABC)).toBeNull();
   });
 });
 

@@ -2,7 +2,7 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { Either } from "effect";
 import { forwardRef, useImperativeHandle, useLayoutEffect, useRef } from "react";
-import type { FindTargetId } from "../core/billable";
+import type { FindTicketId } from "../core/billable";
 import { parseTimeLog } from "../core/timeLog";
 import { timeLogDecorationsPlugin } from "./timeLogEditor/decorations";
 import { lineNumberTooltip } from "./timeLogEditor/lineNumberTooltip";
@@ -21,7 +21,7 @@ export interface TimeLogEditorRef {
 interface Props {
   readonly text: string;
   readonly now: Date;
-  readonly findTargetId: FindTargetId;
+  readonly findTicketId: FindTicketId;
   readonly readOnly: boolean;
   readonly onChange: (text: string) => void;
   readonly onCaretChange: (caret: number) => void;
@@ -79,11 +79,11 @@ export const TimeLogEditor = forwardRef<TimeLogEditorRef, Props>(
           log,
           parseError,
           now: props.now,
-          findTargetId: props.findTargetId,
+          findTicketId: props.findTicketId,
           onLineNumberClick: props.onLineNumberClick,
         }),
       });
-    }, [props.text, props.now, props.findTargetId, props.onLineNumberClick, viewRef]);
+    }, [props.text, props.now, props.findTicketId, props.onLineNumberClick, viewRef]);
 
     useLayoutEffect(() => {
       const view = viewRef.current;

@@ -35,7 +35,7 @@ describe("ConfigService", () => {
     const snap = await runWithFs(fs, (svc) => Effect.sync(() => svc.snapshot()));
     expect(snap.config.activePluginId).toBe("jiratempo");
     expect(snap.submitter.id).toBe("jiratempo");
-    expect(snap.submitter.findTargetId("ABC-1")).toBe("ABC-1");
+    expect(snap.submitter.findTicketId("ABC-1")).toBe("ABC-1");
   });
 
   it("normalises an unknown active plugin id to the default plugin", async () => {

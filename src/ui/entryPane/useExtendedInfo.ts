@@ -2,13 +2,13 @@ import { Effect, Either } from "effect";
 import { useEffect, useRef, useState } from "react";
 import { parseBillable } from "../../core/billable";
 import { runtime } from "../../core/runtime";
-import type { SubmitterImpl, TargetInfo } from "../../core/services/Submitter";
+import type { SubmitterImpl, TicketInfo } from "../../core/services/Submitter";
 import type { TimeLog } from "../../core/timeLog";
 import type { FocusedEntry } from "./focusedEntry";
 
-export type TargetInfoState =
+export type TicketInfoState =
   | { readonly kind: "loading" }
-  | { readonly kind: "ok"; readonly info: TargetInfo }
+  | { readonly kind: "ok"; readonly info: TicketInfo }
   | { readonly kind: "error"; readonly message: string }
   | { readonly kind: "absent" };
 
@@ -19,10 +19,10 @@ export interface ExtendedInfoAggregate {
 }
 
 export interface ExtendedInfo {
-  readonly targetId: string | null;
-  readonly targetInfo: TargetInfoState | null;
+  readonly ticketId: string | null;
+  readonly ticketInfo: TicketInfoState | null;
   readonly sameDescription: ExtendedInfoAggregate;
-  readonly sameTarget: ExtendedInfoAggregate;
+  readonly sameTicket: ExtendedInfoAggregate;
 }
 
 interface Args {
@@ -34,40 +34,40 @@ interface Args {
 
 export const useExtendedInfo = ({ log, focused, now, submitter }: Args): ExtendedInfo | null => {
   const description = focused === null ? "" : focused.entry.description;
-  const targetId =
+  const ticketId =
     focused === null
       ? null
-      : (parseBillable(description, submitter.findTargetId)?.targetId ?? null);
+      : (parseBillable(description, submitter.findTicketId)?.ticketId ?? null);
   const submitterRef = useRef(submitter);
   submitterRef.current = submitter;
 
-  const [targetInfoState, setTargetInfoState] = useState<TargetInfoState | null>(null);
+  const [ticketInfoState, setTicketInfoState] = useState<TicketInfoState | null>(null);
 
   useEffect(() => {
-    if (targetId === null) {
-      setTargetInfoState(null);
+    if (ticketId === null) {
+      setTicketInfoState(null);
       return;
     }
     let cancelled = false;
-    setTargetInfoState({ kind: "loading" });
+    setTicketInfoState({ kind: "loading" });
     void runtime
-      .runPromise(Effect.either(submitterRef.current.fetchTargetInfo(targetId)))
+      .runPromise(Effect.either(submitterRef.current.fetchTicketInfo(ticketId)))
       .then((result) => {
         if (cancelled) return;
         if (Either.isLeft(result)) {
-          setTargetInfoState({ kind: "error", message: String(result.left.cause) });
+          setTicketInfoState({ kind: "error", message: String(result.left.cause) });
           return;
         }
         if (result.right === null) {
-          setTargetInfoState({ kind: "absent" });
+          setTicketInfoState({ kind: "absent" });
           return;
         }
-        setTargetInfoState({ kind: "ok", info: result.right });
+        setTicketInfoState({ kind: "ok", info: result.right });
       });
     return () => {
       cancelled = true;
     };
-  }, [targetId]);
+  }, [ticketId]);
 
   if (focused === null) return null;
 
@@ -77,17 +77,17 @@ export const useExtendedInfo = ({ log, focused, now, submitter }: Args): Extende
       : diffMinutes(focused.entry.start, floorToMinute(now));
 
   return {
-    targetId,
-    targetInfo: targetInfoState,
+    ticketId,
+    ticketInfo: ticketInfoState,
     sameDescription: aggregate(log, now, focusedMinutes, (d) => d.trim() === description.trim()),
-    sameTarget:
-      targetId === null
+    sameTicket:
+      ticketId === null
         ? { count: 0, minutes: 0, focusedMinutes: 0 }
         : aggregate(
             log,
             now,
             focusedMinutes,
-            (d) => parseBillable(d, submitter.findTargetId)?.targetId === targetId,
+            (d) => parseBillable(d, submitter.findTicketId)?.ticketId === ticketId,
           ),
   };
 };

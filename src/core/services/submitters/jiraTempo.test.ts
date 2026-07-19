@@ -1,7 +1,7 @@
 import { HttpClient, HttpClientResponse } from "@effect/platform";
 import { Effect, Either, Layer } from "effect";
 import { describe, expect, it } from "vitest";
-import { SubmitError, TargetInfoError, WeekTotalsError } from "../../errors";
+import { SubmitError, TicketInfoError, WeekTotalsError } from "../../errors";
 import type { BillableEntry, WeekRange } from "../Submitter";
 import { jiraTempoPlugin } from "./jiraTempo";
 
@@ -56,7 +56,7 @@ const completeSettings: Readonly<Record<string, string>> = {
 };
 
 const sampleEntry: BillableEntry = {
-  targetId: "ABC-123",
+  ticketId: "ABC-123",
   start: new Date("2026-01-01T10:00:00"),
   end: new Date("2026-01-01T11:30:00"),
   description: "fix login",
@@ -71,8 +71,8 @@ const runSubmit = (
     Effect.either(jiraTempoPlugin.make(settings).submit(entry)).pipe(Effect.provide(layer)),
   );
 
-describe("jiraTempoPlugin.findTargetId", () => {
-  const find = jiraTempoPlugin.make({}).findTargetId;
+describe("jiraTempoPlugin.findTicketId", () => {
+  const find = jiraTempoPlugin.make({}).findTicketId;
 
   it("returns the key when the input is exactly a Jira key", () => {
     expect(find("ABC-123")).toBe("ABC-123");
@@ -96,7 +96,7 @@ describe("jiraTempoPlugin.findTargetId", () => {
   });
 
   it("does not depend on settings", () => {
-    expect(jiraTempoPlugin.make({}).findTargetId("ABC-1")).toBe("ABC-1");
+    expect(jiraTempoPlugin.make({}).findTicketId("ABC-1")).toBe("ABC-1");
   });
 });
 
@@ -198,7 +198,7 @@ describe("jiraTempoPlugin.submit", () => {
     ]);
   });
 
-  it("sends only the description (without the target id) as Tempo's description", async () => {
+  it("sends only the description (without the ticket id) as Tempo's description", async () => {
     const { layer, captured } = stubClient((req) => {
       if (req.method === "GET") return { status: 200, body: JSON.stringify({ id: "1" }) };
       return { status: 200, body: "{}" };
@@ -210,13 +210,13 @@ describe("jiraTempoPlugin.submit", () => {
   });
 });
 
-const runFetchTargetInfo = (
+const runFetchTicketInfo = (
   settings: Readonly<Record<string, string>>,
-  targetId: string,
+  ticketId: string,
   layer: Layer.Layer<HttpClient.HttpClient>,
 ) =>
   Effect.runPromise(
-    Effect.either(jiraTempoPlugin.make(settings).fetchTargetInfo(targetId)).pipe(
+    Effect.either(jiraTempoPlugin.make(settings).fetchTicketInfo(ticketId)).pipe(
       Effect.provide(layer),
     ),
   );
@@ -235,7 +235,7 @@ const jiraIssueResponse = (over: {
     },
   });
 
-describe("jiraTempoPlugin.fetchTargetInfo", () => {
+describe("jiraTempoPlugin.fetchTicketInfo", () => {
   it("returns title, url, estimate, and logged (all workers) from one Jira request", async () => {
     const { layer, captured } = stubClient(() => ({
       status: 200,
@@ -246,7 +246,7 @@ describe("jiraTempoPlugin.fetchTargetInfo", () => {
       }),
     }));
 
-    const result = await runFetchTargetInfo(completeSettings, "ABC-123", layer);
+    const result = await runFetchTicketInfo(completeSettings, "ABC-123", layer);
 
     expect(Either.isRight(result)).toBe(true);
     if (Either.isRight(result)) {
@@ -276,7 +276,7 @@ describe("jiraTempoPlugin.fetchTargetInfo", () => {
       }),
     }));
 
-    const result = await runFetchTargetInfo(completeSettings, "ABC-123", layer);
+    const result = await runFetchTicketInfo(completeSettings, "ABC-123", layer);
 
     expect(Either.isRight(result)).toBe(true);
     if (Either.isRight(result)) {
@@ -291,7 +291,7 @@ describe("jiraTempoPlugin.fetchTargetInfo", () => {
       body: jiraIssueResponse({ aggregatetimespent: null }),
     }));
 
-    const result = await runFetchTargetInfo(completeSettings, "ABC-123", layer);
+    const result = await runFetchTicketInfo(completeSettings, "ABC-123", layer);
 
     expect(Either.isRight(result)).toBe(true);
     if (Either.isRight(result)) {
@@ -299,37 +299,37 @@ describe("jiraTempoPlugin.fetchTargetInfo", () => {
     }
   });
 
-  it("fails with a TargetInfoError on Jira 404", async () => {
+  it("fails with a TicketInfoError on Jira 404", async () => {
     const { layer } = stubClient(() => ({ status: 404, body: "Issue Does Not Exist" }));
-    const result = await runFetchTargetInfo(completeSettings, "ABC-999", layer);
+    const result = await runFetchTicketInfo(completeSettings, "ABC-999", layer);
 
     expect(Either.isLeft(result)).toBe(true);
     if (Either.isLeft(result)) {
-      expect(result.left).toBeInstanceOf(TargetInfoError);
+      expect(result.left).toBeInstanceOf(TicketInfoError);
       expect(String(result.left.cause)).toBe("Not found in Jira: ABC-999");
     }
   });
 
-  it("fails with a TargetInfoError when Jira auth is rejected", async () => {
+  it("fails with a TicketInfoError when Jira auth is rejected", async () => {
     const { layer } = stubClient(() => ({ status: 401, body: "Unauthorized" }));
-    const result = await runFetchTargetInfo(completeSettings, "ABC-123", layer);
+    const result = await runFetchTicketInfo(completeSettings, "ABC-123", layer);
     expect(Either.isLeft(result)).toBe(true);
     if (Either.isLeft(result)) {
-      expect(result.left).toBeInstanceOf(TargetInfoError);
+      expect(result.left).toBeInstanceOf(TicketInfoError);
       expect(String(result.left.cause)).toBe("Jira fetch failed (401): Unauthorized");
     }
   });
 
-  it("fails with a TargetInfoError when a required setting is missing", async () => {
+  it("fails with a TicketInfoError when a required setting is missing", async () => {
     const { layer, captured } = stubClient(() => ({ status: 200, body: "{}" }));
-    const result = await runFetchTargetInfo(
+    const result = await runFetchTicketInfo(
       { ...completeSettings, tempoToken: "" },
       "ABC-123",
       layer,
     );
     expect(Either.isLeft(result)).toBe(true);
     if (Either.isLeft(result)) {
-      expect(result.left).toBeInstanceOf(TargetInfoError);
+      expect(result.left).toBeInstanceOf(TicketInfoError);
       expect(String(result.left.cause)).toBe("Missing setting: Tempo API token");
     }
     expect(captured).toEqual([]);

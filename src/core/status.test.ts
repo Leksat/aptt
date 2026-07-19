@@ -1,10 +1,10 @@
 import dedent from "dedent";
 import { describe, expect, it } from "vitest";
-import type { FindTargetId } from "./billable";
+import type { FindTicketId } from "./billable";
 import { statusOf } from "./status";
 import type { SubmitState } from "./submit";
 
-const acceptABC: FindTargetId = (token) => (/^ABC-\d+$/.test(token) ? token : null);
+const acceptABC: FindTicketId = (token) => (/^ABC-\d+$/.test(token) ? token : null);
 const NOW = new Date("2026-01-01T12:00");
 
 describe("statusOf", () => {
@@ -53,7 +53,7 @@ describe("statusOf", () => {
     });
   });
 
-  it("returns zero billable when nothing matches the target id", () => {
+  it("returns zero billable when nothing matches the ticket id", () => {
     const log = dedent`
       2026-01-01 10:00
       nothing

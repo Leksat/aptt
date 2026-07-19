@@ -16,14 +16,14 @@ const fakeSubmitter = (
   let count = 0;
   return {
     id: "fake",
-    findTargetId: acceptABC,
+    findTicketId: acceptABC,
     submit: (entry) =>
       Effect.suspend(() => {
         count += 1;
         const verdict = decide(entry, count);
         return verdict === "ok" ? Effect.void : Effect.fail(new SubmitError({ cause: verdict }));
       }),
-    fetchTargetInfo: () => Effect.succeed(null),
+    fetchTicketInfo: () => Effect.succeed(null),
     fetchWeekTotals: () => Effect.succeed(null),
   };
 };
