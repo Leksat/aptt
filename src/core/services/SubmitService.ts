@@ -65,7 +65,6 @@ export class SubmitService extends Effect.Service<SubmitService>()("SubmitServic
           }
           return result;
         }),
-      openHistoryDir: fs.openHistoryDir.pipe(Effect.ignore),
     };
   }),
 }) {}

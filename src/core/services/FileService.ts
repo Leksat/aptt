@@ -1,5 +1,12 @@
 import { appDataDir, join } from "@tauri-apps/api/path";
-import { BaseDirectory, exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import {
+  BaseDirectory,
+  exists,
+  mkdir,
+  readDir,
+  readTextFile,
+  writeTextFile,
+} from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { Effect } from "effect";
 import { FileInitError, FileReadError, FileWriteError } from "../errors";
@@ -47,6 +54,15 @@ export class FileService extends Effect.Service<FileService>()("FileService", {
       writeConfig: (json: string) => writeText(CONFIG, json),
       writeHistory: (filename: string, contents: string) =>
         writeText(`${HISTORY_DIR}/${filename}`, contents),
+      listHistory: Effect.tryPromise({
+        try: () => readDir(HISTORY_DIR, { baseDir: BaseDirectory.AppData }),
+        catch: (cause) => new FileReadError({ path: HISTORY_DIR, cause }),
+      }).pipe(Effect.map((entries) => entries.filter((e) => e.isFile).map((e) => e.name))),
+      readHistory: (filename: string) =>
+        Effect.tryPromise({
+          try: () => readTextFile(`${HISTORY_DIR}/${filename}`, { baseDir: BaseDirectory.AppData }),
+          catch: (cause) => new FileReadError({ path: `${HISTORY_DIR}/${filename}`, cause }),
+        }),
       openHistoryDir: Effect.tryPromise({
         try: async () => {
           const path = await join(await appDataDir(), HISTORY_DIR);

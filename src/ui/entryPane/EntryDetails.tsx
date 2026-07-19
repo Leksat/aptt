@@ -3,16 +3,19 @@ import type { ExtendedInfo, ExtendedInfoAggregate, TicketInfoState } from "./use
 
 interface Props {
   readonly info: ExtendedInfo;
+  readonly mode: "live" | "history";
 }
 
-export const EntryDetails = ({ info }: Props) => {
+export const EntryDetails = ({ info, mode }: Props) => {
   const showJiraCard =
     info.ticketId !== null && info.ticketInfo !== null && info.ticketInfo.kind !== "absent";
-  const showSameDescription = info.sameDescription !== null && info.sameDescription.count >= 2;
+  const showSameDescription =
+    mode === "live" && info.sameDescription !== null && info.sameDescription.count >= 2;
+  const sameTicketThreshold = mode === "history" ? 1 : info.kind === "entry" ? 2 : 1;
   const showSameTicket =
     info.ticketId !== null &&
     info.sameTicket !== null &&
-    info.sameTicket.count >= (info.kind === "entry" ? 2 : 1);
+    info.sameTicket.count >= sameTicketThreshold;
 
   if (!showJiraCard && !showSameDescription && !showSameTicket) {
     return <div className="text-[var(--color-muted)]">No info for this ticket</div>;
@@ -35,7 +38,7 @@ export const EntryDetails = ({ info }: Props) => {
           <EstimateRows
             estimateMinutes={info.ticketInfo.info.estimateMinutes}
             remoteMinutes={info.ticketInfo.info.loggedMinutes}
-            localMinutes={info.localMinutes}
+            localMinutes={mode === "history" ? 0 : info.localMinutes}
           />
         </Card>
       )}
@@ -46,7 +49,10 @@ export const EntryDetails = ({ info }: Props) => {
       )}
       {showSameTicket && info.ticketId !== null && info.sameTicket !== null && (
         <Card>
-          <Row left={`Same ticket (${info.ticketId})`} right={splitFormula(info.sameTicket)} />
+          <Row
+            left={mode === "history" ? "This submission" : `Same ticket (${info.ticketId})`}
+            right={splitFormula(info.sameTicket)}
+          />
         </Card>
       )}
     </div>

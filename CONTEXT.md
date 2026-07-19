@@ -49,8 +49,12 @@ A time-log-formatted snapshot of the entries removed from the live log by a sing
 _Avoid_: backup, archive, snapshot, log file.
 
 **History directory**:
-`{appDataDir}/history/`. Contains all history files. Created on app start. Opened by the History button.
+`{appDataDir}/history/`. Contains all history files. Created on app start. Revealed in Finder by the History tab's "Open history folder" button.
 _Avoid_: archive, backup folder.
+
+**History tab**:
+The right-pane tab that browses history files in-app: one collapsible section per file, newest first, titled from the filename alone (relative day plus `YYYY-MM-DD HH:MM`). Expanding a section reads and parses the file, shows its billable total, and renders it as a read-only time log with the same cmd-click/cmd-hover ticket features as the live editors. Its extended-info tooltip drops the live `Logged: local + remote` formula (the file's time is already submitted) and reframes the same-ticket aggregation as `This submission`. Re-lists on activation and after a submit settles.
+_Avoid_: history view, history panel, log browser.
 
 **Notes**:
 A free-form scratch area kept alongside the time log, persisted to `notes.txt`. Independent of the time log: notes are never submitted. A line whose first token is a valid ticket ID can be used as a candidate description (e.g. via the selection-driven status hookup); other lines are pure scratch.

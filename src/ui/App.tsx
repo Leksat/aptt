@@ -166,13 +166,6 @@ const AppInner = () => {
           >
             {submitDisabled ? "Submit" : `Submit ${formatDurationShort(closedBillable)}`}
           </button>
-          <button
-            type="button"
-            onClick={core.history.open}
-            className="rounded border border-[var(--color-border)] px-3 py-1"
-          >
-            History
-          </button>
         </div>
         <StatusLine />
         {popup.anchor !== null && extendedInfo !== null && (
@@ -182,7 +175,7 @@ const AppInner = () => {
             onMouseEnter={popup.onPopupMouseEnter}
             onMouseLeave={popup.onPopupMouseLeave}
           >
-            <EntryDetails info={extendedInfo} />
+            <EntryDetails info={extendedInfo} mode="live" />
           </EntryTooltip>
         )}
       </main>

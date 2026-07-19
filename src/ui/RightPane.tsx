@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { HistoryPane } from "./HistoryPane";
 import { NotesPane } from "./NotesPane";
 import { SettingsPane } from "./SettingsPane";
 
-const TABS = ["Notes", "Settings"] as const;
+const TABS = ["Notes", "History", "Settings"] as const;
 type Tab = (typeof TABS)[number];
 
 export const RightPane = () => {
@@ -24,6 +25,7 @@ export const RightPane = () => {
       </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-auto py-3">
         {active === "Notes" && <NotesPane />}
+        {active === "History" && <HistoryPane />}
         {active === "Settings" && <SettingsPane />}
       </div>
     </aside>

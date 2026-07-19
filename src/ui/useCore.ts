@@ -1,9 +1,10 @@
 import { Effect } from "effect";
-import { type ChangeEvent, useCallback, useSyncExternalStore } from "react";
+import { type ChangeEvent, useCallback, useMemo, useSyncExternalStore } from "react";
 import type { ThemeMode } from "../core/config";
 import { runtime } from "../core/runtime";
 import type { Backend } from "../core/services/Backend";
 import { ConfigService, type ConfigSnapshot } from "../core/services/ConfigService";
+import { FileService } from "../core/services/FileService";
 import { NotesText, TimeLogText } from "../core/services/persistedText";
 import { SubmitService } from "../core/services/SubmitService";
 import { WeekTotalsService, type WeekTotalsState } from "../core/services/WeekTotalsService";
@@ -18,7 +19,8 @@ const resolveServices = Effect.gen(function* () {
   const config = yield* ConfigService;
   const submit = yield* SubmitService;
   const weekTotals = yield* WeekTotalsService;
-  return { entries, notes, config, submit, weekTotals };
+  const files = yield* FileService;
+  return { entries, notes, config, submit, weekTotals, files };
 });
 
 type Services = Effect.Effect.Success<typeof resolveServices>;
@@ -76,6 +78,8 @@ export interface Core {
   };
   readonly history: {
     readonly open: () => void;
+    readonly list: () => Promise<string[]>;
+    readonly read: (filename: string) => Promise<string>;
   };
 }
 
@@ -132,9 +136,20 @@ export const useCore = (): Core => {
     return result;
   };
 
-  const openHistory = () => {
-    void runtime.runPromise(services.submit.openHistoryDir);
-  };
+  const history = useMemo(
+    () => ({
+      open: () => {
+        void runtime.runPromise(services.files.openHistoryDir.pipe(Effect.ignore));
+      },
+      list: (): Promise<string[]> =>
+        runtime.runPromise(
+          services.files.listHistory.pipe(Effect.orElse(() => Effect.succeed<string[]>([]))),
+        ),
+      read: (filename: string): Promise<string> =>
+        runtime.runPromise(services.files.readHistory(filename)),
+    }),
+    [services],
+  );
 
   return {
     entries: { text, setText, onChange },
@@ -151,6 +166,6 @@ export const useCore = (): Core => {
       submit,
     },
     weekTotals: { state: weekTotalsState },
-    history: { open: openHistory },
+    history,
   };
 };

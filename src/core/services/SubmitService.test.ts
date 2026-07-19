@@ -184,15 +184,6 @@ describe("SubmitService", () => {
     );
   });
 
-  it("openHistoryDir delegates to FileService", async () => {
-    await runWithService((svc, fs) =>
-      Effect.gen(function* () {
-        yield* svc.openHistoryDir;
-        expect(fs.state.historyOpened).toBe(1);
-      }),
-    );
-  });
-
   it("a new submit during the linger window cancels the prior linger timer", async () => {
     await runWithService((svc) =>
       Effect.gen(function* () {

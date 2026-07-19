@@ -8,7 +8,6 @@ export interface FakeFileService {
     notes: string;
     config: string;
     history: Record<string, string>;
-    historyOpened: number;
   };
 }
 
@@ -20,7 +19,6 @@ export const makeFakeFileService = (
     notes: init.notes ?? "",
     config: init.config ?? "",
     history: {} as Record<string, string>,
-    historyOpened: 0,
   };
   const layer = Layer.succeed(
     FileService,
@@ -44,9 +42,9 @@ export const makeFakeFileService = (
         Effect.sync(() => {
           state.history[filename] = contents;
         }),
-      openHistoryDir: Effect.sync(() => {
-        state.historyOpened += 1;
-      }),
+      listHistory: Effect.sync(() => Object.keys(state.history)),
+      readHistory: (filename: string) => Effect.sync(() => state.history[filename] ?? ""),
+      openHistoryDir: Effect.void,
     }),
   );
   return { layer, state };
