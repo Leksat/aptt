@@ -8,12 +8,12 @@ import {
   useState,
 } from "react";
 
-export type FocusedSource = "timeLog" | "notes";
+export type FocusedSource = "timeLog" | "notes" | "history";
 
-export interface FocusedSourceState {
-  readonly source: FocusedSource;
-  readonly caret: number;
-}
+export type FocusedSourceState =
+  | { readonly source: "timeLog"; readonly caret: number }
+  | { readonly source: "notes"; readonly caret: number }
+  | { readonly source: "history"; readonly caret: number; readonly text: string };
 
 interface FocusedSourceContextValue {
   readonly state: FocusedSourceState | null;

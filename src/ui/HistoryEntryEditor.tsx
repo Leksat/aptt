@@ -13,6 +13,8 @@ interface Props {
   readonly findTicketId: FindTicketId;
   readonly ticketUrl: (ticketId: string) => string | null;
   readonly onOpenEntry: (startLine: number, anchor: DOMRect) => void;
+  readonly onCaretChange: (caret: number) => void;
+  readonly onBlur: () => void;
 }
 
 const autoHeightTheme = EditorView.theme({
@@ -23,7 +25,15 @@ const autoHeightTheme = EditorView.theme({
 
 const noop = () => {};
 
-export const HistoryEntryEditor = ({ text, log, findTicketId, ticketUrl, onOpenEntry }: Props) => {
+export const HistoryEntryEditor = ({
+  text,
+  log,
+  findTicketId,
+  ticketUrl,
+  onOpenEntry,
+  onCaretChange,
+  onBlur,
+}: Props) => {
   const { hostRef, viewRef } = useCodeMirror({
     text,
     extensions: [
@@ -32,8 +42,8 @@ export const HistoryEntryEditor = ({ text, log, findTicketId, ticketUrl, onOpenE
       autoHeightTheme,
     ],
     onChange: noop,
-    onCaretChange: noop,
-    onBlur: noop,
+    onCaretChange,
+    onBlur,
   });
 
   useLayoutEffect(() => {

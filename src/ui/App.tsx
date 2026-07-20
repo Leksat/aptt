@@ -212,5 +212,6 @@ const deriveDescription = (
 ): string | null => {
   if (state === null) return null;
   if (state.source === "timeLog") return selectedDescriptionFromTimeLog(timeLogText, state.caret);
+  if (state.source === "history") return selectedDescriptionFromTimeLog(state.text, state.caret);
   return selectedDescriptionFromNotes(notesText, state.caret, findTicketId);
 };

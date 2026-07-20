@@ -10,6 +10,7 @@ import { EntryTooltip } from "./entryPane/EntryTooltip";
 import { entryAtStartLine } from "./entryPane/focusedEntry";
 import { useTicketPopup } from "./entryPane/ticketPopup";
 import { type ExtendedInfoTarget, useExtendedInfo } from "./entryPane/useExtendedInfo";
+import { useFocusedSource } from "./FocusedSourceContext";
 import { HistoryEntryEditor } from "./HistoryEntryEditor";
 
 interface Props {
@@ -91,6 +92,7 @@ export const HistorySection = ({
               ticketUrl={backend.ticketUrl}
               now={now}
               backend={backend}
+              selectable={true}
             />
           )}
           {content.kind === "raw" && (
@@ -101,6 +103,7 @@ export const HistorySection = ({
               ticketUrl={noTicketUrl}
               now={now}
               backend={backend}
+              selectable={false}
             />
           )}
         </div>
@@ -116,15 +119,32 @@ interface ExpandedProps {
   readonly ticketUrl: (ticketId: string) => string | null;
   readonly now: Date;
   readonly backend: Backend;
+  readonly selectable: boolean;
 }
 
-const ExpandedHistory = ({ text, log, findTicketId, ticketUrl, now, backend }: ExpandedProps) => {
+const noop = () => {};
+
+const ExpandedHistory = ({
+  text,
+  log,
+  findTicketId,
+  ticketUrl,
+  now,
+  backend,
+  selectable,
+}: ExpandedProps) => {
   const popup = useTicketPopup();
+  const focused = useFocusedSource();
   const target: ExtendedInfoTarget | null =
     popup.target === null || popup.target.kind === "ticket"
       ? null
       : mapEntryTarget(log, popup.target.startLine);
   const extendedInfo = useExtendedInfo({ log, target, now, backend });
+
+  const onCaretChange = selectable
+    ? (caret: number) => focused.set({ source: "history", caret, text })
+    : noop;
+  const onBlur = selectable ? () => focused.set((s) => (s?.source === "history" ? null : s)) : noop;
 
   return (
     <>
@@ -134,6 +154,8 @@ const ExpandedHistory = ({ text, log, findTicketId, ticketUrl, now, backend }: E
         findTicketId={findTicketId}
         ticketUrl={ticketUrl}
         onOpenEntry={popup.actions.openEntry}
+        onCaretChange={onCaretChange}
+        onBlur={onBlur}
       />
       {popup.anchor !== null && extendedInfo !== null && (
         <EntryTooltip
