@@ -20,7 +20,7 @@ const leftClass = (status: Status): string =>
 const lineText = (status: Status): string => {
   switch (status.tag) {
     case "submitting":
-      return `Submitting ${status.current}/${status.total}…`;
+      return `Submitting ${status.current}/${status.total}...`;
     case "success":
       return `Submitted ${status.total} ${status.total === 1 ? "entry" : "entries"}`;
     case "parseError":

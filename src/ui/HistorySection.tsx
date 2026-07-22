@@ -82,7 +82,7 @@ export const HistorySection = ({
       </summary>
       {open && (
         <div className="px-3 pt-1 pb-3">
-          {content.kind === "loading" && <Muted>Loading…</Muted>}
+          {content.kind === "loading" && <Muted>Loading...</Muted>}
           {content.kind === "error" && <Muted>Failed to read this file.</Muted>}
           {content.kind === "parsed" && (
             <ExpandedHistory
